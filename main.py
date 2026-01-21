@@ -5,12 +5,12 @@ global namespaces
 global tiers
 global keys
 global sword_sets
+global loader
 sword_sets = ["chakram", "claymore", "cutlass", "glaive",
               "greataxe", "greathammer", "halberd", "katana",
               "longsword", "rapier", "sai", "scythe", "spear",
               "twinblade", "warglaive"]
 keys = {}
-tiers = {}
 
 def create_key_data():
     # Minecraft and Common
@@ -93,11 +93,10 @@ def create_tier_data():
     create_tier("forgotten", "undergarden", keys["forgotten_ingot"], keys["wood_sticks"], keys["iron_nugget"])
 
 def create_tier(name, mod_id, material, handle, binder):
-    tiers[name] = [name, mod_id, material, handle, binder]
     for sword in sword_sets:
-        create_shaped_recipe(sword, name)
+        create_shaped_recipe(sword, name, mod_id, material, handle, binder)
 
-def create_shaped_recipe(sword, name):
+def create_shaped_recipe(sword, name, mod_id, material, handle, binder):
     pattern = []
 
     match sword:
@@ -162,44 +161,70 @@ def create_shaped_recipe(sword, name):
                        "MHM",
                        "H  "]
 
+    result = "knavesneeds:" + mod_id + "/" + name + "/" + sword
+
+    if loader == "fabric":
+        condition_type = "fabric:load_conditions"
+        conditions = [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+          mod_id
+      ]
+    }
+  ]
+    elif loader == "forge":
+        condition_type = "conditions"
+        conditions = [
+    {
+      "type": "forge:mod_loaded",
+      "modid": mod_id
+    }
+]
+
+
     if any("B" in row for row in pattern):
         json_data = {
+            condition_type: conditions,
             "type": "minecraft:crafting_shaped",
             "category": "equipment",
             "key": {
-                "B": {"item": "b_item"},
-                "H": {"tag": "h_tag"},
-                "M": {"item": "m_item"}
+                "B": {str(binder[0]): str(binder[1])},
+                "H": {str(handle[0]): str(handle[1])},
+                "M": {str(material[0]): str(material[1])}
             },
             "pattern": pattern,
-            "result": "bleh"
+            "result": {"item": result}
         }
 
     else:
         json_data = {
+            condition_type: conditions,
             "type": "minecraft:crafting_shaped",
             "category": "equipment",
             "key": {
-                "H": {"tag": "h_tag"},
-                "M": {"item": "m_item"}
+                "H": {str(handle[0]): str(handle[1])},
+                "M": {str(material[0]): str(material[1])}
             },
             "pattern": pattern,
-            "result": "bleh"
+            "result": {"item": result}
         }
 
 
 
-    filename = "data/recipes/" + tiers[name][1] + "/" + name + "/" + sword + ".json"
+    filename = "data/recipes/" + mod_id + "/" + name + "/" + sword + ".json"
     os.makedirs(os.path.dirname(filename) or ".", exist_ok=True)
 
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(json_data, f, ensure_ascii=False, indent=4)
 
 
-def create_key(type, namespace, identifier):
-    keys[identifier] = {type, str(namespace + ":" + identifier)}
+def create_key(prefix, namespace, identifier):
+    keys[identifier] = [prefix, str(namespace + ":" + identifier)]
+
 
 if __name__ == '__main__':
+    loader = input("Fabric or Forge?")
     create_key_data()
     create_tier_data()
 
