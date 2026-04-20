@@ -225,8 +225,16 @@ def create_model_date():
 def create_weapon_attributes_date():
     for tier_name, tier in tiers.items():
         for sword in SWORD_PATTERNS:
-            pass
 
+            json_data = {
+                "parent": f"knavesneeds:{sword}"
+            }
+
+            namespace = "blues_skies" if tier.mod_id == "blue_skies" else "knavesneeds"
+            filename = f"fabric/data/{namespace}/weapon_attributes/{tier.mod_id}/{tier_name}/{sword}.json"
+            write_json(filename, json_data)
+            filename = f"forge/data/{namespace}/weapon_attributes/{tier.mod_id}/{tier_name}/{sword}.json"
+            write_json(filename, json_data)
 
 def create_unlock_data():
     for tier_name, tier in tiers.items():
@@ -319,3 +327,4 @@ if __name__ == '__main__':
     start_time = log_and_return_time("Created unlock data", start_time)
 
     print(f"Finished! Created {count} files.")
+
