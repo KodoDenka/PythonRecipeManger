@@ -1,0 +1,107 @@
+{
+  "longsword" : {
+    "pattern": [
+      "H  ",
+      " M ",
+      "  M"
+    ]
+  },
+  "twinblade" : {
+    "pattern": [
+      "  M",
+      " H ",
+      "M  "
+    ]
+  },
+  "rapier": {
+    "pattern": [
+      "  M",
+      " M ",
+      "H  "
+    ]
+  },
+  "katana" : {
+    "pattern": [
+      "   ",
+      "HMM",
+      "   "
+    ]
+  },
+  "sai" : {
+    "pattern" : [
+      " M ",
+      "H  ",
+      "   "
+    ]
+  },
+  "spear" : {
+    "pattern" : [
+      "  M",
+      " H ",
+      "H  "
+    ]
+  },
+  "glaive" : {
+    "pattern" : [
+      "  M",
+      " HM",
+      "H  "
+    ]
+  },
+  "warglaive" : {
+    "pattern" : [
+      "   ",
+      " B ",
+      "MHM"
+    ]
+  },
+  "cutlass" : {
+    "pattern" : [
+      " B ",
+      "MM ",
+      "H  "
+    ]
+  },
+  "claymore" : {
+    "pattern" : [
+      " BM",
+      "BMB",
+      "HB "
+    ]
+  },
+  "greathammer" : {
+    "pattern" : [
+      "MMM",
+      "BBB",
+      " H "
+    ]
+  },
+  "greataxe" : {
+    "pattern" : [
+      "MMM",
+      "BHB",
+      " H "
+    ]
+  },
+  "chakram" : {
+    "pattern" : [
+      "BMB",
+      "M M",
+      "BHB"
+    ]
+  },
+  "scythe" : {
+    "pattern" : [
+      "MHM",
+      "MH ",
+      "H  "
+    ]
+  },
+  "halberd" : {
+    "pattern" : [
+      " MB",
+      "MHM",
+      "H  "
+    ]
+  }
+}

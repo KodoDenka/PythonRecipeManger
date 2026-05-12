@@ -4,54 +4,6 @@ import shutil
 import time
 from dataclasses import dataclass
 
-SWORD_PATTERNS = {
-    "longsword": ["H  ",
-                  " M ",
-                  "  M"],
-    "twinblade": ["  M",
-                  " H ",
-                  "M  "],
-    "rapier": ["  M",
-               " M ",
-               "H  "],
-    "katana": ["   ",
-               "HMM",
-               "   "],
-    "sai": [" M ",
-            "H  ",
-            "   "],
-    "spear": ["  M",
-              " H ",
-              "H  "],
-    "glaive": ["  M",
-               " HM",
-               "H  "],
-    "warglaive": ["   ",
-                  " B ",
-                  "MHM"],
-    "cutlass": [" B ",
-                "MM ",
-                "H  "],
-    "claymore": [" BM",
-                 "BMB",
-                 "HB "],
-    "greathammer": ["MMM",
-                    "BBB",
-                    " H "],
-    "greataxe": ["MMM",
-                 "BHB",
-                 " H "],
-    "chakram": ["BMB",
-                "M M",
-                "BHB"],
-    "scythe": ["MHM",
-               "MH ",
-               "H  "],
-    "halberd": [" MB",
-                "MHM",
-                "H  "]
-}
-
 @dataclass(frozen=True, slots=True)
 class TierClass:
     mod_id: str
@@ -61,8 +13,6 @@ class TierClass:
 
 tiers: dict[str, TierClass] = {}
 keys = {}
-global count
-count = 0
 
 def create_key(prefix, namespace, identifier):
     keys[identifier] = [prefix, f"{namespace}:{identifier}"]
@@ -135,6 +85,21 @@ def create_tier_data():
     create_tier("froststeel", "undergarden", keys["froststeel_ingot"], keys["wood_sticks"], keys["iron_nugget"])
     create_tier("utheric", "undergarden", keys["utheric_shard"], keys["wood_sticks"], keys["iron_nugget"])
     create_tier("forgotten", "undergarden", keys["forgotten_ingot"], keys["wood_sticks"], keys["iron_nugget"])
+
+def return_json_data(file_path):
+
+    if not os.path.isfile(file_path):
+        raise FileNotFoundError(f"JSON file not found at {file_path}")
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        return data
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON format in file: {file_path}\nError: {e}")
+    except Exception as e:
+        raise RuntimeError(f"An error occurred while reading the file: {e}")
+
+
 
 def create_recipe_data(loader):
     for tier_name, tier in tiers.items():
@@ -299,6 +264,9 @@ def log_and_return_time(message, start_time):
     return time.time()
 
 if __name__ == '__main__':
+    global SWORD_PATTERNS
+    global count
+
     print("Starting data generation...")
     start_time = time.time()
 
@@ -310,6 +278,9 @@ if __name__ == '__main__':
 
     create_tier_data()
     start_time = log_and_return_time("Created tiers", start_time)
+
+    SWORD_PATTERNS = return_json_data("common/patterns/sword_patterns.json")
+    start_time = log_and_return_time("Loaded sword patterns", start_time)
 
     create_recipe_data("fabric")
     start_time = log_and_return_time("Made recipes for Fabric", start_time)
