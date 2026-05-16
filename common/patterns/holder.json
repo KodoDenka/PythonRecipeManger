@@ -1,0 +1,13 @@
+{
+  "pattern": {
+    "handle": {
+      "object" : "object_name"
+    },
+    "material": {
+      "object" : "object_name"
+    },
+    "binder" : {
+      "object" : "object_name"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "wood_sticks":              ["tag",  "c:wood_sticks"],
+  "iron_nugget":              ["item", "minecraft:iron_nugget"],
+  "blaze_rod":                ["item", "minecraft:blaze_rod"],
+  "blaze_powder":             ["item", "minecraft:blaze_powder"],
+
+  "fiery_ingot":              ["item", "twilight_forest:fiery_ingot"],
+  "knightmetal_ingot":        ["item", "twilight_forest:knightmetal_ingot"],
+  "ironwood_ingot":           ["item", "twilight_forest:ironwood_ingot"],
+  "steeleaf_ingot":           ["item", "twilight_forest:steeleaf_ingot"],
+
+  "reinforced_echo_shard":    ["item", "deeperdarker:reinforced_echo_shard"],
+
+  "lost_soul":                ["item", "soulsweapons:lost_soul"],
+
+  "pyrope_gem":               ["item", "blue_skies:pyrope_gem"],
+  "aquite":                   ["item", "blue_skies:aquite"],
+  "diopside_gem":             ["item", "blue_skies:diopside_gem"],
+  "charoite":                 ["item", "blue_skies:charoite"],
+  "horizonite_ingot":         ["item", "blue_skies:horizonite_ingot"],
+  "turquoise_cobblestone":    ["item", "blue_skies:turquoise_cobblestone"],
+  "lunar_cobblestone":        ["item", "blue_skies:lunar_cobblestone"],
+  "bluebright_planks":        ["item", "blue_skies:bluebright_planks"],
+  "lunar_planks":             ["item", "blue_skies:lunar_planks"],
+  "starlit_planks":           ["item", "blue_skies:starlit_planks"],
+  "dusk_planks":              ["item", "blue_skies:dusk_planks"],
+  "frostbright_planks":       ["item", "blue_skies:frostbright_planks"],
+  "maple_planks":             ["item", "blue_skies:maple_planks"],
+  "comet_planks":             ["item", "blue_skies:comet_planks"],
+
+  "cloggrum_ingot":           ["item", "undergarden:cloggrum_ingot"],
+  "froststeel_ingot":         ["item", "undergarden:froststeel_ingot"],
+  "utheric_shard":            ["item", "undergarden:utheric_shard"],
+  "forgotten_ingot":          ["item", "undergarden:forgotten_ingot"]
+}
