@@ -14,13 +14,13 @@ Sprites are the single source of truth here: they live in `common/sprites/` and 
 python main.py
 ```
 
-JSON and texture generation needs only the standard library (`json`, `os`, `shutil`, `time`). Preview GIF rendering additionally needs Pillow:
+JSON and texture generation needs only the standard library (`json`, `os`, `shutil`, `time`). Preview GIF rendering additionally needs Pillow, and the 3D renderer needs numpy:
 
 ```
 pip install -r requirements.txt
 ```
 
-Pillow is imported lazily inside `create_preview_data()`, so without it the run still produces every JSON file and texture and just skips the GIF step with a warning. The script clears and regenerates `fabric/`, `forge/`, and `preview/` on every run; all three are gitignored.
+Both are imported lazily, and the run degrades in stages rather than failing: without numpy previews fall back to the 2D sprite renderer, and without Pillow the GIF step is skipped entirely with a warning. Every JSON file and texture is produced either way. The script clears and regenerates `fabric/`, `forge/`, and `preview/` on every run; all three are gitignored.
 
 ## Architecture
 
@@ -40,12 +40,26 @@ Everything lives in `main.py`. The generation pipeline runs in this order:
 
 ## Preview GIFs
 
-Each tier's GIF spins its weapons toward the camera like a coin. Width follows `|cos(angle)|`, so each weapon owns exactly one half turn — edge-on, through full-face, back to edge-on — and the texture swaps to the next weapon at the edge-on frame, where the sprite is a 1px sliver and the cut is invisible. Sprites are never mirrored past edge-on: they are flat textures with no back face, and a mirrored weapon reads as wrong rather than as rotated.
+Each tier's GIF spins its weapons toward the camera. Each weapon owns one half turn — edge-on, through face-on, back to edge-on — and the next weapon takes over at the edge-on frame, where the weapon is a sliver and the cut is invisible. The held frame is face-on, showing the weapon as the game draws it in an inventory slot.
 
-Tuning constants live at the top of `preview.py` (`SPIN_FRAMES`, `HOLD_FRAMES`, `FRAME_MS`, `SCALE`, `MIN_BRIGHTNESS`). Two things to know before changing them:
+`PREVIEW_MODE` in `main.py` selects the renderer:
 
-- Sprites are 16/48px depending on weapon type (sai/cutlass/chakram are 16, halberd is 48, the rest 32) and that difference is intentional. Everything composites onto a `BASE_SPRITE`-sized canvas so relative scale survives — do not normalise each sprite to fill the frame.
-- Pillow merges consecutive identical frames on save, so the hold frames collapse into one long-duration frame. A GIF reporting fewer frames than were generated is expected; total playback time is unchanged.
+**`"3d"` (default, `render3d.py`)** rasterises the actual item models. Two mesh sources:
+
+- Templates with an `elements` list — currently only `greathammer` — are read directly, including per-element rotation. This is the case the 2D renderer could not fake.
+- The other 14 weapons are `minecraft:item/generated`, which has no geometry. `extrude_sprite()` reproduces what the game builds for them: a 1px-thick slab with the sprite on front and back and a wall quad at every silhouette boundary texel.
+
+Either way the model's `display.gui` transform is applied, so weapons are sized the way the game sizes them. Hand-built models rely on this — greathammer is authored ~43 units across against the standard 16 and only fits once its 0.45 GUI scale is applied.
+
+**`"2d"`** squashes the sprite horizontally by `|cos(angle)|`. Kept as the fallback when numpy is missing. It never mirrors past edge-on, since a flat sprite has no back face and a mirrored weapon reads as wrong rather than as rotated.
+
+Things to know before changing any of this:
+
+- **Sprite resolution is detail, not size.** Sprites are 16/32/48px by weapon type, but Minecraft maps every item texture onto the same 16×16 quad, so a 48px halberd is not three times the size of a 16px sai in game — it is the same size with finer pixels. The 3D renderer reflects this. The 2D fallback does not: it preserves sprite pixel dimensions and so overstates large-sprite weapons.
+- **One scale per GIF.** `fit_scale()` computes a single pixel scale across every weapon in the tier, bounding the horizontal extent by `hypot(x, z)` since rotation sweeps each vertex through a circle. Per-weapon fitting would make every weapon fill the frame and destroy the honest size comparison.
+- **Pillow merges consecutive identical frames on save**, so the hold frames collapse into one long-duration frame. A GIF reporting fewer frames than were generated is expected; total playback time is unchanged.
+- `TEMPLATES_DIR` in `preview.py` points at a sibling checkout of the knavesneeds mod by absolute path, overridable with `KNAVESNEEDS_TEMPLATES`. It only resolves on one machine — see the TODO there about moving templates into this project the way sprites were. If the path is missing, every weapon falls back to sprite extrusion, which costs real geometry on greathammer only.
+- Spin speed is `SPIN_FRAMES` alone; hold length is `HOLD_FRAMES * FRAME_MS` and is independent of it. Raising `FRAME_MS` would slow the spin but stretch the hold with it.
 
 ## Output path conventions
 

@@ -1,3 +1,6 @@
-# Only needed for preview GIF generation (preview.py). JSON and texture output runs on
-# the standard library alone.
+# Only needed for preview GIF generation. JSON and texture output runs on the standard
+# library alone, and main.py falls back automatically when these are absent.
 pillow>=10.0
+# Used by the 3D model renderer (render3d.py). Without it previews fall back to the 2D
+# sprite-squash renderer.
+numpy>=1.24

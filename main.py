@@ -23,6 +23,10 @@ ITEM_ROOT = "item"
 
 missing_sprites: list[tuple[str, str, str]] = []
 
+# "3d" rasterises the real item models; "2d" is the sprite-squash fallback. Falls back
+# automatically if the 3D renderer's dependencies are missing.
+PREVIEW_MODE = "3d"
+
 def load_keys(file_path):
     return return_json_data(file_path)
 
@@ -142,20 +146,25 @@ def create_preview_data():
         print("\nSkipping preview GIFs: Pillow is not installed (pip install -r requirements.txt).")
         return
 
+    mode = PREVIEW_MODE
+    if not preview.renderer_available(mode):
+        print("  numpy not installed, falling back to the 2D sprite renderer.")
+        mode = "2d"
+
     for tier_name, tier in tiers.items():
-        sprite_paths = []
+        weapons = []
         for sword in SWORD_PATTERNS:
             source = find_sprite(tier.mod_id, tier_name, sword)
             if source is not None:
-                sprite_paths.append(source)
+                weapons.append((sword, source))
 
-        if not sprite_paths:
+        if not weapons:
             continue
 
         dest = f"preview/{tier.mod_id}/{tier_name}.gif"
-        frames = preview.create_preview_gif(sprite_paths, dest)
+        frames = preview.create_preview_gif(weapons, dest, mode)
         count = count + 1
-        print(f"  {dest} ({len(sprite_paths)} weapons, {frames} frames)")
+        print(f"  {dest} ({len(weapons)} weapons, {frames} frames, {mode})")
 
 def get_pattern(sword):
     """Return the 3-row grid for a weapon.

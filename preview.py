@@ -1,12 +1,20 @@
 """Preview GIF generation.
 
 Renders one looping GIF per material tier: each weapon in the tier spins toward the
-camera like a coin, and at the moment the spin is edge-on — when the sprite is only a
-sliver wide and nothing is legible — the texture swaps to the next weapon. The swap is
-invisible, so the tier reads as a single object rotating through its whole weapon set.
+camera, and at the moment the spin is edge-on — when the weapon is a sliver and nothing
+is legible — the next weapon takes its place. The swap is invisible, so the tier reads as
+a single object rotating through its whole weapon set.
 
-This is the only part of the project that needs a third-party package (Pillow). It is
-imported lazily by main.py so JSON generation still works without it.
+Two renderers are available:
+
+- "3d" (default) rasterises the actual item models via render3d, so weapons have real
+  thickness, real silhouette edges, and — for hand-built models like greathammer — real
+  geometry. Needs numpy.
+- "2d" squashes the sprite horizontally to fake the rotation. No numpy, and the fallback
+  if render3d is unavailable.
+
+Pillow is required either way. Both are imported lazily by main.py so JSON and texture
+generation still work without them.
 """
 
 import math
@@ -15,57 +23,140 @@ import os
 from PIL import Image
 
 # --- animation tuning -------------------------------------------------------------
-# Frames per half turn. Each weapon owns exactly one half turn: it unfolds from edge-on,
-# passes through full-face, and folds back to edge-on before handing off to the next.
-SPIN_FRAMES = 18
-# Extra frames held at full-face, so each weapon is actually readable before it spins on.
+# Frames per half turn. Each weapon owns one half turn: it unfolds from edge-on, passes
+# through face-on, and folds back to edge-on before handing off to the next. This is the
+# knob for spin speed — more frames spreads the same half turn over more time. Keep it
+# even so the held frame lands exactly face-on. Hold length is independent of it.
+SPIN_FRAMES = 24
+# Extra frames held face-on, so each weapon is actually readable before it spins away.
+# Hold duration is HOLD_FRAMES * FRAME_MS, unaffected by spin speed.
 HOLD_FRAMES = 10
 FRAME_MS = 40
 
-# Sprites come in 16/32/48 px depending on weapon type, and that difference is meaningful
-# — a halberd really is drawn three times the size of a sai. Everything is composited onto
-# a canvas sized for the largest sprite so those proportions survive.
-BASE_SPRITE = 48
-SCALE = 4
-CANVAS = BASE_SPRITE * SCALE
+CANVAS = 192
 
-# Palette index reserved for transparency. quantize() below is capped at 255 colours so
-# this one stays free.
+# Palette index reserved for transparency. quantize() is capped at 255 colours so this
+# one stays free.
 TRANSPARENT_INDEX = 255
 
-# How much the sprite darkens as it turns away from the camera, which is what sells the
-# rotation as 3D rather than a horizontal squash.
+# --- 2D fallback tuning -----------------------------------------------------------
+# Only used by the sprite-squash renderer. The 3D path lights the model instead.
+SCALE_2D = 4
+BASE_SPRITE = 48
 MIN_BRIGHTNESS = 0.55
 
+# Hand-built model templates. Only greathammer currently has real geometry; every other
+# weapon is minecraft:item/generated and is extruded from its sprite, so these paths being
+# absent costs detail on exactly one weapon rather than breaking the render.
+#
+# TODO: these reach into a sibling checkout of the knavesneeds mod by absolute path, so
+# they only resolve on one machine. Templates and their extra textures should move into
+# this project the way sprites did — probably common/models/ and common/sprites/overlays/
+# — once there is a story for keeping them in step with the Blockbench sources they are
+# authored from. Until then, override with KNAVESNEEDS_TEMPLATES.
+MOD_REPO = "C:/Program Files/GitHub/knavesneeds"
+TEMPLATES_DIR = os.environ.get(
+    "KNAVESNEEDS_TEMPLATES",
+    f"{MOD_REPO}/common/src/main/resources/assets/knavesneeds/models/item/templates",
+)
+# Extra textures some templates reference beyond the tier sprite, keyed by the slot name
+# used in the model's faces.
+EXTRA_TEXTURES = {
+    "layer": f"{MOD_REPO}/fabric/src/main/resources/assets/knavesneeds/textures/item/greathammer_layer.png",
+}
+
+
+def spin_angles():
+    """Angles for one weapon's half turn, plus the index that should be held.
+
+    Runs -90 to +90 so the held frame is face-on, showing the weapon exactly as the game
+    draws it in an inventory slot. Both ends are edge-on, which is what lets the next
+    weapon take over unnoticed.
+    """
+    face = SPIN_FRAMES // 2
+    return [-90 + 180 * step / SPIN_FRAMES for step in range(SPIN_FRAMES)], face
+
+
+# --- 2D sprite-squash renderer ----------------------------------------------------
 
 def _shade(sprite, factor):
-    """Scale RGB brightness by factor, leaving alpha untouched."""
     r, g, b, a = sprite.split()
     lut = [min(255, int(i * factor)) for i in range(256)]
     return Image.merge("RGBA", (r.point(lut), g.point(lut), b.point(lut), a))
 
 
-def _spin_frame(sprite, angle):
-    """Composite one frame of the coin spin at the given angle in degrees.
-
-    Width follows |cos(angle)|, so the sprite is full-face at 180 degrees and edge-on at
-    90 and 270. The sprite is never mirrored past edge-on: these are flat textures with no
-    meaningful back face, and a mirrored weapon reads as wrong rather than as rotated.
-    """
+def _squash_frame(sprite, angle):
     turn = abs(math.cos(math.radians(angle)))
-
-    scaled = sprite.resize((sprite.width * SCALE, sprite.height * SCALE), Image.NEAREST)
+    scaled = sprite.resize((sprite.width * SCALE_2D, sprite.height * SCALE_2D), Image.NEAREST)
     scaled = _shade(scaled, MIN_BRIGHTNESS + (1 - MIN_BRIGHTNESS) * turn)
 
-    # Clamp to 1px: a zero-width frame would blink out and read as a dropped frame rather
-    # than as an object turning through its own plane.
+    # Clamp to 1px: a zero-width frame blinks out and reads as a dropped frame rather than
+    # as an object turning through its own plane.
     width = max(1, round(scaled.width * turn))
     squashed = scaled.resize((width, scaled.height), Image.NEAREST)
 
-    frame = Image.new("RGBA", (CANVAS, CANVAS), (0, 0, 0, 0))
-    frame.paste(squashed, ((CANVAS - width) // 2, (CANVAS - squashed.height) // 2))
+    canvas = BASE_SPRITE * SCALE_2D
+    frame = Image.new("RGBA", (canvas, canvas), (0, 0, 0, 0))
+    frame.paste(squashed, ((canvas - width) // 2, (canvas - squashed.height) // 2))
     return frame
 
+
+def build_frames_2d(weapons):
+    frames = []
+    angles, face = spin_angles()
+    for _, path in weapons:
+        with Image.open(path) as handle:
+            sprite = handle.convert("RGBA")
+        for step, angle in enumerate(angles):
+            frame = _squash_frame(sprite, angle)
+            frames.append(frame)
+            if step == face:
+                frames.extend([frame] * (HOLD_FRAMES - 1))
+    return frames
+
+
+# --- 3D model renderer ------------------------------------------------------------
+
+def build_frames_3d(weapons):
+    """Rasterise each weapon's real item model through the spin."""
+    import numpy as np
+
+    import render3d
+
+    extras = {}
+    for slot, path in EXTRA_TEXTURES.items():
+        if os.path.isfile(path):
+            with Image.open(path) as handle:
+                extras[slot] = np.array(handle.convert("RGBA"))
+
+    meshes = []
+    for weapon, path in weapons:
+        with Image.open(path) as handle:
+            sprite = handle.convert("RGBA")
+        quads, model = render3d.build_quads(weapon, sprite, TEMPLATES_DIR)
+        quads = render3d.apply_display(quads, model, "gui")
+        textures = dict(extras)
+        textures["layer0"] = np.array(sprite)
+        meshes.append((quads, textures))
+
+    # One scale for the whole tier, so weapons stay honestly sized against each other and
+    # nothing clips at any point in the spin.
+    scale = render3d.fit_scale([quads for quads, _ in meshes], CANVAS)
+
+    frames = []
+    angles, face = spin_angles()
+    for quads, textures in meshes:
+        for step, angle in enumerate(angles):
+            frame = render3d.to_image(
+                render3d.render(quads, textures, angle, CANVAS, scale)
+            )
+            frames.append(frame)
+            if step == face:
+                frames.extend([frame] * (HOLD_FRAMES - 1))
+    return frames
+
+
+# --- GIF assembly -----------------------------------------------------------------
 
 def _to_gif_frame(frame):
     """Convert an RGBA frame to a palettised frame with a transparent index."""
@@ -75,29 +166,28 @@ def _to_gif_frame(frame):
     return palettised
 
 
-def build_frames(sprite_paths):
-    """Build the full frame list for one tier from its ordered weapon sprites."""
-    frames = []
-    face = SPIN_FRAMES // 2
-    for path in sprite_paths:
-        with Image.open(path) as handle:
-            sprite = handle.convert("RGBA")
-        for step in range(SPIN_FRAMES):
-            # Stop one step short of 270 degrees: that frame is the next weapon's opening
-            # edge-on frame, and emitting both would stall the spin for a beat.
-            angle = 90 + 180 * step / SPIN_FRAMES
-            frame = _to_gif_frame(_spin_frame(sprite, angle))
-            frames.append(frame)
-            if step == face:
-                frames.extend([frame] * (HOLD_FRAMES - 1))
-    return frames
+def renderer_available(mode):
+    if mode != "3d":
+        return True
+    try:
+        import numpy  # noqa: F401
+
+        import render3d  # noqa: F401
+    except ImportError:
+        return False
+    return True
 
 
-def create_preview_gif(sprite_paths, dest):
-    """Render one tier's spin loop to dest. Returns the number of frames written."""
-    frames = build_frames(sprite_paths)
-    if not frames:
+def create_preview_gif(weapons, dest, mode="3d"):
+    """Render one tier's spin loop to dest.
+
+    `weapons` is an ordered list of (weapon_name, sprite_path). Returns the frame count.
+    """
+    if not weapons:
         return 0
+
+    builder = build_frames_3d if mode == "3d" else build_frames_2d
+    frames = [_to_gif_frame(frame) for frame in builder(weapons)]
 
     os.makedirs(os.path.dirname(dest), exist_ok=True)
     frames[0].save(
@@ -106,7 +196,7 @@ def create_preview_gif(sprite_paths, dest):
         append_images=frames[1:],
         duration=FRAME_MS,
         loop=0,
-        # Each frame must clear the last: the sprite changes shape constantly and without
+        # Each frame must clear the last: the weapon changes shape constantly and without
         # this the wide frames leave fringes behind the narrow ones.
         disposal=2,
         transparency=TRANSPARENT_INDEX,
