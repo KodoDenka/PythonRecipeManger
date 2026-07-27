@@ -2,3 +2,5 @@
 /data/
 /fabric/
 /forge/
+/preview/
+__pycache__/

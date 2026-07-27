@@ -21,6 +21,6 @@
 
   "cloggrum":         { "mod_id": "undergarden",     "material": "cloggrum_ingot",         "handle": "wood_sticks", "binder": "iron_nugget"          },
   "froststeel":       { "mod_id": "undergarden",     "material": "froststeel_ingot",       "handle": "wood_sticks", "binder": "iron_nugget"          },
-  "utheric":          { "mod_id": "undergarden",     "material": "utheric_shard",          "handle": "wood_sticks", "binder": "iron_nugget"          },
+  "utherium":         { "mod_id": "undergarden",     "material": "utheric_shard",          "handle": "wood_sticks", "binder": "iron_nugget"          },
   "forgotten":        { "mod_id": "undergarden",     "material": "forgotten_ingot",        "handle": "wood_sticks", "binder": "iron_nugget"          }
 }

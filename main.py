@@ -15,6 +15,14 @@ tiers: dict[str, TierClass] = {}
 
 count = 0
 
+SPRITES_DIR = "common/sprites"
+# Subfolder used under both assets/<ns>/textures/ and assets/<ns>/models/. Everything
+# that builds a texture or model reference goes through this, so the generated JSON and
+# the files on disk can't drift apart.
+ITEM_ROOT = "item"
+
+missing_sprites: list[tuple[str, str, str]] = []
+
 def load_keys(file_path):
     return return_json_data(file_path)
 
@@ -76,8 +84,92 @@ def write_json(path: str, data: dict) -> None:
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
 
+def copy_file(src: str, dest: str) -> None:
+    global count
+    count = count + 1
+    os.makedirs(os.path.dirname(dest), exist_ok=True)
+    shutil.copyfile(src, dest)
+
+def get_texture_ref(mod_id, name, sword):
+    """The "layer0" texture id an item model points at.
+
+    Always in the knavesneeds namespace, even for tiers whose models live under the
+    blues_skies namespace, because the sprites ship with this mod.
+    """
+    return f"knavesneeds:{ITEM_ROOT}/{mod_id}/{name}/{sword}"
+
+def get_texture_path(loader, mod_id, name, sword):
+    """Where the sprite for get_texture_ref() has to land for the game to resolve it."""
+    return f"{loader}/assets/knavesneeds/textures/{ITEM_ROOT}/{mod_id}/{name}/{sword}.png"
+
+def find_sprite(mod_id, name, sword):
+    """Locate a source sprite in common/sprites, or None if it hasn't been drawn.
+
+    Sprite folders use two layouts (mod-scoped and tier-at-top-level) and two naming
+    conventions (tier-prefixed and bare), so try each combination.
+    """
+    candidates = [
+        f"{SPRITES_DIR}/{mod_id}/{name}/{name}_{sword}.png",
+        f"{SPRITES_DIR}/{mod_id}/{name}/{sword}.png",
+        f"{SPRITES_DIR}/{name}/{name}_{sword}.png",
+        f"{SPRITES_DIR}/{name}/{sword}.png",
+    ]
+    for candidate in candidates:
+        if os.path.isfile(candidate):
+            return candidate
+    return None
+
+def create_texture_data():
+    for tier_name, tier in tiers.items():
+        for sword in SWORD_PATTERNS:
+            source = find_sprite(tier.mod_id, tier_name, sword)
+            if source is None:
+                missing_sprites.append((tier.mod_id, tier_name, sword))
+                continue
+            for loader in ["fabric", "forge"]:
+                copy_file(source, get_texture_path(loader, tier.mod_id, tier_name, sword))
+
+def create_preview_data():
+    """Render one spin-loop GIF per tier for the website.
+
+    Needs Pillow, which is the project's only third-party dependency. If it isn't
+    installed the JSON and texture output is still complete, so this only warns.
+    """
+    global count
+    try:
+        import preview
+    except ImportError:
+        print("\nSkipping preview GIFs: Pillow is not installed (pip install -r requirements.txt).")
+        return
+
+    for tier_name, tier in tiers.items():
+        sprite_paths = []
+        for sword in SWORD_PATTERNS:
+            source = find_sprite(tier.mod_id, tier_name, sword)
+            if source is not None:
+                sprite_paths.append(source)
+
+        if not sprite_paths:
+            continue
+
+        dest = f"preview/{tier.mod_id}/{tier_name}.gif"
+        frames = preview.create_preview_gif(sprite_paths, dest)
+        count = count + 1
+        print(f"  {dest} ({len(sprite_paths)} weapons, {frames} frames)")
+
+def get_pattern(sword):
+    """Return the 3-row grid for a weapon.
+
+    Entries in sword_patterns.json wrap the grid in a {"pattern": [...]} object, but
+    tolerate a bare list too so either shape works.
+    """
+    entry = SWORD_PATTERNS.get(sword, [])
+    if isinstance(entry, dict):
+        return entry.get("pattern", [])
+    return entry
+
 def create_shaped_recipe(sword, name, mod_id, material, handle, binder, loader):
-    pattern = SWORD_PATTERNS.get(sword, [])
+    pattern = get_pattern(sword)
     result = get_result_item(mod_id, name, sword)
     condition_type, conditions = get_loader_conditions(mod_id, loader)
 
@@ -110,17 +202,16 @@ def create_model_date():
             namespace = "blues_skies" if tier.mod_id == "blue_skies" else "knavesneeds"
 
             json_data = {
-                "parent" : f"knavesneeds:items/templates/{sword}",
+                "parent" : f"knavesneeds:{ITEM_ROOT}/templates/{sword}",
                 "textures" : {
-                    "layer0" : f"knavesneeds:items/{tier.mod_id}/{tier_name}/{sword}"
+                    "layer0" : get_texture_ref(tier.mod_id, tier_name, sword)
                 }
             }
 
 
-            filename = f"fabric/assets/{namespace}/models/item/{tier.mod_id}/{tier_name}/{sword}.json"
-            write_json(filename, json_data)
-            filename = f"forge/assets/{namespace}/models/item/{tier.mod_id}/{tier_name}/{sword}.json"
-            write_json(filename, json_data)
+            for loader in ["fabric", "forge"]:
+                filename = f"{loader}/assets/{namespace}/models/{ITEM_ROOT}/{tier.mod_id}/{tier_name}/{sword}.json"
+                write_json(filename, json_data)
 
 
 def create_weapon_attributes_date():
@@ -181,7 +272,9 @@ def create_unlock_data():
 
 #Credit to https://stackoverflow.com/questions/185936/how-to-delete-the-contents-of-a-folder
 def clear_old_data():
-    for folder in ["fabric", "forge"]:
+    for folder in ["fabric", "forge", "preview"]:
+        if not os.path.isdir(folder):
+            continue
         for filename in os.listdir(folder):
             file_path = os.path.join(folder, filename)
             try:
@@ -232,5 +325,24 @@ if __name__ == '__main__':
     create_unlock_data()
     start_time = log_and_return_time("Created unlock data", start_time)
 
-    print(f"Finished! Created {count} files.")
+    create_texture_data()
+    start_time = log_and_return_time("Copied textures", start_time)
+
+    print("Rendering preview GIFs...")
+    create_preview_data()
+    start_time = log_and_return_time("Rendered preview GIFs", start_time)
+
+    if missing_sprites:
+        print(f"\nWARNING: no sprite found for {len(missing_sprites)} item(s):")
+        by_tier: dict[str, list[str]] = {}
+        for miss_mod, miss_tier, miss_sword in missing_sprites:
+            by_tier.setdefault(f"{miss_mod}/{miss_tier}", []).append(miss_sword)
+        for tier_path, tier_swords in by_tier.items():
+            if len(tier_swords) == len(SWORD_PATTERNS):
+                print(f"  {tier_path}: all {len(tier_swords)} weapons")
+            else:
+                print(f"  {tier_path}: {', '.join(tier_swords)}")
+        print("These items will render as missing textures in game.")
+
+    print(f"\nFinished! Created {count} files.")
 

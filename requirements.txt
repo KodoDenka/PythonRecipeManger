@@ -1,0 +1,3 @@
+# Only needed for preview GIF generation (preview.py). JSON and texture output runs on
+# the standard library alone.
+pillow>=10.0
