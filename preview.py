@@ -32,6 +32,10 @@ SPIN_FRAMES = 24
 # Hold duration is HOLD_FRAMES * FRAME_MS, unaffected by spin speed.
 HOLD_FRAMES = 10
 FRAME_MS = 40
+# How much the spin eases in and out of the held frame. 0 is constant speed; 1 fully
+# stalls at face-on. Only redistributes the angles across the existing frames, so it
+# changes the feel of the spin without changing its duration.
+EASING = 0.55
 
 CANVAS = 192
 
@@ -66,15 +70,33 @@ EXTRA_TEXTURES = {
 }
 
 
+def _ease(t):
+    """Redistribute progress through the half turn without changing its duration.
+
+    A constant-speed spin hits the held frame at full tilt and stops dead, and that
+    velocity jump is what reads as jarring. Shaping progress with a cubic about the
+    midpoint slows the weapon as it settles face-on and accelerates it away again, so the
+    hold is eased into rather than slammed into.
+
+    Blended against linear rather than used neat: a pure cubic stalls completely at
+    face-on, which bunches frames there and stretches the hold well past HOLD_FRAMES.
+    The blend keeps a floor under the speed so the hold stays the length it is set to.
+    """
+    shaped = 0.5 + 0.5 * (2 * t - 1) ** 3
+    return (1 - EASING) * t + EASING * shaped
+
+
 def spin_angles():
     """Angles for one weapon's half turn, plus the index that should be held.
 
     Runs -90 to +90 so the held frame is face-on, showing the weapon exactly as the game
     draws it in an inventory slot. Both ends are edge-on, which is what lets the next
-    weapon take over unnoticed.
+    weapon take over unnoticed — and easing sweeps through those ends fastest, so the
+    handoff spends less time on the sliver where the swap could be spotted.
     """
     face = SPIN_FRAMES // 2
-    return [-90 + 180 * step / SPIN_FRAMES for step in range(SPIN_FRAMES)], face
+    angles = [-90 + 180 * _ease(step / SPIN_FRAMES) for step in range(SPIN_FRAMES)]
+    return angles, face
 
 
 # --- 2D sprite-squash renderer ----------------------------------------------------
