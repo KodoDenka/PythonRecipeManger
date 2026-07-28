@@ -111,6 +111,10 @@ def find_sprite(mod_id, name, sword):
 
     Sprite folders use two layouts (mod-scoped and tier-at-top-level) and two naming
     conventions (tier-prefixed and bare), so try each combination.
+
+    Candidates are exact filenames built from the weapon name, which is what keeps variant
+    art out: Better End's `*_head.png` alternates and the stray `*2.png` / `*3.png` drafts
+    can never match, because no weapon is named `chakram_head` or `claymore2`.
     """
     candidates = [
         f"{SPRITES_DIR}/{mod_id}/{name}/{name}_{sword}.png",
@@ -123,6 +127,45 @@ def find_sprite(mod_id, name, sword):
             return candidate
     return None
 
+def discover_sprite_tiers():
+    """Find every tier that has artwork, whether or not it is wired into tiers.json.
+
+    Previews are driven off the sprite folders rather than the tier data, so a mod whose
+    art has landed but whose recipes have not still gets a showcase GIF. Recipes, models,
+    textures and advancements stay driven by tiers.json — those need real item IDs.
+
+    Two folder shapes exist: a mod folder holding tier folders, and a bare tier folder at
+    the top level. A folder containing PNGs directly is a tier; one containing only
+    folders is a mod. Returns (mod_id, tier_name) pairs, where mod_id is None for a
+    top-level tier that tiers.json has never heard of.
+    """
+    found = []
+    if not os.path.isdir(SPRITES_DIR):
+        return found
+
+    for entry in sorted(os.listdir(SPRITES_DIR)):
+        path = os.path.join(SPRITES_DIR, entry)
+        if not os.path.isdir(path):
+            continue
+
+        children = sorted(os.listdir(path))
+        if any(child.lower().endswith(".png") for child in children):
+            # A tier sitting at the top level. tiers.json is the authority on which mod it
+            # belongs to, since the folder name alone does not say.
+            mod_id = tiers[entry].mod_id if entry in tiers else None
+            found.append((mod_id, entry))
+            continue
+
+        for child in children:
+            if os.path.isdir(os.path.join(path, child)):
+                found.append((entry, child))
+    return found
+
+def get_preview_path(mod_id, tier_name):
+    if mod_id is None:
+        return f"preview/{tier_name}.gif"
+    return f"preview/{mod_id}/{tier_name}.gif"
+
 def create_texture_data():
     for tier_name, tier in tiers.items():
         for sword in SWORD_PATTERNS:
@@ -134,10 +177,13 @@ def create_texture_data():
                 copy_file(source, get_texture_path(loader, tier.mod_id, tier_name, sword))
 
 def create_preview_data():
-    """Render one spin-loop GIF per tier for the website.
+    """Render one spin-loop GIF per tier that has artwork, for the website.
 
-    Needs Pillow, which is the project's only third-party dependency. If it isn't
-    installed the JSON and texture output is still complete, so this only warns.
+    Driven by the sprite folders rather than tiers.json, so mods whose art exists but
+    whose recipes do not are still showcased.
+
+    Needs Pillow. If it isn't installed the JSON and texture output is still complete, so
+    this only warns.
     """
     global count
     try:
@@ -151,20 +197,28 @@ def create_preview_data():
         print("  numpy not installed, falling back to the 2D sprite renderer.")
         mode = "2d"
 
-    for tier_name, tier in tiers.items():
+    unresolved = []
+    for mod_id, tier_name in discover_sprite_tiers():
         weapons = []
         for sword in SWORD_PATTERNS:
-            source = find_sprite(tier.mod_id, tier_name, sword)
+            source = find_sprite(mod_id, tier_name, sword)
             if source is not None:
                 weapons.append((sword, source))
 
         if not weapons:
+            # Art that follows none of the known naming conventions, so nothing matched.
+            unresolved.append(f"{mod_id}/{tier_name}" if mod_id else tier_name)
             continue
 
-        dest = f"preview/{tier.mod_id}/{tier_name}.gif"
+        dest = get_preview_path(mod_id, tier_name)
         frames = preview.create_preview_gif(weapons, dest, mode)
         count = count + 1
-        print(f"  {dest} ({len(weapons)} weapons, {frames} frames, {mode})")
+        recipes = "" if tier_name in tiers else "  [art only, no recipes]"
+        print(f"  {dest} ({len(weapons)} weapons, {frames} frames, {mode}){recipes}")
+
+    if unresolved:
+        print(f"\n  No sprite matched a weapon name in: {', '.join(unresolved)}")
+        print("  Art there is named for a different tier or is a numbered variant.")
 
 def get_pattern(sword):
     """Return the 3-row grid for a weapon.

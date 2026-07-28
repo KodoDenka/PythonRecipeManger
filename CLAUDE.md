@@ -36,6 +36,8 @@ Everything lives in `main.py`. The generation pipeline runs in this order:
 8. **Textures** (`create_texture_data`) — copies each tier × weapon sprite from `common/sprites/` into both loaders. Tiers with no matching sprite are collected in `missing_sprites` and printed as a warning at the end of the run.
 9. **Preview GIFs** (`create_preview_data` → `preview.py`) — renders one looping showcase GIF per tier to `preview/{mod_id}/{tier}.gif`.
 
+Steps 1–8 are driven by `tiers.json`, because recipes, models and advancements need real item IDs. Step 9 is driven by `discover_sprite_tiers()` walking `common/sprites/` instead, so a mod whose art has landed but whose recipes have not still gets a showcase GIF. Those are flagged `[art only, no recipes]` in the run output.
+
 `main.py` holds the JSON pipeline; `preview.py` is the only separate module, kept apart because it is the sole consumer of the optional Pillow dependency.
 
 ## Preview GIFs
@@ -84,7 +86,11 @@ common/sprites/{tier}/{tier}_{weapon}.png          # tier at top level (Blue Ski
 common/sprites/{tier}/{weapon}.png
 ```
 
-A sprite only exports if a tier in `tiers.json` references it — sprite folders with no corresponding tier are silently ignored, so adding art alone is not enough to make an item appear.
+A sprite only exports as a **texture** if a tier in `tiers.json` references it, so adding art alone is not enough to make an item appear in game. **Preview GIFs** are the exception and cover every sprite folder found on disk.
+
+Candidates are exact filenames built from the weapon name, and that is what filters variant art. Better End ships `*_head.png` alternates alongside its base sprites, and there are stray `*2.png` / `*3.png` drafts in several folders; none can ever match, because no weapon is named `chakram_head` or `claymore2`. Do not loosen this to a prefix or glob match without another way to exclude them.
+
+The flip side is that art named for a different tier than its folder never resolves — `plus_the_end/prideful` holds `endronium_*2.png` files, so it produces nothing. Unresolved folders are listed at the end of a run rather than passing silently.
 
 ## Extending the project
 
