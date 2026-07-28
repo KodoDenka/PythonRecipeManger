@@ -27,6 +27,13 @@ missing_sprites: list[tuple[str, str, str]] = []
 # automatically if the 3D renderer's dependencies are missing.
 PREVIEW_MODE = "3d"
 
+# The mod's showcase thumbnail: one weapon spun through every material, with the logo over
+# it. Chakram because it is the roundest weapon in the set, so it reads at thumbnail size
+# and keeps a consistent silhouette while the material changes underneath it.
+THUMBNAIL_WEAPON = "chakram"
+THUMBNAIL_PATH = "preview/thumbnail"
+LOGO_PATH = f"{SPRITES_DIR}/LOGO.png"
+
 def load_keys(file_path):
     return return_json_data(file_path)
 
@@ -177,26 +184,45 @@ def create_texture_data():
             for loader in ["fabric", "forge"]:
                 copy_file(source, get_texture_path(loader, tier.mod_id, tier_name, sword))
 
-def create_preview_data():
-    """Render one spin-loop GIF per tier that has artwork, for the website.
+_preview_runtime = None
 
-    Driven by the sprite folders rather than tiers.json, so mods whose art exists but
-    whose recipes do not are still showcased.
+def resolve_preview_runtime():
+    """Import preview.py and settle on a renderer, or (None, None) if Pillow is missing.
 
-    Needs Pillow. If it isn't installed the JSON and texture output is still complete, so
-    this only warns.
+    Both the per-tier previews and the thumbnail need this, and both are optional extras
+    on top of a run whose JSON and texture output is already complete — so a missing
+    dependency warns rather than raising. Resolved once and cached, so the warnings are
+    printed once no matter how many steps ask.
     """
-    global count
+    global _preview_runtime
+    if _preview_runtime is not None:
+        return _preview_runtime
+
     try:
         import preview
     except ImportError:
         print("\nSkipping preview GIFs: Pillow is not installed (pip install -r requirements.txt).")
-        return
+        _preview_runtime = (None, None)
+        return _preview_runtime
 
     mode = PREVIEW_MODE
     if not preview.renderer_available(mode):
         print("  numpy not installed, falling back to the 2D sprite renderer.")
         mode = "2d"
+
+    _preview_runtime = (preview, mode)
+    return _preview_runtime
+
+def create_preview_data():
+    """Render one spin-loop GIF per tier that has artwork, for the website.
+
+    Driven by the sprite folders rather than tiers.json, so mods whose art exists but
+    whose recipes do not are still showcased.
+    """
+    global count
+    preview, mode = resolve_preview_runtime()
+    if preview is None:
+        return
 
     unresolved = []
     for mod_id, tier_name in discover_sprite_tiers():
@@ -221,6 +247,61 @@ def create_preview_data():
     if unresolved:
         print(f"\n  No sprite matched a weapon name in: {', '.join(unresolved)}")
         print("  Art there is named for a different tier or is a numbered variant.")
+
+def is_wooden_tier(tier_name):
+    """True for tiers crafted out of planks — Blue Skies' seven wood sets.
+
+    Tested on the material item rather than the tier name, because `ironwood` is a metal
+    and `turquoise_stone` is not, so neither the name nor its suffix is a reliable signal.
+    Tiers that have art but no entry in tiers.json have no material to test and are
+    treated as non-wooden.
+    """
+    tier = tiers.get(tier_name)
+    return tier is not None and str(tier.material[1]).endswith("_planks")
+
+def collect_thumbnail_weapons():
+    """Gather THUMBNAIL_WEAPON's sprite from every material in the mod, in tier order.
+
+    Wooden tiers are left out: they are seven near-identical entries out of a set of about
+    thirty, and a showcase that spends a quarter of its loop cycling through planks sells
+    the mod short.
+
+    Returns (label, sprite_path) pairs. The label is the tier name rather than the weapon
+    name, since here it is the material that changes from entry to entry.
+    """
+    weapons = []
+    for mod_id, tier_name in discover_sprite_tiers():
+        if is_wooden_tier(tier_name):
+            continue
+        source = find_sprite(mod_id, tier_name, THUMBNAIL_WEAPON)
+        if source is not None:
+            weapons.append((tier_name, source))
+    return weapons
+
+def create_thumbnail_data():
+    """Render the mod's showcase loop to preview/thumbnail.{gif,webp}.
+
+    Same spin as the per-tier previews with the axes swapped — one weapon through every
+    material instead of one material through every weapon — plus the logo on top.
+    """
+    global count
+    preview, mode = resolve_preview_runtime()
+    if preview is None:
+        return
+
+    weapons = collect_thumbnail_weapons()
+    if not weapons:
+        print(f"  No {THUMBNAIL_WEAPON} sprites found, skipping the thumbnail.")
+        return
+
+    if not os.path.isfile(LOGO_PATH):
+        print(f"  {LOGO_PATH} is missing, rendering the thumbnail without the logo.")
+
+    frames = preview.create_thumbnail(weapons, THUMBNAIL_PATH, LOGO_PATH, mode)
+    count = count + len(preview.FORMATS)
+    formats = "/".join(preview.FORMATS)
+    print(f"  {THUMBNAIL_PATH}.{{{formats}}} "
+          f"({len(weapons)} materials, {frames} frames, {mode})")
 
 def get_pattern(sword):
     """Return the 3-row grid for a weapon.
@@ -396,6 +477,10 @@ if __name__ == '__main__':
     print("Rendering preview GIFs...")
     create_preview_data()
     start_time = log_and_return_time("Rendered preview GIFs", start_time)
+
+    print("Rendering mod thumbnail...")
+    create_thumbnail_data()
+    start_time = log_and_return_time("Rendered mod thumbnail", start_time)
 
     if missing_sprites:
         print(f"\nWARNING: no sprite found for {len(missing_sprites)} item(s):")

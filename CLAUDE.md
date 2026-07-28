@@ -35,8 +35,11 @@ Everything lives in `main.py`. The generation pipeline runs in this order:
 7. **Unlock advancements** (`create_unlock_data`) — writes Fabric-only advancement JSONs for recipe unlocking.
 8. **Textures** (`create_texture_data`) — copies each tier × weapon sprite from `common/sprites/` into both loaders. Tiers with no matching sprite are collected in `missing_sprites` and printed as a warning at the end of the run.
 9. **Previews** (`create_preview_data` → `preview.py`) — renders one looping showcase animation per tier to `preview/{mod_id}/{tier}.{gif,webp}`.
+10. **Thumbnail** (`create_thumbnail_data` → `preview.py`) — renders the mod's showcase image to `preview/thumbnail.{gif,webp}`.
 
-Steps 1–8 are driven by `tiers.json`, because recipes, models and advancements need real item IDs. Step 9 is driven by `discover_sprite_tiers()` walking `common/sprites/` instead, so a mod whose art has landed but whose recipes have not still gets a showcase GIF. Those are flagged `[art only, no recipes]` in the run output.
+Steps 1–8 are driven by `tiers.json`, because recipes, models and advancements need real item IDs. Steps 9–10 are driven by `discover_sprite_tiers()` walking `common/sprites/` instead, so a mod whose art has landed but whose recipes have not still gets a showcase GIF. Those are flagged `[art only, no recipes]` in the run output.
+
+Both preview steps share `resolve_preview_runtime()`, which imports `preview.py` and settles on a renderer once so a missing dependency warns a single time rather than once per step.
 
 `main.py` holds the JSON pipeline; `preview.py` is the only separate module, kept apart because it is the sole consumer of the optional Pillow dependency.
 
@@ -66,6 +69,38 @@ Things to know before changing any of this:
 - `TILT` tilts the camera off the equator so top faces stay visible. `fit_scale()` must be given the same tilt or tall weapons clip, since tilting mixes depth into the vertical extent.
 - The specular sweep (`SPEC_STRENGTH`, `SPEC_WIDTH` in `render3d.py`) follows `sin(2*spin)^2`, which is zero both edge-on and face-on. Face-on **must** stay zero: that is the frame the GIF holds, and a highlight peaking there would freeze mid-blade for the whole hold.
 - `SPEC_STEPS` bands the highlight instead of letting it fall off smoothly. This is a file size control, not just a look: a smooth gradient spends the GIF's 255 colours on near-identical shades and compresses badly, costing ~75% more per file for no visible gain. Raise it only alongside a size check — it also keeps the busiest frame at ~228 colours, and pushing past 255 would start costing the GIF real colour.
+
+## Mod thumbnail
+
+`preview/thumbnail.{gif,webp}` is the mod's showcase image. It runs the same spin as the
+per-tier previews with the two axes swapped: one weapon cycling through **every material**,
+rather than one material cycling through every weapon. The logo from `common/sprites/LOGO.png`
+is composited over every frame.
+
+`THUMBNAIL_WEAPON` in `main.py` picks the weapon — chakram, because it is the roundest item
+in the set, so its silhouette stays constant while the material changes underneath it and it
+still reads at thumbnail size.
+
+- **Wooden tiers are excluded.** `is_wooden_tier()` tests the tier's *material* item for a
+  `_planks` suffix, not the tier name — `ironwood` is a metal and `turquoise_stone` is not
+  stone-only, so neither the name nor its suffix is a usable signal. Blue Skies' seven wood
+  sets are near-identical and would otherwise eat a quarter of the loop.
+- **The thumbnail spins faster** (`THUMB_SPIN_FRAMES`, `THUMB_HOLD_FRAMES`) because it has
+  roughly twice as many entries as any tier has weapons. At the per-tier speed the loop would
+  run past 40 seconds.
+- **Its backdrop is opaque.** The logo's drop shadow is partial alpha, which the GIF path
+  binarises away against a transparent frame, and a thumbnail lands on an unknown page
+  background anyway. Keep it flat: the backdrop is most of the frame, and a gradient would be
+  re-encoded on every one.
+- **It has its own GIF saver.** Because the frames are opaque, `_save_thumbnail_gif()` uses
+  disposal 1 and quantises every frame against one shared palette, which lets the encoder
+  write only the rectangle that moved. That takes the file from ~2.5MB to under 1MB. Neither
+  trick transfers to the per-tier previews, whose transparent frames need disposal 2. Note
+  that passing `optimize=False` to Pillow's GIF save is *worse* than omitting it — it costs
+  ~50% more — so leave it unset.
+- The weapon is rendered at `CANVAS` and pasted into the larger `THUMB_CANVAS` square, so the
+  bigger output costs compositing rather than rasterising. `THUMB_LIFT` raises it out of dead
+  centre, since the logo claims the bottom of the frame.
 
 ## Output formats
 

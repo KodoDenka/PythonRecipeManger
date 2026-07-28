@@ -5,6 +5,10 @@ camera, and at the moment the spin is edge-on — when the weapon is a sliver an
 is legible — the next weapon takes its place. The swap is invisible, so the tier reads as
 a single object rotating through its whole weapon set.
 
+`create_thumbnail()` reuses the same spin to build the mod's showcase image, swapping the
+axis it cycles: one weapon across every material rather than one material across every
+weapon, with the mod logo composited over it.
+
 Two renderers are available:
 
 - "3d" (default) rasterises the actual item models via render3d, so weapons have real
@@ -43,6 +47,39 @@ CANVAS = 192
 # faces stay visible through the whole turn, which is what stops the spin reading as a
 # flat shape rotating in place. 3D renderer only.
 TILT = 12.0
+
+# --- thumbnail tuning -------------------------------------------------------------
+# The thumbnail cycles one weapon through every material in the mod — roughly twice as
+# many entries as any tier has weapons — so it spins faster and holds shorter. Without
+# that the loop would run past 40 seconds and nobody would watch it to the end.
+THUMB_SPIN_FRAMES = 12
+THUMB_HOLD_FRAMES = 3
+
+# Square output, larger than the per-tier previews because the logo has to stay legible
+# on top of the art. The weapon itself is still rendered at CANVAS and pasted in, so the
+# extra size costs compositing rather than rasterising.
+THUMB_CANVAS = 256
+
+# Flat, opaque backdrop. Opaque for two reasons: the logo's drop shadow is partial alpha,
+# which the GIF path binarises away against a transparent frame, and a thumbnail is going
+# to be shown against an unknown page background anyway. Flat rather than a gradient
+# because the backdrop is most of the frame and anything varying across it would be
+# re-encoded on every one.
+THUMB_BACKGROUND = (24, 22, 28, 255)
+
+# Take every Nth frame when building the thumbnail GIF's shared palette. The loop holds
+# each material for several frames, so a sample this coarse still sees every one of them.
+PALETTE_SAMPLE = 4
+
+# Integer scale for the logo, so it stays pixel-crisp. Placed bottom-centre, overlapping
+# the low edge of the weapon — its outline and shadow are what keep it readable there.
+LOGO_SCALE = 2
+LOGO_MARGIN = 10
+
+# Pixels the weapon is raised out of the square's centre. The logo claims the bottom of
+# the frame, so a centred weapon leaves all the slack above it and the composition sits
+# low; lifting it centres the weapon in what is actually left over.
+THUMB_LIFT = 20
 
 # TODO: idle float. A slow vertical drift across the loop, as a per-frame offset applied
 # after the spin. Cheap to add, but it has to be shared by every weapon in the tier and
@@ -105,7 +142,7 @@ def _ease(t):
     return (1 - EASING) * t + EASING * shaped
 
 
-def hold_ms(step, face):
+def hold_ms(step, face, hold_frames=HOLD_FRAMES):
     """Duration for one frame of a weapon's turn.
 
     The face-on frame carries the whole hold as a single long frame rather than being
@@ -114,10 +151,10 @@ def hold_ms(step, face):
     written every duplicate out. Stating the duration outright gives both formats the same
     frame list and the same playback.
     """
-    return HOLD_FRAMES * FRAME_MS if step == face else FRAME_MS
+    return hold_frames * FRAME_MS if step == face else FRAME_MS
 
 
-def spin_angles():
+def spin_angles(spin_frames=SPIN_FRAMES):
     """Angles for one weapon's half turn, plus the index that should be held.
 
     Runs -90 to +90 so the held frame is face-on, showing the weapon exactly as the game
@@ -125,8 +162,8 @@ def spin_angles():
     weapon take over unnoticed — and easing sweeps through those ends fastest, so the
     handoff spends less time on the sliver where the swap could be spotted.
     """
-    face = SPIN_FRAMES // 2
-    angles = [-90 + 180 * _ease(step / SPIN_FRAMES) for step in range(SPIN_FRAMES)]
+    face = spin_frames // 2
+    angles = [-90 + 180 * _ease(step / spin_frames) for step in range(spin_frames)]
     return angles, face
 
 
@@ -154,21 +191,21 @@ def _squash_frame(sprite, angle):
     return frame
 
 
-def build_frames_2d(weapons):
+def build_frames_2d(weapons, spin_frames=SPIN_FRAMES, hold_frames=HOLD_FRAMES):
     frames = []
-    angles, face = spin_angles()
+    angles, face = spin_angles(spin_frames)
     for _, path in weapons:
         with Image.open(path) as handle:
             sprite = handle.convert("RGBA")
         for step, angle in enumerate(angles):
             frame = _squash_frame(sprite, angle)
-            frames.append((frame, hold_ms(step, face)))
+            frames.append((frame, hold_ms(step, face, hold_frames)))
     return frames
 
 
 # --- 3D model renderer ------------------------------------------------------------
 
-def build_frames_3d(weapons):
+def build_frames_3d(weapons, spin_frames=SPIN_FRAMES, hold_frames=HOLD_FRAMES):
     """Rasterise each weapon's real item model through the spin."""
     import numpy as np
 
@@ -195,13 +232,13 @@ def build_frames_3d(weapons):
     scale = render3d.fit_scale([quads for quads, _ in meshes], CANVAS, TILT)
 
     frames = []
-    angles, face = spin_angles()
+    angles, face = spin_angles(spin_frames)
     for quads, textures in meshes:
         for step, angle in enumerate(angles):
             frame = render3d.to_image(
                 render3d.render(quads, textures, angle, CANVAS, scale, TILT)
             )
-            frames.append((frame, hold_ms(step, face)))
+            frames.append((frame, hold_ms(step, face, hold_frames)))
     return frames
 
 
@@ -270,6 +307,100 @@ def _save_webp(frames, durations, dest):
 
 
 SAVERS = {"gif": _save_gif, "webp": _save_webp}
+
+
+# --- thumbnail assembly -----------------------------------------------------------
+
+def _save_thumbnail_gif(frames, durations, dest):
+    """Write the thumbnail as GIF, exploiting the fact that its frames are opaque.
+
+    The per-tier saver cannot do any of this: its frames are transparent, so every frame
+    has to clear the last (disposal 2) and each is written whole. Here the backdrop and
+    the logo are identical in every frame — most of the picture — and only the weapon
+    changes, so leaving the previous frame in place (disposal 1) lets the encoder write
+    just the rectangle that actually moved.
+
+    That only works if consecutive frames share a palette, hence quantising every frame
+    against one palette built from a sample of the loop rather than letting each pick its
+    own 255 colours. Together the two take the file from ~2.5MB to under 1MB. Spreading
+    one palette over 32 materials does cost a little colour accuracy, but at thumbnail
+    size it is not visible against the WebP.
+    """
+    sample = frames[::PALETTE_SAMPLE]
+    strip = Image.new("RGB", (sample[0].width, sample[0].height * len(sample)))
+    for index, frame in enumerate(sample):
+        strip.paste(frame.convert("RGB"), (0, index * frame.height))
+    palette = strip.quantize(colors=256, method=Image.MEDIANCUT)
+
+    # No dithering: the source is flat-shaded pixel art, and dithering would scatter noise
+    # across the backdrop that then has to be re-encoded every frame.
+    quantised = [frame.convert("RGB").quantize(palette=palette, dither=Image.NONE)
+                 for frame in frames]
+    quantised[0].save(
+        dest,
+        save_all=True,
+        append_images=quantised[1:],
+        duration=durations,
+        loop=0,
+        disposal=1,
+    )
+
+
+THUMB_SAVERS = {"gif": _save_thumbnail_gif, "webp": _save_webp}
+
+
+def _load_logo(logo_path):
+    """Load and upscale the mod logo, or None if it isn't on disk.
+
+    Scaled with NEAREST at an integer factor: the logo is pixel art of the same kind as
+    the sprites, and anything smoother would leave it looking soft against them.
+    """
+    if not logo_path or not os.path.isfile(logo_path):
+        return None
+    with Image.open(logo_path) as handle:
+        logo = handle.convert("RGBA")
+    return logo.resize((logo.width * LOGO_SCALE, logo.height * LOGO_SCALE), Image.NEAREST)
+
+
+def _compose_thumbnail(frame, logo):
+    """Drop one rendered spin frame onto the thumbnail backdrop and stamp the logo on.
+
+    The weapon is centred in the square and the logo sits bottom-centre, overlapping the
+    low edge of the art rather than being given a clear band of its own — the logo carries
+    its own outline and shadow, so it reads over the weapon, and a reserved band would cost
+    the weapon a third of the frame.
+    """
+    canvas = Image.new("RGBA", (THUMB_CANVAS, THUMB_CANVAS), THUMB_BACKGROUND)
+    canvas.alpha_composite(frame, ((THUMB_CANVAS - frame.width) // 2,
+                                   (THUMB_CANVAS - frame.height) // 2 - THUMB_LIFT))
+    if logo is not None:
+        canvas.alpha_composite(logo, ((THUMB_CANVAS - logo.width) // 2,
+                                      THUMB_CANVAS - logo.height - LOGO_MARGIN))
+    return canvas
+
+
+def create_thumbnail(weapons, dest_stem, logo_path=None, mode="3d", formats=FORMATS):
+    """Render the mod's showcase loop: one weapon spinning through every material.
+
+    Same call shape as create_preview() and the same spin machinery, but `weapons` here is
+    one entry per material rather than one per weapon, so the loop reads as a single item
+    changing material instead of a single material changing item. Runs at the thumbnail
+    spin speed and composites the logo over every frame. Returns the frame count.
+    """
+    if not weapons:
+        return 0
+
+    builder = build_frames_3d if mode == "3d" else build_frames_2d
+    built = builder(weapons, THUMB_SPIN_FRAMES, THUMB_HOLD_FRAMES)
+    logo = _load_logo(logo_path)
+
+    frames = [_compose_thumbnail(frame, logo) for frame, _ in built]
+    durations = [duration for _, duration in built]
+
+    os.makedirs(os.path.dirname(dest_stem), exist_ok=True)
+    for fmt in formats:
+        THUMB_SAVERS[fmt](frames, durations, f"{dest_stem}.{fmt}")
+    return len(frames)
 
 
 def create_preview(weapons, dest_stem, mode="3d", formats=FORMATS):
