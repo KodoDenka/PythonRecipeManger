@@ -39,6 +39,15 @@ EASING = 0.55
 
 CANVAS = 192
 
+# Camera tilt in degrees, looking slightly down at the weapon. Off the equator the top
+# faces stay visible through the whole turn, which is what stops the spin reading as a
+# flat shape rotating in place. 3D renderer only.
+TILT = 12.0
+
+# TODO: idle float. A slow vertical drift across the loop, as a per-frame offset applied
+# after the spin. Cheap to add, but it has to be shared by every weapon in the tier and
+# continuous across the handoff, otherwise the swap gains a visible jump in height.
+
 # Palette index reserved for transparency. quantize() is capped at 255 colours so this
 # one stays free.
 TRANSPARENT_INDEX = 255
@@ -163,14 +172,14 @@ def build_frames_3d(weapons):
 
     # One scale for the whole tier, so weapons stay honestly sized against each other and
     # nothing clips at any point in the spin.
-    scale = render3d.fit_scale([quads for quads, _ in meshes], CANVAS)
+    scale = render3d.fit_scale([quads for quads, _ in meshes], CANVAS, TILT)
 
     frames = []
     angles, face = spin_angles()
     for quads, textures in meshes:
         for step, angle in enumerate(angles):
             frame = render3d.to_image(
-                render3d.render(quads, textures, angle, CANVAS, scale)
+                render3d.render(quads, textures, angle, CANVAS, scale, TILT)
             )
             frames.append(frame)
             if step == face:

@@ -36,6 +36,25 @@ LIGHT = LIGHT / np.linalg.norm(LIGHT)
 AMBIENT = 0.42
 DIFFUSE = 0.58
 
+# Specular sweep. A highlight band travels across the weapon's own horizontal axis as it
+# turns, so metal catches the light instead of reading as flat-shaded.
+#
+# Strength follows sin(2*spin)^2, which is deliberately zero both edge-on and face-on and
+# peaks at the quarter turns. Face-on has to be zero because that is the frame the GIF
+# holds for HOLD_FRAMES: a highlight that peaked there would freeze mid-blade for the
+# whole hold and read as a smudge rather than a gleam. So the weapon flashes once on the
+# way in and once on the way out, and settles clean.
+SPEC_STRENGTH = 0.55
+# Gaussian half-width of the band, in the model's 0..16 texture space. Wide enough to
+# still read once a GIF is scaled down on a page; much wider and the whole weapon just
+# brightens instead of a band travelling across it.
+SPEC_WIDTH = 1.8
+# Quantise the highlight into this many steps. A smooth gradient spends the GIF's 255
+# colours on near-identical shades and compresses badly, so banding the falloff keeps
+# files small — and reads as more at home against pixel art than a soft airbrush would.
+# 0 disables quantisation.
+SPEC_STEPS = 4
+
 # Corner order for each box face, viewed from outside: top-left, top-right, bottom-right,
 # bottom-left. UV corners (u1,v1), (u2,v1), (u2,v2), (u1,v2) map onto them in that order.
 def _box_face(x1, y1, z1, x2, y2, z2, face):
@@ -171,6 +190,12 @@ def render(quads, textures, spin_deg, canvas, scale, tilt_deg=0.0):
     colour = np.zeros((canvas, canvas, 4), dtype=np.float32)
     depth = np.full((canvas, canvas), -np.inf, dtype=np.float32)
 
+    # Band travels the weapon's own horizontal axis rather than the screen's, so it tracks
+    # the blade instead of drifting off it as the shape foreshortens.
+    spin_rad = math.radians(spin_deg)
+    spec_strength = SPEC_STRENGTH * math.sin(2 * spin_rad) ** 2
+    spec_centre = MODEL_SIZE * (0.5 + spin_deg / 180.0)
+
     for quad in quads:
         texture = textures.get(quad["texture"])
         if texture is None:
@@ -192,6 +217,8 @@ def render(quads, textures, spin_deg, canvas, scale, tilt_deg=0.0):
         if normal[2] < 0:
             normal = -normal
         shade = AMBIENT + DIFFUSE * max(0.0, float(np.dot(normal, LIGHT)))
+        # Surfaces angled away from the camera catch less of the sweep.
+        spec = spec_strength * float(normal[2])
 
         screen = np.empty((4, 2), dtype=np.float32)
         screen[:, 0] = (verts[:, 0] - CENTER[0]) * scale + canvas / 2
@@ -200,13 +227,14 @@ def render(quads, textures, spin_deg, canvas, scale, tilt_deg=0.0):
 
         for tri in ((0, 1, 2), (0, 2, 3)):
             _raster_tri(colour, depth, screen[list(tri)], zs[list(tri)],
-                        quad["uvs"][list(tri)], texture, shade, canvas)
+                        quad["uvs"][list(tri)], texture, shade, canvas,
+                        spec, spec_centre)
 
     out = np.clip(colour, 0, 255).astype(np.uint8)
     return out
 
 
-def _raster_tri(colour, depth, pts, zs, uvs, texture, shade, canvas):
+def _raster_tri(colour, depth, pts, zs, uvs, texture, shade, canvas, spec=0.0, spec_centre=0.0):
     min_x = max(int(np.floor(pts[:, 0].min())), 0)
     max_x = min(int(np.ceil(pts[:, 0].max())), canvas - 1)
     min_y = max(int(np.floor(pts[:, 1].min())), 0)
@@ -253,6 +281,15 @@ def _raster_tri(colour, depth, pts, zs, uvs, texture, shade, canvas):
     lit = texel[opaque].astype(np.float32)
     lit[:, :3] *= shade
 
+    if spec > 0.0:
+        # Blend toward white rather than adding, so the gleam brightens the material
+        # instead of clipping to a flat white blob on already-light textures.
+        falloff = np.exp(-(((u[closer][opaque] - spec_centre) / SPEC_WIDTH) ** 2))
+        gain = spec * falloff
+        if SPEC_STEPS:
+            gain = np.round(gain * SPEC_STEPS) / SPEC_STEPS
+        lit[:, :3] += (255.0 - lit[:, :3]) * gain[:, None]
+
     colour[rows, cols] = lit
     depth[rows, cols] = z[closer][opaque]
 
@@ -284,22 +321,30 @@ def apply_display(quads, model, kind="gui"):
     return out
 
 
-def fit_scale(meshes, canvas, margin=0.06):
+def fit_scale(meshes, canvas, tilt_deg=0.0, margin=0.06):
     """One pixel scale shared by every weapon in a GIF.
 
-    Sized so nothing clips at any point in the spin: rotation about Y sweeps each vertex
-    through a circle of radius hypot(x, z), so that radius bounds the horizontal extent.
+    Sized so nothing clips at any point in the spin. Rotation about Y sweeps each vertex
+    through a circle of radius hypot(x, z), which bounds the horizontal extent and is
+    unaffected by the camera tilt since tilting about X leaves x alone. The tilt does
+    reach the vertical extent though, mixing in depth as |y|cos(t) + radius*sin(t), so it
+    has to be accounted for or tall weapons clip once the camera comes off the equator.
+
     Sharing a single scale across the whole tier keeps weapons honestly sized against each
     other instead of each being fitted to the frame.
     """
+    tilt = math.radians(tilt_deg)
+    cos_t, sin_t = abs(math.cos(tilt)), abs(math.sin(tilt))
+
     half_width = 0.0
     half_height = 0.0
     for quads in meshes:
         for quad in quads:
             offset = quad["verts"] - CENTER
-            radius = np.hypot(offset[:, 0], offset[:, 2]).max()
-            half_width = max(half_width, float(radius))
-            half_height = max(half_height, float(np.abs(offset[:, 1]).max()))
+            radius = np.hypot(offset[:, 0], offset[:, 2])
+            half_width = max(half_width, float(radius.max()))
+            reach = np.abs(offset[:, 1]) * cos_t + radius * sin_t
+            half_height = max(half_height, float(reach.max()))
     extent = max(half_width, half_height, 1e-6)
     return (canvas / 2) * (1 - margin) / extent
 

@@ -60,6 +60,10 @@ Things to know before changing any of this:
 - **Pillow merges consecutive identical frames on save**, so the hold frames collapse into one long-duration frame. A GIF reporting fewer frames than were generated is expected; total playback time is unchanged.
 - `TEMPLATES_DIR` in `preview.py` points at a sibling checkout of the knavesneeds mod by absolute path, overridable with `KNAVESNEEDS_TEMPLATES`. It only resolves on one machine — see the TODO there about moving templates into this project the way sprites were. If the path is missing, every weapon falls back to sprite extrusion, which costs real geometry on greathammer only.
 - Spin speed is `SPIN_FRAMES` alone; hold length is `HOLD_FRAMES * FRAME_MS` and is independent of it. Raising `FRAME_MS` would slow the spin but stretch the hold with it.
+- `EASING` in `preview.py` shapes progress through the half turn so the weapon decelerates into the held frame instead of stopping dead. It only redistributes angles across existing frames, so it never changes the loop duration. Blended against linear rather than applied neat, since a pure cubic stalls at face-on and bunches frames there, silently lengthening the hold.
+- `TILT` tilts the camera off the equator so top faces stay visible. `fit_scale()` must be given the same tilt or tall weapons clip, since tilting mixes depth into the vertical extent.
+- The specular sweep (`SPEC_STRENGTH`, `SPEC_WIDTH` in `render3d.py`) follows `sin(2*spin)^2`, which is zero both edge-on and face-on. Face-on **must** stay zero: that is the frame the GIF holds, and a highlight peaking there would freeze mid-blade for the whole hold.
+- `SPEC_STEPS` bands the highlight instead of letting it fall off smoothly. This is a file size control, not just a look: a smooth gradient spends the GIF's 255 colours on near-identical shades and compresses badly, costing ~75% more per file for no visible gain. Raise it only alongside a size check.
 
 ## Output path conventions
 
