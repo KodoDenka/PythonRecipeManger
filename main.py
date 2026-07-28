@@ -162,9 +162,10 @@ def discover_sprite_tiers():
     return found
 
 def get_preview_path(mod_id, tier_name):
+    """Output path without an extension; preview.py appends one per format."""
     if mod_id is None:
-        return f"preview/{tier_name}.gif"
-    return f"preview/{mod_id}/{tier_name}.gif"
+        return f"preview/{tier_name}"
+    return f"preview/{mod_id}/{tier_name}"
 
 def create_texture_data():
     for tier_name, tier in tiers.items():
@@ -210,11 +211,12 @@ def create_preview_data():
             unresolved.append(f"{mod_id}/{tier_name}" if mod_id else tier_name)
             continue
 
-        dest = get_preview_path(mod_id, tier_name)
-        frames = preview.create_preview_gif(weapons, dest, mode)
-        count = count + 1
+        stem = get_preview_path(mod_id, tier_name)
+        frames = preview.create_preview(weapons, stem, mode)
+        count = count + len(preview.FORMATS)
         recipes = "" if tier_name in tiers else "  [art only, no recipes]"
-        print(f"  {dest} ({len(weapons)} weapons, {frames} frames, {mode}){recipes}")
+        formats = "/".join(preview.FORMATS)
+        print(f"  {stem}.{{{formats}}} ({len(weapons)} weapons, {frames} frames, {mode}){recipes}")
 
     if unresolved:
         print(f"\n  No sprite matched a weapon name in: {', '.join(unresolved)}")

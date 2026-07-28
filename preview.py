@@ -48,9 +48,19 @@ TILT = 12.0
 # after the spin. Cheap to add, but it has to be shared by every weapon in the tier and
 # continuous across the handoff, otherwise the swap gains a visible jump in height.
 
+# Output formats, written from a single render pass. WebP is the better file by every
+# measure — smaller, full alpha, no 256-colour ceiling — but GIF is kept alongside it as
+# the fallback for anywhere WebP is not supported.
+FORMATS = ("gif", "webp")
+
 # Palette index reserved for transparency. quantize() is capped at 255 colours so this
 # one stays free.
 TRANSPARENT_INDEX = 255
+
+# WebP encoder settings. quality drives the compression effort when lossless, and method
+# 6 is the slowest and smallest of the presets.
+WEBP_QUALITY = 90
+WEBP_METHOD = 6
 
 # --- 2D fallback tuning -----------------------------------------------------------
 # Only used by the sprite-squash renderer. The 3D path lights the model instead.
@@ -93,6 +103,18 @@ def _ease(t):
     """
     shaped = 0.5 + 0.5 * (2 * t - 1) ** 3
     return (1 - EASING) * t + EASING * shaped
+
+
+def hold_ms(step, face):
+    """Duration for one frame of a weapon's turn.
+
+    The face-on frame carries the whole hold as a single long frame rather than being
+    repeated. Repeating it and leaning on the GIF encoder to merge duplicates worked, but
+    that is a GIF-specific optimisation the WebP encoder does not share — it would have
+    written every duplicate out. Stating the duration outright gives both formats the same
+    frame list and the same playback.
+    """
+    return HOLD_FRAMES * FRAME_MS if step == face else FRAME_MS
 
 
 def spin_angles():
@@ -140,9 +162,7 @@ def build_frames_2d(weapons):
             sprite = handle.convert("RGBA")
         for step, angle in enumerate(angles):
             frame = _squash_frame(sprite, angle)
-            frames.append(frame)
-            if step == face:
-                frames.extend([frame] * (HOLD_FRAMES - 1))
+            frames.append((frame, hold_ms(step, face)))
     return frames
 
 
@@ -181,9 +201,7 @@ def build_frames_3d(weapons):
             frame = render3d.to_image(
                 render3d.render(quads, textures, angle, CANVAS, scale, TILT)
             )
-            frames.append(frame)
-            if step == face:
-                frames.extend([frame] * (HOLD_FRAMES - 1))
+            frames.append((frame, hold_ms(step, face)))
     return frames
 
 
@@ -209,27 +227,67 @@ def renderer_available(mode):
     return True
 
 
-def create_preview_gif(weapons, dest, mode="3d"):
-    """Render one tier's spin loop to dest.
-
-    `weapons` is an ordered list of (weapon_name, sprite_path). Returns the frame count.
-    """
-    if not weapons:
-        return 0
-
-    builder = build_frames_3d if mode == "3d" else build_frames_2d
-    frames = [_to_gif_frame(frame) for frame in builder(weapons)]
-
-    os.makedirs(os.path.dirname(dest), exist_ok=True)
-    frames[0].save(
+def _save_gif(frames, durations, dest):
+    palettised = [_to_gif_frame(frame) for frame in frames]
+    palettised[0].save(
         dest,
         save_all=True,
-        append_images=frames[1:],
-        duration=FRAME_MS,
+        append_images=palettised[1:],
+        duration=durations,
         loop=0,
         # Each frame must clear the last: the weapon changes shape constantly and without
         # this the wide frames leave fringes behind the narrow ones.
         disposal=2,
         transparency=TRANSPARENT_INDEX,
     )
+
+
+def _save_webp(frames, durations, dest):
+    """Write the same animation as WebP.
+
+    Lossless, because the source is pixel art and lossy WebP smears exactly the hard texel
+    edges the render works to keep crisp. Encoded from the RGBA frames rather than the
+    palettised ones so nothing is quantised on the way in.
+
+    In practice the output is pixel-identical to the GIF — the busiest frame uses 228
+    colours against GIF's ceiling of 255, and the render produces no partial alpha — so
+    this is purely a size win, roughly half the bytes. The headroom only starts to matter
+    if the art gains soft edges or SPEC_STEPS is raised enough to push past 255 colours,
+    at which point the GIF becomes the lossy one.
+    """
+    frames[0].save(
+        dest,
+        format="WEBP",
+        save_all=True,
+        append_images=frames[1:],
+        duration=durations,
+        loop=0,
+        lossless=True,
+        quality=WEBP_QUALITY,
+        method=WEBP_METHOD,
+        minimize_size=True,
+    )
+
+
+SAVERS = {"gif": _save_gif, "webp": _save_webp}
+
+
+def create_preview(weapons, dest_stem, mode="3d", formats=FORMATS):
+    """Render one tier's spin loop and write it in each requested format.
+
+    `weapons` is an ordered list of (weapon_name, sprite_path); `dest_stem` is the output
+    path without an extension. The frames are rendered once and encoded per format, since
+    rasterising is far more expensive than encoding. Returns the frame count.
+    """
+    if not weapons:
+        return 0
+
+    builder = build_frames_3d if mode == "3d" else build_frames_2d
+    built = builder(weapons)
+    frames = [frame for frame, _ in built]
+    durations = [duration for _, duration in built]
+
+    os.makedirs(os.path.dirname(dest_stem), exist_ok=True)
+    for fmt in formats:
+        SAVERS[fmt](frames, durations, f"{dest_stem}.{fmt}")
     return len(frames)

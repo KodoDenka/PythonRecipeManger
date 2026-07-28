@@ -34,7 +34,7 @@ Everything lives in `main.py`. The generation pipeline runs in this order:
 6. **Weapon attributes** (`create_weapon_attributes_date`) — writes weapon attribute JSONs for both loaders.
 7. **Unlock advancements** (`create_unlock_data`) — writes Fabric-only advancement JSONs for recipe unlocking.
 8. **Textures** (`create_texture_data`) — copies each tier × weapon sprite from `common/sprites/` into both loaders. Tiers with no matching sprite are collected in `missing_sprites` and printed as a warning at the end of the run.
-9. **Preview GIFs** (`create_preview_data` → `preview.py`) — renders one looping showcase GIF per tier to `preview/{mod_id}/{tier}.gif`.
+9. **Previews** (`create_preview_data` → `preview.py`) — renders one looping showcase animation per tier to `preview/{mod_id}/{tier}.{gif,webp}`.
 
 Steps 1–8 are driven by `tiers.json`, because recipes, models and advancements need real item IDs. Step 9 is driven by `discover_sprite_tiers()` walking `common/sprites/` instead, so a mod whose art has landed but whose recipes have not still gets a showcase GIF. Those are flagged `[art only, no recipes]` in the run output.
 
@@ -65,7 +65,15 @@ Things to know before changing any of this:
 - `EASING` in `preview.py` shapes progress through the half turn so the weapon decelerates into the held frame instead of stopping dead. It only redistributes angles across existing frames, so it never changes the loop duration. Blended against linear rather than applied neat, since a pure cubic stalls at face-on and bunches frames there, silently lengthening the hold.
 - `TILT` tilts the camera off the equator so top faces stay visible. `fit_scale()` must be given the same tilt or tall weapons clip, since tilting mixes depth into the vertical extent.
 - The specular sweep (`SPEC_STRENGTH`, `SPEC_WIDTH` in `render3d.py`) follows `sin(2*spin)^2`, which is zero both edge-on and face-on. Face-on **must** stay zero: that is the frame the GIF holds, and a highlight peaking there would freeze mid-blade for the whole hold.
-- `SPEC_STEPS` bands the highlight instead of letting it fall off smoothly. This is a file size control, not just a look: a smooth gradient spends the GIF's 255 colours on near-identical shades and compresses badly, costing ~75% more per file for no visible gain. Raise it only alongside a size check.
+- `SPEC_STEPS` bands the highlight instead of letting it fall off smoothly. This is a file size control, not just a look: a smooth gradient spends the GIF's 255 colours on near-identical shades and compresses badly, costing ~75% more per file for no visible gain. Raise it only alongside a size check — it also keeps the busiest frame at ~228 colours, and pushing past 255 would start costing the GIF real colour.
+
+## Output formats
+
+Each tier is written as both GIF and WebP from a single render pass — rasterising costs far more than encoding, so `create_preview()` builds the frames once and hands them to each saver in `FORMATS`. WebP is the better file at roughly half the bytes; GIF is kept as the fallback for anywhere WebP is unsupported.
+
+Frame durations are stated explicitly rather than repeating the held frame. Repetition worked for GIF because Pillow's GIF encoder merges consecutive duplicates, but that is a GIF-specific optimisation the WebP encoder does not share and it would have written every duplicate out.
+
+Note that Pillow's WebP *reader* does not expose per-frame durations — `info["duration"]` comes back empty regardless of what was written. To verify WebP timing, parse the container's `ANMF` chunks (bytes 12–14 of each chunk body are a 24-bit little-endian duration in ms) rather than trusting the reader.
 
 ## Output path conventions
 
