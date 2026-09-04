@@ -33,7 +33,7 @@ Everything lives in `main.py`. The generation pipeline runs in this order:
 5. **Model generation** (`create_model_date`) — writes item model JSONs for both loaders.
 6. **Weapon attributes** (`create_weapon_attributes_date`) — writes weapon attribute JSONs for both loaders.
 7. **Unlock advancements** (`create_unlock_data`) — writes Fabric-only advancement JSONs for recipe unlocking.
-8. **Textures** (`create_texture_data`) — copies each tier × weapon sprite from `common/sprites/` into both loaders. Tiers with no matching sprite are collected in `missing_sprites` and printed as a warning at the end of the run.
+8. **Textures** (`create_texture_data`) — copies each tier × weapon sprite from `common/sprites/` into both loaders, together with its `.png.mcmeta` where one exists. Tiers with no matching sprite are collected in `missing_sprites` and printed as a warning at the end of the run.
 9. **Previews** (`create_preview_data` → `preview.py`) — renders one looping showcase animation per tier to `preview/{mod_id}/{tier}.{gif,webp}`.
 10. **Thumbnail** (`create_thumbnail_data` → `preview.py`) — renders the mod's showcase image to `preview/thumbnail.{gif,webp}`.
 
@@ -117,6 +117,7 @@ Note that Pillow's WebP *reader* does not expose per-frame durations — `info["
 - Fabric conditions use `fabric:load_conditions` / `fabric:all_mods_loaded`; Forge uses `conditions` / `forge:mod_loaded`.
 - Models and textures both use the singular `item` subfolder, set once as `ITEM_ROOT` in `main.py`. Every model `parent`, `layer0` reference, and output path derives from it, so the generated JSON and the files on disk cannot disagree.
 - Textures always go to the `knavesneeds` namespace, even for Blue Skies tiers whose *models* live under `blues_skies` — the sprites ship with this mod regardless of which mod the tier comes from.
+- An animated sprite is a vertical strip of frames plus a sibling `.png.mcmeta` naming the frame time. The two must travel together: without the `.mcmeta` the game has no reason to think the PNG is anything but one very tall texture, so the strip ships as a stretched still. `create_texture_data` copies the `.mcmeta` alongside the sprite for exactly that reason, and reports how many it moved.
 
 ## Sprite layout
 

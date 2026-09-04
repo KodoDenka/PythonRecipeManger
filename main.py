@@ -175,14 +175,27 @@ def get_preview_path(mod_id, tier_name):
     return f"preview/{mod_id}/{tier_name}"
 
 def create_texture_data():
+    animated = 0
     for tier_name, tier in tiers.items():
         for sword in SWORD_PATTERNS:
             source = find_sprite(tier.mod_id, tier_name, sword)
             if source is None:
                 missing_sprites.append((tier.mod_id, tier_name, sword))
                 continue
+            # an animated sprite is a vertical strip of frames plus a sibling .png.mcmeta
+            # naming the frame time. Without the .mcmeta the game has no reason to think
+            # the PNG is anything but one very tall texture, so the two have to travel
+            # together or the strip ships as a stretched still.
+            meta = source + ".mcmeta"
+            has_meta = os.path.exists(meta)
             for loader in ["fabric", "forge"]:
-                copy_file(source, get_texture_path(loader, tier.mod_id, tier_name, sword))
+                dest = get_texture_path(loader, tier.mod_id, tier_name, sword)
+                copy_file(source, dest)
+                if has_meta:
+                    copy_file(meta, dest + ".mcmeta")
+            animated += has_meta
+    if animated:
+        print(f"  {animated} animated texture(s) exported with their .mcmeta.")
 
 _preview_runtime = None
 
