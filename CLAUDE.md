@@ -225,6 +225,68 @@ as before.
   thin ones very little (sai 13%, rapier 17%), so the same palette reads two-tone on a
   claymore and nearly single-tone on a sai.
 
+### Surface treatments
+
+A palette says what a material is made of; a treatment in `treatments.py` says what its
+surface *does*. Colour alone runs out of distinctions well before twelve materials do, so
+each `arpg_core` tier also declares an ordered `treatments` list, a grip ramp and a
+silhouette map. Two tiers can share a hue family and still read as different substances.
+
+A treatment receives a `Surface`: the rendered pixels plus, per pixel, the **family and
+ramp position** the slot table shaded it from. That is what makes the effects structural.
+`pulse` can brighten "the lit two thirds of the blade" because position already encodes
+how lit a texel is, and `translucent` can spare the grip because family already
+distinguishes it. Matching on output colour would break the moment two tiers shared a
+shade.
+
+Treatments compose in the order the tier lists them, each seeing the last one's output —
+`bloom` after `pulse` haloes the swollen core, before it haloes the resting one, and both
+are legitimate.
+
+- **`_rand` needs its avalanche.** It is FNV followed by the murmur3 finaliser. FNV alone
+  avalanches badly on keys as small and correlated as pixel coordinates: it returned
+  0.33–0.94 with adjacent texels differing in the fourth decimal, so every treatment that
+  thresholds against a density below 0.33 — `noise`, `sparkle`, `pit` — matched nothing at
+  all and silently did nothing. It is deterministic on purpose, so a speck lands in the
+  same place on every run and on every machine; art that moves under a regenerate cannot
+  be hand-fixed afterwards.
+- **`etch` scales its period with the canvas.** A fixed pixel period puts twice as many
+  rungs on a 32px blank as on a 16px one, reading as inlay on one and a screen door on the
+  other.
+- **`facet` quantises the position, not the colour.** On a two-tone palette, quantising
+  colour bands body and accent separately and leaves the split visible as a seam.
+- **`bloom` only writes into transparent pixels**, so a sprite that already fills its frame
+  is a no-op rather than a clipped rectangle. A halo is how a 16px sprite says emissive;
+  there is no room for one inside the silhouette.
+
+### Animated tiers
+
+`frames > 1` renders the strip Minecraft wants: every frame stacked vertically into one
+PNG with a `.png.mcmeta` beside it naming the frame time in ticks. That is the shippable
+format, not a preview. `generate(..., preview=True)` additionally writes a GIF per animated
+weapon, which the game never reads and a person browsing the folder does.
+
+### Grips and silhouettes
+
+- **A tier that omits `handle` inherits the same wooden grip as every other tier.** All
+  twelve `arpg_core` materials did at first, which made every scythe shaft in the set
+  identical — the largest block of shared pixels in the whole thing. Two-tone tiers now
+  take a machined gunmetal or charcoal grip and single-tone ones a dark grip tinted from
+  their own ramp.
+- **`weapon_split` exists because the accent lands on whatever is lit.** See the two-tone
+  section: one flat split gives a warglaive 42% accent and a sai 13%.
+- **`variants` maps weapon → blank variant, falling back to `base`.** Falling back beats
+  skipping — a tier missing three of its fifteen weapons is a broken item set, one wearing
+  the base silhouette for three of them is merely less distinctive. No non-base variant
+  covers all fifteen weapons (greathammer exists in only two, warglaive in few), so a tier
+  declares a priority chain and the builder resolves it per weapon.
+- **Some blanks are mostly grip and must not be used as variants.**
+  `chakram/betternether_cincinnasite` has 80% handle-family slots against base's 0% — that
+  tier drew the disc in colours the other tiers agreed on, so `_learn_handles` claimed it.
+  It renders entirely from the handle ramp and ignores the material. `_mostly_grip()`
+  catches this against the same weapon's base blank rather than an absolute threshold,
+  since a spear is legitimately half shaft.
+
 ### Hand-authored palettes
 
 `common/data/palettes_custom.json` holds palettes written by hand; `load_palettes()` reads it

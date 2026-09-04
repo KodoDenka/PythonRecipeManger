@@ -29,7 +29,78 @@
       "#d86df2"
     ],
     "split": 0.58,
-    "blend": 0.1
+    "blend": 0.1,
+    "handle": [
+      "#1a1d24",
+      "#252a33",
+      "#333944",
+      "#434a57",
+      "#545d6b",
+      "#68717f"
+    ],
+    "weapon_split": {
+      "sai": 0.41,
+      "rapier": 0.44,
+      "halberd": 0.48,
+      "glaive": 0.5,
+      "cutlass": 0.52,
+      "katana": 0.54,
+      "scythe": 0.56,
+      "greataxe": 0.58,
+      "greathammer": 0.58,
+      "chakram": 0.56,
+      "twinblade": 0.6,
+      "longsword": 0.6,
+      "spear": 0.64,
+      "claymore": 0.66,
+      "warglaive": 0.66
+    },
+    "variants": {
+      "longsword": "forbidden_arcanus_draco_arcanus",
+      "twinblade": "forbidden_arcanus_draco_arcanus",
+      "rapier": "forbidden_arcanus_draco_arcanus",
+      "katana": "forbidden_arcanus_draco_arcanus",
+      "sai": "forbidden_arcanus_draco_arcanus",
+      "spear": "forbidden_arcanus_draco_arcanus",
+      "glaive": "forbidden_arcanus_draco_arcanus",
+      "warglaive": "forbidden_arcanus_draco_arcanus",
+      "cutlass": "forbidden_arcanus_draco_arcanus",
+      "claymore": "forbidden_arcanus_draco_arcanus",
+      "greathammer": "byg_pendorite",
+      "greataxe": "forbidden_arcanus_draco_arcanus",
+      "chakram": "forbidden_arcanus_draco_arcanus",
+      "scythe": "forbidden_arcanus_draco_arcanus",
+      "halberd": "forbidden_arcanus_draco_arcanus"
+    },
+    "frames": 12,
+    "frametime": 4,
+    "treatments": [
+      {
+        "type": "noise",
+        "colours": [
+          "#1b0330",
+          "#2c0650",
+          "#4a0d78",
+          "#7f27a8",
+          "#c158e0",
+          "#efc0ff"
+        ],
+        "density": 0.13,
+        "seed": 11,
+        "drift": [
+          1,
+          1
+        ],
+        "mode": "drift"
+      },
+      {
+        "type": "bloom",
+        "colour": "#7f27a8",
+        "alpha": 70,
+        "above": 0.8,
+        "falloff": 0.42
+      }
+    ]
   },
   "arpg_core/erythryl": {
     "material": [
@@ -61,7 +132,74 @@
       "#fff2f0"
     ],
     "split": 0.66,
-    "blend": 0.08
+    "blend": 0.08,
+    "handle": [
+      "#180709",
+      "#240b0e",
+      "#310e13",
+      "#3e1217",
+      "#4a161c",
+      "#571921"
+    ],
+    "weapon_split": {
+      "sai": 0.49,
+      "rapier": 0.52,
+      "halberd": 0.56,
+      "glaive": 0.58,
+      "cutlass": 0.6,
+      "katana": 0.62,
+      "scythe": 0.64,
+      "greataxe": 0.66,
+      "greathammer": 0.66,
+      "chakram": 0.64,
+      "twinblade": 0.68,
+      "longsword": 0.68,
+      "spear": 0.72,
+      "claymore": 0.74,
+      "warglaive": 0.74
+    },
+    "variants": {
+      "longsword": "undergarden_forgotten",
+      "twinblade": "undergarden_forgotten",
+      "rapier": "undergarden_forgotten",
+      "katana": "undergarden_forgotten",
+      "sai": "undergarden_forgotten",
+      "spear": "undergarden_forgotten",
+      "glaive": "undergarden_forgotten",
+      "warglaive": "undergarden_cloggrum",
+      "cutlass": "undergarden_forgotten",
+      "claymore": "undergarden_forgotten",
+      "greathammer": "byg_pendorite",
+      "greataxe": "byg_pendorite",
+      "scythe": "undergarden_forgotten",
+      "halberd": "undergarden_forgotten"
+    },
+    "frames": 16,
+    "frametime": 3,
+    "treatments": [
+      {
+        "type": "pulse",
+        "above": 0.52,
+        "amount": 0.34,
+        "cycles": 1
+      },
+      {
+        "type": "rimlight",
+        "amount": 1.18,
+        "above": 0.3,
+        "sides": [
+          "up",
+          "left"
+        ]
+      },
+      {
+        "type": "bloom",
+        "colour": "#c9645b",
+        "alpha": 52,
+        "above": 0.86,
+        "falloff": 0.34
+      }
+    ]
   },
   "arpg_core/faeglas": {
     "material": [
@@ -93,7 +231,69 @@
       "#c6ff8c"
     ],
     "split": 0.66,
-    "blend": 0.1
+    "blend": 0.1,
+    "handle": [
+      "#0a0a0c",
+      "#111114",
+      "#18191d",
+      "#212227",
+      "#2b2c32",
+      "#36373e"
+    ],
+    "weapon_split": {
+      "sai": 0.49,
+      "rapier": 0.52,
+      "halberd": 0.56,
+      "glaive": 0.58,
+      "cutlass": 0.6,
+      "katana": 0.62,
+      "scythe": 0.64,
+      "greataxe": 0.66,
+      "greathammer": 0.66,
+      "chakram": 0.64,
+      "twinblade": 0.68,
+      "longsword": 0.68,
+      "spear": 0.72,
+      "claymore": 0.74,
+      "warglaive": 0.74
+    },
+    "variants": {
+      "longsword": "charoite",
+      "twinblade": "charoite",
+      "rapier": "charoite",
+      "katana": "charoite",
+      "sai": "charoite",
+      "spear": "betterend_terminite",
+      "glaive": "charoite",
+      "warglaive": "byg_pendorite",
+      "cutlass": "amethyst_imbuement_glowing",
+      "claymore": "charoite",
+      "greathammer": "byg_pendorite",
+      "greataxe": "byg_pendorite",
+      "chakram": "betterend_terminite",
+      "scythe": "charoite",
+      "halberd": "charoite"
+    },
+    "treatments": [
+      {
+        "type": "facet",
+        "steps": 5
+      },
+      {
+        "type": "translucent",
+        "alpha": 158,
+        "above": 0.66,
+        "above_alpha": 242,
+        "lift": 1.34
+      },
+      {
+        "type": "bloom",
+        "colour": "#7ce34b",
+        "alpha": 86,
+        "above": 0.78,
+        "falloff": 0.42
+      }
+    ]
   },
   "arpg_core/cryalt": {
     "material": [
@@ -125,7 +325,71 @@
       "#e6fcff"
     ],
     "split": 0.68,
-    "blend": 0.09
+    "blend": 0.09,
+    "handle": [
+      "#0d0f12",
+      "#161a1f",
+      "#20252b",
+      "#2b3138",
+      "#373e46",
+      "#454d56"
+    ],
+    "weapon_split": {
+      "sai": 0.51,
+      "rapier": 0.54,
+      "halberd": 0.58,
+      "glaive": 0.6,
+      "cutlass": 0.62,
+      "katana": 0.64,
+      "scythe": 0.66,
+      "greataxe": 0.68,
+      "greathammer": 0.68,
+      "chakram": 0.66,
+      "twinblade": 0.7,
+      "longsword": 0.7,
+      "spear": 0.74,
+      "claymore": 0.76,
+      "warglaive": 0.76
+    },
+    "variants": {
+      "longsword": "diopside",
+      "twinblade": "diopside",
+      "rapier": "diopside",
+      "katana": "diopside",
+      "sai": "diopside",
+      "spear": "diopside",
+      "glaive": "diopside",
+      "warglaive": "byg_pendorite",
+      "cutlass": "betterend_aeternium",
+      "claymore": "diopside",
+      "greathammer": "byg_pendorite",
+      "greataxe": "byg_pendorite",
+      "chakram": "betterend_terminite",
+      "scythe": "byg_pendorite",
+      "halberd": "diopside"
+    },
+    "treatments": [
+      {
+        "type": "facet",
+        "steps": 4
+      },
+      {
+        "type": "rimlight",
+        "amount": 1.3,
+        "above": 0.2,
+        "sides": [
+          "up",
+          "right"
+        ]
+      },
+      {
+        "type": "sparkle",
+        "colour": "#eaffff",
+        "density": 0.09,
+        "above": 0.55,
+        "seed": 5
+      }
+    ]
   },
   "arpg_core/hesperynt": {
     "material": [
@@ -157,7 +421,67 @@
       "#ffdb4d"
     ],
     "split": 0.6,
-    "blend": 0.1
+    "blend": 0.1,
+    "handle": [
+      "#0a0a0c",
+      "#111114",
+      "#18191d",
+      "#212227",
+      "#2b2c32",
+      "#36373e"
+    ],
+    "weapon_split": {
+      "sai": 0.43,
+      "rapier": 0.46,
+      "halberd": 0.5,
+      "glaive": 0.52,
+      "cutlass": 0.54,
+      "katana": 0.56,
+      "scythe": 0.58,
+      "greataxe": 0.6,
+      "greathammer": 0.6,
+      "chakram": 0.58,
+      "twinblade": 0.62,
+      "longsword": 0.62,
+      "spear": 0.66,
+      "claymore": 0.68,
+      "warglaive": 0.68
+    },
+    "variants": {
+      "longsword": "betternether_cincinnasite",
+      "twinblade": "betternether_cincinnasite",
+      "rapier": "betternether_cincinnasite",
+      "katana": "byg_pendorite",
+      "sai": "byg_pendorite",
+      "spear": "betternether_cincinnasite",
+      "glaive": "betternether_cincinnasite",
+      "warglaive": "forbidden_arcanus_reinforced_deorum",
+      "cutlass": "betternether_cincinnasite",
+      "claymore": "betternether_cincinnasite",
+      "greathammer": "byg_pendorite",
+      "greataxe": "betternether_cincinnasite",
+      "chakram": "forbidden_arcanus_reinforced_deorum",
+      "scythe": "betternether_cincinnasite",
+      "halberd": "betternether_cincinnasite"
+    },
+    "frames": 8,
+    "frametime": 2,
+    "treatments": [
+      {
+        "type": "flicker",
+        "above": 0.58,
+        "amount": 0.3,
+        "coherence": 3,
+        "seed": 7
+      },
+      {
+        "type": "bloom",
+        "colour": "#e8b52e",
+        "alpha": 78,
+        "above": 0.8,
+        "falloff": 0.4
+      }
+    ]
   },
   "arpg_core/rhodynth": {
     "material": [
@@ -173,6 +497,50 @@
       "#df9fbf",
       "#eebbd5",
       "#fcd9ec"
+    ],
+    "handle": [
+      "#140b0e",
+      "#201117",
+      "#2c1720",
+      "#381e28",
+      "#442431",
+      "#502b39"
+    ],
+    "variants": {
+      "longsword": "amethyst_imbuement_glowing",
+      "twinblade": "amethyst_imbuement_glowing",
+      "rapier": "amethyst_imbuement_glowing",
+      "katana": "amethyst_imbuement_glowing",
+      "sai": "amethyst_imbuement_glowing",
+      "spear": "amethyst_imbuement_glowing",
+      "glaive": "amethyst_imbuement_glowing",
+      "warglaive": "byg_pendorite",
+      "cutlass": "amethyst_imbuement_glowing",
+      "claymore": "amethyst_imbuement_glowing",
+      "greathammer": "byg_pendorite",
+      "greataxe": "byg_pendorite",
+      "scythe": "amethyst_imbuement_glowing",
+      "halberd": "charoite"
+    },
+    "frames": 12,
+    "frametime": 4,
+    "treatments": [
+      {
+        "type": "iridescent",
+        "spread": 30,
+        "axis": "position",
+        "saturate": 1.1,
+        "cycles": 1
+      },
+      {
+        "type": "rimlight",
+        "amount": 1.22,
+        "above": 0.35,
+        "sides": [
+          "up",
+          "left"
+        ]
+      }
     ]
   },
   "arpg_core/viriwyn": {
@@ -189,6 +557,46 @@
       "#3eb236",
       "#52c543",
       "#69d952"
+    ],
+    "handle": [
+      "#07180e",
+      "#0a2314",
+      "#0d2e1b",
+      "#113921",
+      "#144428",
+      "#174f2f"
+    ],
+    "variants": {
+      "longsword": "undergarden_cloggrum",
+      "twinblade": "undergarden_cloggrum",
+      "rapier": "undergarden_forgotten",
+      "katana": "undergarden_forgotten",
+      "sai": "undergarden_forgotten",
+      "spear": "undergarden_cloggrum",
+      "glaive": "undergarden_forgotten",
+      "warglaive": "undergarden_cloggrum",
+      "cutlass": "undergarden_forgotten",
+      "claymore": "undergarden_forgotten",
+      "greathammer": "byg_pendorite",
+      "greataxe": "byg_pendorite",
+      "scythe": "undergarden_forgotten",
+      "halberd": "undergarden_forgotten"
+    },
+    "treatments": [
+      {
+        "type": "pit",
+        "density": 0.24,
+        "darken": 0.58,
+        "below": 0.88,
+        "seed": 3
+      },
+      {
+        "type": "bloom",
+        "colour": "#3eb236",
+        "alpha": 44,
+        "above": 0.88,
+        "falloff": 0.3
+      }
     ]
   },
   "arpg_core/phthalium": {
@@ -205,6 +613,32 @@
       "#39a177",
       "#4fb989",
       "#69d19d"
+    ],
+    "handle": [
+      "#071714",
+      "#0b241f",
+      "#0f3029",
+      "#133d34",
+      "#164a3f",
+      "#1a5649"
+    ],
+    "treatments": [
+      {
+        "type": "etch",
+        "period": 5,
+        "darken": 0.82,
+        "above": 0.44,
+        "axis": "cross"
+      },
+      {
+        "type": "rimlight",
+        "amount": 1.42,
+        "above": 0.25,
+        "sides": [
+          "up",
+          "left"
+        ]
+      }
     ]
   },
   "arpg_core/glykios": {
@@ -221,6 +655,43 @@
       "#516ab2",
       "#708bcc",
       "#95b0e6"
+    ],
+    "handle": [
+      "#080a17",
+      "#0c1025",
+      "#111533",
+      "#151b41",
+      "#1a214e",
+      "#1e275c"
+    ],
+    "variants": {
+      "longsword": "byg_pendorite",
+      "twinblade": "byg_pendorite",
+      "rapier": "byg_pendorite",
+      "katana": "byg_pendorite",
+      "sai": "byg_pendorite",
+      "spear": "byg_pendorite",
+      "glaive": "byg_pendorite",
+      "warglaive": "byg_pendorite",
+      "cutlass": "byg_pendorite",
+      "claymore": "byg_pendorite",
+      "greathammer": "byg_pendorite",
+      "greataxe": "byg_pendorite",
+      "chakram": "forbidden_arcanus_draco_arcanus",
+      "scythe": "byg_pendorite",
+      "halberd": "byg_pendorite"
+    },
+    "frames": 8,
+    "frametime": 4,
+    "treatments": [
+      {
+        "type": "sparkle",
+        "colour": "#ffffff",
+        "density": 0.17,
+        "above": 0.42,
+        "seed": 21,
+        "twinkle": 2
+      }
     ]
   },
   "arpg_core/wyrdbright": {
@@ -237,6 +708,48 @@
       "#ada2d7",
       "#c2bce7",
       "#dad7f7"
+    ],
+    "handle": [
+      "#100b14",
+      "#19121f",
+      "#23182b",
+      "#2c1f37",
+      "#362543",
+      "#3f2c4f"
+    ],
+    "variants": {
+      "longsword": "twilight_forest_knightmetal",
+      "twinblade": "twilight_forest_knightmetal",
+      "rapier": "twilight_forest_knightmetal",
+      "katana": "twilight_forest_knightmetal",
+      "sai": "twilight_forest_knightmetal",
+      "spear": "twilight_forest_knightmetal",
+      "glaive": "twilight_forest_knightmetal",
+      "warglaive": "twilight_forest_knightmetal",
+      "cutlass": "twilight_forest_knightmetal",
+      "claymore": "twilight_forest_knightmetal",
+      "greathammer": "byg_pendorite",
+      "greataxe": "twilight_forest_knightmetal",
+      "chakram": "twilight_forest_knightmetal",
+      "scythe": "byg_pendorite",
+      "halberd": "twilight_forest_knightmetal"
+    },
+    "frames": 12,
+    "frametime": 4,
+    "treatments": [
+      {
+        "type": "pulse",
+        "above": 0.6,
+        "amount": 0.2,
+        "cycles": 1
+      },
+      {
+        "type": "bloom",
+        "colour": "#c2bce7",
+        "alpha": 96,
+        "above": 0.74,
+        "falloff": 0.46
+      }
     ]
   },
   "arpg_core/auridine": {
@@ -253,6 +766,49 @@
       "#d78e19",
       "#eba828",
       "#ffc338"
+    ],
+    "handle": [
+      "#0a0a0c",
+      "#111114",
+      "#18191d",
+      "#212227",
+      "#2b2c32",
+      "#36373e"
+    ],
+    "variants": {
+      "longsword": "forbidden_arcanus_reinforced_deorum",
+      "twinblade": "forbidden_arcanus_reinforced_deorum",
+      "rapier": "forbidden_arcanus_reinforced_deorum",
+      "katana": "byg_pendorite",
+      "sai": "byg_pendorite",
+      "spear": "forbidden_arcanus_reinforced_deorum",
+      "glaive": "byg_pendorite",
+      "warglaive": "forbidden_arcanus_reinforced_deorum",
+      "cutlass": "forbidden_arcanus_reinforced_deorum",
+      "claymore": "forbidden_arcanus_reinforced_deorum",
+      "greathammer": "byg_pendorite",
+      "greataxe": "forbidden_arcanus_reinforced_deorum",
+      "chakram": "forbidden_arcanus_reinforced_deorum",
+      "scythe": "forbidden_arcanus_reinforced_deorum",
+      "halberd": "forbidden_arcanus_reinforced_deorum"
+    },
+    "treatments": [
+      {
+        "type": "etch",
+        "period": 4,
+        "darken": 0.7,
+        "above": 0.38,
+        "axis": "cross"
+      },
+      {
+        "type": "rimlight",
+        "amount": 1.3,
+        "above": 0.3,
+        "sides": [
+          "up",
+          "left"
+        ]
+      }
     ]
   },
   "arpg_core/celadium": {
@@ -269,6 +825,54 @@
       "#aed271",
       "#c3e68e",
       "#d9faaf"
+    ],
+    "handle": [
+      "#131608",
+      "#1d220c",
+      "#272e11",
+      "#313a15",
+      "#3b4619",
+      "#45521e"
+    ],
+    "variants": {
+      "longsword": "twilight_forest_steeleaf",
+      "twinblade": "twilight_forest_steeleaf",
+      "rapier": "byg_pendorite",
+      "katana": "byg_pendorite",
+      "sai": "byg_pendorite",
+      "spear": "twilight_forest_steeleaf",
+      "glaive": "twilight_forest_steeleaf",
+      "warglaive": "byg_pendorite",
+      "cutlass": "twilight_forest_ironwood",
+      "claymore": "twilight_forest_steeleaf",
+      "greathammer": "byg_pendorite",
+      "greataxe": "twilight_forest_steeleaf",
+      "scythe": "twilight_forest_steeleaf",
+      "halberd": "twilight_forest_steeleaf"
+    },
+    "treatments": [
+      {
+        "type": "pit",
+        "density": 0.14,
+        "darken": 0.8,
+        "below": 0.92,
+        "seed": 9
+      },
+      {
+        "type": "iridescent",
+        "spread": 12,
+        "axis": "y",
+        "saturate": 1.05
+      },
+      {
+        "type": "rimlight",
+        "amount": 1.2,
+        "above": 0.35,
+        "sides": [
+          "up",
+          "left"
+        ]
+      }
     ]
   }
 }

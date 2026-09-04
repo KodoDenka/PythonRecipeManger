@@ -34,7 +34,7 @@ by hand, not part of the per-run JSON pipeline.
 import json
 import os
 import colorsys
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 SPRITES_DIR = "common/sprites"
 BLANKS_DIR = "common/blanks"
@@ -132,6 +132,30 @@ class Palette:
     accent: list[str] | None = None
     split: float = 0.62
     blend: float = 0.10
+    # surface effects, in order; see treatments.py
+    treatments: list[dict] = field(default_factory=list)
+    # >1 renders an animated strip and writes the .mcmeta beside it
+    frames: int = 1
+    frametime: int = 3
+    # per-weapon overrides, because one split does not fit every silhouette
+    weapon_split: dict = field(default_factory=dict)
+    # weapon -> blank variant, falling back to "base" where the variant does not exist
+    variants: dict = field(default_factory=dict)
+
+    def for_weapon(self, weapon):
+        """This palette as it applies to one weapon, with any split override folded in.
+
+        The accent lands on whatever is lit, and how much of a drawing is lit depends on
+        the drawing: at a single split of 0.62 a warglaive comes out 42% accent and a sai
+        13%, so the same material reads two-tone on one weapon and single-tone on another.
+        Overriding split per weapon is what keeps the accent a property of the material
+        rather than of the silhouette.
+        """
+        if weapon not in self.weapon_split:
+            return self
+        clone = replace(self, weapon_split={})
+        clone.split = self.weapon_split[weapon]
+        return clone
 
     def shade(self, position):
         """The colour for a material slot at `position`, two-tone aware."""
@@ -644,6 +668,11 @@ def load_palettes():
             accent=entry.get("accent"),
             split=entry.get("split", 0.62),
             blend=entry.get("blend", 0.10),
+            treatments=entry.get("treatments") or [],
+            frames=entry.get("frames", 1),
+            frametime=entry.get("frametime", 3),
+            weapon_split=entry.get("weapon_split") or {},
+            variants=entry.get("variants") or {},
         )
     return palettes
 
@@ -658,51 +687,172 @@ def render(weapon, variant, palette, index=None):
     except KeyError:
         raise KeyError(f"no blank {weapon}/{variant}; run `python spritegen.py extract`")
 
+    pixels, family, position, size = _shade(weapon, variant, palette, spec)
+    image = Image.new("RGBA", size)
+    image.putdata(pixels)
+    return image
+
+
+def _shade(weapon, variant, palette, spec):
+    """Recolour a blank, returning the pixels alongside the slot data behind each one.
+
+    The family and position maps are what treatments act on. They cost one dict lookup per
+    pixel to carry and let an effect say "the lit part of the blade" instead of matching on
+    output colour, which would collide the moment two tiers shared a shade.
+    """
+    from PIL import Image
+
     lookup = {}
     for slot in spec["slots"]:
         if slot["family"] == "material":
             colour = palette.shade(slot["position"])
         else:
             colour = sample_ramp(palette.handle, slot["position"])
-        lookup[hex_to_rgb(slot["colour"]) + (slot["alpha"],)] = tuple(colour) + (slot["alpha"],)
+        key = hex_to_rgb(slot["colour"]) + (slot["alpha"],)
+        lookup[key] = (tuple(colour) + (slot["alpha"],), slot["family"], slot["position"])
 
     blank = Image.open(f"{BLANKS_DIR}/{weapon}/{variant}.png").convert("RGBA")
-    out = []
+    pixels, family, position = [], [], []
     for pixel in _pixels(blank):
         if pixel[3] == 0:
-            out.append((0, 0, 0, 0))
+            pixels.append((0, 0, 0, 0))
+            family.append(None)
+            position.append(None)
             continue
-        recoloured = lookup.get(pixel)
-        if recoloured is None:
+        found = lookup.get(pixel)
+        if found is None:
             # a blank should only ever contain its own slot colours; anything else means
             # the PNG and blanks.json have drifted apart
             raise ValueError(f"{weapon}/{variant}: colour {rgb_to_hex(pixel)} has no slot")
-        out.append(recoloured)
+        pixels.append(found[0])
+        family.append(found[1])
+        position.append(found[2])
+    return pixels, family, position, blank.size
 
-    image = Image.new("RGBA", blank.size)
-    image.putdata(out)
-    return image
+
+def render_frames(weapon, variant, palette, index=None):
+    """Render one weapon as a list of frames, with the palette's treatments applied.
+
+    Always returns at least one frame, so a still tier and an animated one go down the same
+    path and `generate` never branches on whether a material happens to move.
+
+    Each treatment sees the previous one's output, which is why a tier declares them as an
+    ordered list rather than a set of flags: `bloom` after `pulse` haloes the swollen core,
+    `bloom` before it haloes the resting one, and both are legitimate.
+    """
+    from PIL import Image
+    import treatments as fx
+
+    index = index or load_index()
+    try:
+        spec = index["weapons"][weapon][variant]
+    except KeyError:
+        raise KeyError(f"no blank {weapon}/{variant}; run `python spritegen.py extract`")
+
+    palette = palette.for_weapon(weapon)
+    base, family, position, size = _shade(weapon, variant, palette, spec)
+
+    out = []
+    for frame in range(max(1, palette.frames)):
+        pixels = list(base)
+        for treatment in palette.treatments:
+            surface = fx.Surface(size, pixels, family, position, palette)
+            pixels = fx.apply(surface, treatment, frame, max(1, palette.frames))
+        image = Image.new("RGBA", size)
+        image.putdata(pixels)
+        out.append(image)
+    return out
 
 
-def generate(tier, palette, variants=None, out_dir=None):
-    """Render a whole weapon set for one material into GENERATED_DIR."""
+def generate(tier, palette, variants=None, out_dir=None, preview=False):
+    """Render a whole weapon set for one material into GENERATED_DIR.
+
+    An animated palette is written the way Minecraft wants it: every frame stacked into one
+    vertical strip, with a `.png.mcmeta` naming the frame time. That is a resource-pack
+    format decision, not a preview one -- the strip is the shippable file. `preview=True`
+    additionally writes a GIF per animated weapon, which the game never reads and a person
+    looking at a folder very much does.
+    """
     index = load_index()
-    variants = variants or {}
+    # the palette carries the tier's silhouette map; the argument overrides it per call
+    chosen = dict(palette.variants)
+    chosen.update(variants or {})
     out_dir = out_dir or os.path.join(GENERATED_DIR, tier.replace("/", os.sep))
     os.makedirs(out_dir, exist_ok=True)
 
-    written = []
+    written, fallbacks = [], []
     for weapon, available in index["weapons"].items():
-        variant = variants.get(weapon, "base")
+        variant = chosen.get(weapon, "base")
+        if variant in available and _mostly_grip(available[variant], available.get("base")):
+            # some blanks came out of extraction with most of their slots classified as
+            # grip, because that tier drew the part in colours the other tiers agreed on.
+            # chakram/betternether_cincinnasite is 80% handle against base's 0%, so it
+            # renders entirely from the handle ramp and ignores the material completely
+            print(f"  ! {weapon}/{variant} is mostly grip slots and would ignore the "
+                  f"material, used base")
+            variant = "base"
         if variant not in available:
-            print(f"  ! {weapon}: no variant {variant!r}, skipping")
-            continue
-        image = render(weapon, variant, palette, index)
+            # falling back beats skipping: a tier missing three of its fifteen weapons is a
+            # broken item set, while one wearing the base silhouette for three of them is
+            # merely a less distinctive one
+            fallbacks.append(f"{weapon}:{variant}")
+            variant = "base"
+        frames = render_frames(weapon, variant, palette, index)
         path = os.path.join(out_dir, f"{weapon}.png")
-        image.save(path)
+
+        if len(frames) == 1:
+            frames[0].save(path)
+        else:
+            _save_strip(frames, path, palette.frametime)
+            if preview:
+                _save_gif(frames, path[:-4] + ".gif", palette.frametime)
         written.append(path)
-    print(f"wrote {len(written)} sprites to {out_dir}")
+
+    note = f", {len(frames)} frames each" if len(frames) > 1 else ""
+    print(f"wrote {len(written)} sprites to {out_dir}{note}")
+    if fallbacks:
+        print(f"  variant not in the blank library, used base: {', '.join(fallbacks)}")
     return written
+
+
+def _mostly_grip(spec, base_spec):
+    """True if a blank's slots are so grip-heavy that a material ramp barely shows.
+
+    Judged against the same weapon's base blank rather than an absolute threshold: a spear
+    is legitimately half shaft, so 45% handle means nothing there and everything on a
+    chakram, which has no grip at all.
+    """
+    if not base_spec:
+        return False
+    share = sum(1 for s in spec["slots"] if s["family"] == "handle") / len(spec["slots"])
+    base = sum(1 for s in base_spec["slots"] if s["family"] == "handle") / len(base_spec["slots"])
+    return share > max(0.45, base * 2.2)
+
+
+def _save_strip(frames, path, frametime):
+    """Stack frames vertically and write the .mcmeta that tells the game how to read it."""
+    from PIL import Image
+
+    w, h = frames[0].size
+    strip = Image.new("RGBA", (w, h * len(frames)))
+    for i, frame in enumerate(frames):
+        strip.paste(frame, (0, i * h))
+    strip.save(path)
+    meta = {"animation": {"frametime": frametime,
+                          "frames": list(range(len(frames)))}}
+    with open(path + ".mcmeta", "w", encoding="utf-8") as handle:
+        json.dump(meta, handle, indent=2)
+
+
+def _save_gif(frames, path, frametime):
+    """A looping preview of an animated sprite, scaled up so it is visible at all.
+
+    Nearest-neighbour and 8x, because a 16px GIF shown at 16px on a modern display is a
+    smudge, and any smooth resample would invent shades the sprite does not contain.
+    """
+    big = [f.resize((f.width * 8, f.height * 8), 0) for f in frames]
+    big[0].save(path, save_all=True, append_images=big[1:], loop=0,
+                duration=frametime * 50, disposal=2, transparency=0)
 
 
 # --- fidelity check ----------------------------------------------------------------
