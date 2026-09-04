@@ -430,8 +430,14 @@ def create_unlock_data():
             write_json(filename, json_data)
 
 #Credit to https://stackoverflow.com/questions/185936/how-to-delete-the-contents-of-a-folder
-def clear_old_data():
-    for folder in ["fabric", "forge", "preview"]:
+def clear_old_data(folders=("fabric", "forge", "preview")):
+    """Empty the generated output folders.
+
+    `preview/` is only cleared on a run that is going to rebuild it. Wiping previews that
+    the run then skips would leave the folder empty rather than stale, which is the worse
+    of the two -- a stale GIF is still a GIF.
+    """
+    for folder in folders:
         if not os.path.isdir(folder):
             continue
         for filename in os.listdir(folder):
@@ -451,13 +457,27 @@ def log_and_return_time(message, start_time):
     print(f"{message} (took {elapsed:.2f}ms)")
     return time.time()
 
+PREVIEW_FLAGS = ("--previews", "--preview", "-p")
+
 if __name__ == '__main__':
     global SWORD_PATTERNS
+    import sys
+
+    # Previews are opt-in because they cost minutes while the JSON and textures -- the part
+    # a mod build actually consumes -- take seconds. Rebuilding 39 tiers of spin animation
+    # to change one recipe is a bad default.
+    render_previews = any(flag in sys.argv[1:] for flag in PREVIEW_FLAGS)
+    unknown = [a for a in sys.argv[1:] if a not in PREVIEW_FLAGS]
+    if unknown:
+        print(f"Unknown argument(s): {', '.join(unknown)}")
+        print(f"usage: python main.py [{PREVIEW_FLAGS[0]}]")
+        raise SystemExit(2)
 
     print("Starting data generation...")
     start_time = time.time()
 
-    clear_old_data()
+    clear_old_data(("fabric", "forge", "preview") if render_previews
+                   else ("fabric", "forge"))
     start_time = log_and_return_time("Cleared old data", start_time)
 
     keys = load_keys("common/data/keys.json")
@@ -487,13 +507,17 @@ if __name__ == '__main__':
     create_texture_data()
     start_time = log_and_return_time("Copied textures", start_time)
 
-    print("Rendering preview GIFs...")
-    create_preview_data()
-    start_time = log_and_return_time("Rendered preview GIFs", start_time)
+    if render_previews:
+        print("Rendering preview GIFs...")
+        create_preview_data()
+        start_time = log_and_return_time("Rendered preview GIFs", start_time)
 
-    print("Rendering mod thumbnail...")
-    create_thumbnail_data()
-    start_time = log_and_return_time("Rendered mod thumbnail", start_time)
+        print("Rendering mod thumbnail...")
+        create_thumbnail_data()
+        start_time = log_and_return_time("Rendered mod thumbnail", start_time)
+    else:
+        print(f"Skipped previews and thumbnail "
+              f"(pass {PREVIEW_FLAGS[0]} to render them).")
 
     if missing_sprites:
         print(f"\nWARNING: no sprite found for {len(missing_sprites)} item(s):")

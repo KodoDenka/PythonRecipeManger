@@ -11,8 +11,15 @@ Sprites are the single source of truth here: they live in `common/sprites/` and 
 ## Running the generator
 
 ```
-python main.py
+python main.py              # JSON + textures, about a second
+python main.py --previews   # ...and the preview GIFs and thumbnail, minutes
 ```
+
+**Previews are opt-in.** They cost minutes while the JSON and textures — the part a mod
+build actually consumes — take about a second, so rebuilding 39 tiers of spin animation to
+change one recipe is a bad default. `-p` and `--preview` are accepted too; anything else is
+rejected rather than ignored, so a typo'd flag does not silently give a run without the
+previews it asked for.
 
 JSON and texture generation needs only the standard library (`json`, `os`, `shutil`, `time`). Preview GIF rendering additionally needs Pillow, and the 3D renderer needs numpy:
 
@@ -20,7 +27,7 @@ JSON and texture generation needs only the standard library (`json`, `os`, `shut
 pip install -r requirements.txt
 ```
 
-Both are imported lazily, and the run degrades in stages rather than failing: without numpy previews fall back to the 2D sprite renderer, and without Pillow the GIF step is skipped entirely with a warning. Every JSON file and texture is produced either way. The script clears and regenerates `fabric/`, `forge/`, and `preview/` on every run; all three are gitignored.
+Both are imported lazily, and the run degrades in stages rather than failing: without numpy previews fall back to the 2D sprite renderer, and without Pillow the GIF step is skipped entirely with a warning. Every JSON file and texture is produced either way. The script clears and regenerates `fabric/` and `forge/` on every run, and `preview/` only on a run that is going to rebuild it — wiping previews the run then skips would leave the folder empty rather than stale, and a stale GIF is the better of the two. All three are gitignored.
 
 ## Architecture
 
