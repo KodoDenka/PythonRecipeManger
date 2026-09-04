@@ -31,12 +31,12 @@
     "split": 0.58,
     "blend": 0.1,
     "handle": [
-      "#1a1d24",
-      "#252a33",
-      "#333944",
-      "#434a57",
-      "#545d6b",
-      "#68717f"
+      "#15181e",
+      "#232830",
+      "#323842",
+      "#414854",
+      "#505866",
+      "#606976"
     ],
     "weapon_split": {
       "sai": 0.41,
@@ -56,21 +56,21 @@
       "warglaive": 0.66
     },
     "variants": {
-      "longsword": "forbidden_arcanus_draco_arcanus",
-      "twinblade": "forbidden_arcanus_draco_arcanus",
-      "rapier": "forbidden_arcanus_draco_arcanus",
-      "katana": "forbidden_arcanus_draco_arcanus",
-      "sai": "forbidden_arcanus_draco_arcanus",
-      "spear": "forbidden_arcanus_draco_arcanus",
-      "glaive": "forbidden_arcanus_draco_arcanus",
-      "warglaive": "forbidden_arcanus_draco_arcanus",
-      "cutlass": "forbidden_arcanus_draco_arcanus",
-      "claymore": "forbidden_arcanus_draco_arcanus",
-      "greathammer": "byg_pendorite",
-      "greataxe": "forbidden_arcanus_draco_arcanus",
-      "chakram": "forbidden_arcanus_draco_arcanus",
-      "scythe": "forbidden_arcanus_draco_arcanus",
-      "halberd": "forbidden_arcanus_draco_arcanus"
+      "longsword": "arpg_nebulium",
+      "twinblade": "arpg_nebulium",
+      "rapier": "arpg_nebulium",
+      "katana": "arpg_nebulium",
+      "sai": "arpg_nebulium",
+      "spear": "arpg_nebulium",
+      "glaive": "arpg_nebulium",
+      "warglaive": "arpg_nebulium",
+      "cutlass": "arpg_nebulium",
+      "claymore": "arpg_nebulium",
+      "greathammer": "arpg_nebulium",
+      "greataxe": "arpg_nebulium",
+      "chakram": "arpg_nebulium",
+      "scythe": "arpg_nebulium",
+      "halberd": "arpg_nebulium"
     },
     "frames": 12,
     "frametime": 4,
@@ -134,12 +134,12 @@
     "split": 0.66,
     "blend": 0.08,
     "handle": [
-      "#180709",
-      "#240b0e",
-      "#310e13",
-      "#3e1217",
-      "#4a161c",
-      "#571921"
+      "#270c0f",
+      "#401419",
+      "#5a1a23",
+      "#73222b",
+      "#8c2a35",
+      "#a6303f"
     ],
     "weapon_split": {
       "sai": 0.49,
@@ -159,20 +159,21 @@
       "warglaive": 0.74
     },
     "variants": {
-      "longsword": "undergarden_forgotten",
-      "twinblade": "undergarden_forgotten",
-      "rapier": "undergarden_forgotten",
-      "katana": "undergarden_forgotten",
-      "sai": "undergarden_forgotten",
-      "spear": "undergarden_forgotten",
-      "glaive": "undergarden_forgotten",
-      "warglaive": "undergarden_cloggrum",
-      "cutlass": "undergarden_forgotten",
-      "claymore": "undergarden_forgotten",
-      "greathammer": "byg_pendorite",
-      "greataxe": "byg_pendorite",
-      "scythe": "undergarden_forgotten",
-      "halberd": "undergarden_forgotten"
+      "longsword": "arpg_erythryl",
+      "twinblade": "arpg_erythryl",
+      "rapier": "arpg_erythryl",
+      "katana": "arpg_erythryl",
+      "sai": "arpg_erythryl",
+      "spear": "arpg_erythryl",
+      "glaive": "arpg_erythryl",
+      "warglaive": "arpg_erythryl",
+      "cutlass": "arpg_erythryl",
+      "claymore": "arpg_erythryl",
+      "greathammer": "arpg_erythryl",
+      "greataxe": "arpg_erythryl",
+      "chakram": "arpg_erythryl",
+      "scythe": "arpg_erythryl",
+      "halberd": "arpg_erythryl"
     },
     "frames": 16,
     "frametime": 3,
@@ -233,12 +234,12 @@
     "split": 0.66,
     "blend": 0.1,
     "handle": [
-      "#0a0a0c",
-      "#111114",
-      "#18191d",
-      "#212227",
-      "#2b2c32",
-      "#36373e"
+      "#17171c",
+      "#26262d",
+      "#353740",
+      "#444651",
+      "#545662",
+      "#646672"
     ],
     "weapon_split": {
       "sai": 0.49,
@@ -258,21 +259,21 @@
       "warglaive": 0.74
     },
     "variants": {
-      "longsword": "charoite",
-      "twinblade": "charoite",
-      "rapier": "charoite",
-      "katana": "charoite",
-      "sai": "charoite",
-      "spear": "betterend_terminite",
-      "glaive": "charoite",
-      "warglaive": "byg_pendorite",
-      "cutlass": "amethyst_imbuement_glowing",
-      "claymore": "charoite",
-      "greathammer": "byg_pendorite",
-      "greataxe": "byg_pendorite",
-      "chakram": "betterend_terminite",
-      "scythe": "charoite",
-      "halberd": "charoite"
+      "longsword": "arpg_faeglas",
+      "twinblade": "arpg_faeglas",
+      "rapier": "arpg_faeglas",
+      "katana": "arpg_faeglas",
+      "sai": "arpg_faeglas",
+      "spear": "arpg_faeglas",
+      "glaive": "arpg_faeglas",
+      "warglaive": "arpg_faeglas",
+      "cutlass": "arpg_faeglas",
+      "claymore": "arpg_faeglas",
+      "greathammer": "arpg_faeglas",
+      "greataxe": "arpg_faeglas",
+      "chakram": "arpg_faeglas",
+      "scythe": "arpg_faeglas",
+      "halberd": "arpg_faeglas"
     },
     "treatments": [
       {
@@ -327,12 +328,12 @@
     "split": 0.68,
     "blend": 0.09,
     "handle": [
-      "#0d0f12",
-      "#161a1f",
-      "#20252b",
-      "#2b3138",
-      "#373e46",
-      "#454d56"
+      "#15191e",
+      "#232931",
+      "#323943",
+      "#414a54",
+      "#505a66",
+      "#5f6a77"
     ],
     "weapon_split": {
       "sai": 0.51,
@@ -352,21 +353,21 @@
       "warglaive": 0.76
     },
     "variants": {
-      "longsword": "diopside",
-      "twinblade": "diopside",
-      "rapier": "diopside",
-      "katana": "diopside",
-      "sai": "diopside",
-      "spear": "diopside",
-      "glaive": "diopside",
-      "warglaive": "byg_pendorite",
-      "cutlass": "betterend_aeternium",
-      "claymore": "diopside",
-      "greathammer": "byg_pendorite",
-      "greataxe": "byg_pendorite",
-      "chakram": "betterend_terminite",
-      "scythe": "byg_pendorite",
-      "halberd": "diopside"
+      "longsword": "arpg_cryalt",
+      "twinblade": "arpg_cryalt",
+      "rapier": "arpg_cryalt",
+      "katana": "arpg_cryalt",
+      "sai": "arpg_cryalt",
+      "spear": "arpg_cryalt",
+      "glaive": "arpg_cryalt",
+      "warglaive": "arpg_cryalt",
+      "cutlass": "arpg_cryalt",
+      "claymore": "arpg_cryalt",
+      "greathammer": "arpg_cryalt",
+      "greataxe": "arpg_cryalt",
+      "chakram": "arpg_cryalt",
+      "scythe": "arpg_cryalt",
+      "halberd": "arpg_cryalt"
     },
     "treatments": [
       {
@@ -423,12 +424,12 @@
     "split": 0.6,
     "blend": 0.1,
     "handle": [
-      "#0a0a0c",
-      "#111114",
-      "#18191d",
-      "#212227",
-      "#2b2c32",
-      "#36373e"
+      "#17171c",
+      "#26262d",
+      "#353740",
+      "#444651",
+      "#545662",
+      "#646672"
     ],
     "weapon_split": {
       "sai": 0.43,
@@ -448,21 +449,21 @@
       "warglaive": 0.68
     },
     "variants": {
-      "longsword": "betternether_cincinnasite",
-      "twinblade": "betternether_cincinnasite",
-      "rapier": "betternether_cincinnasite",
-      "katana": "byg_pendorite",
-      "sai": "byg_pendorite",
-      "spear": "betternether_cincinnasite",
-      "glaive": "betternether_cincinnasite",
-      "warglaive": "forbidden_arcanus_reinforced_deorum",
-      "cutlass": "betternether_cincinnasite",
-      "claymore": "betternether_cincinnasite",
-      "greathammer": "byg_pendorite",
-      "greataxe": "betternether_cincinnasite",
-      "chakram": "forbidden_arcanus_reinforced_deorum",
-      "scythe": "betternether_cincinnasite",
-      "halberd": "betternether_cincinnasite"
+      "longsword": "arpg_hesperynt",
+      "twinblade": "arpg_hesperynt",
+      "rapier": "arpg_hesperynt",
+      "katana": "arpg_hesperynt",
+      "sai": "arpg_hesperynt",
+      "spear": "arpg_hesperynt",
+      "glaive": "arpg_hesperynt",
+      "warglaive": "arpg_hesperynt",
+      "cutlass": "arpg_hesperynt",
+      "claymore": "arpg_hesperynt",
+      "greathammer": "arpg_hesperynt",
+      "greataxe": "arpg_hesperynt",
+      "chakram": "arpg_hesperynt",
+      "scythe": "arpg_hesperynt",
+      "halberd": "arpg_hesperynt"
     },
     "frames": 8,
     "frametime": 2,
@@ -499,28 +500,29 @@
       "#fcd9ec"
     ],
     "handle": [
-      "#140b0e",
-      "#201117",
-      "#2c1720",
-      "#381e28",
-      "#442431",
-      "#502b39"
+      "#211217",
+      "#371d27",
+      "#4c2838",
+      "#613445",
+      "#773f56",
+      "#8b4b63"
     ],
     "variants": {
-      "longsword": "amethyst_imbuement_glowing",
-      "twinblade": "amethyst_imbuement_glowing",
-      "rapier": "amethyst_imbuement_glowing",
-      "katana": "amethyst_imbuement_glowing",
-      "sai": "amethyst_imbuement_glowing",
-      "spear": "amethyst_imbuement_glowing",
-      "glaive": "amethyst_imbuement_glowing",
-      "warglaive": "byg_pendorite",
-      "cutlass": "amethyst_imbuement_glowing",
-      "claymore": "amethyst_imbuement_glowing",
-      "greathammer": "byg_pendorite",
-      "greataxe": "byg_pendorite",
-      "scythe": "amethyst_imbuement_glowing",
-      "halberd": "charoite"
+      "longsword": "arpg_rhodynth",
+      "twinblade": "arpg_rhodynth",
+      "rapier": "arpg_rhodynth",
+      "katana": "arpg_rhodynth",
+      "sai": "arpg_rhodynth",
+      "spear": "arpg_rhodynth",
+      "glaive": "arpg_rhodynth",
+      "warglaive": "arpg_rhodynth",
+      "cutlass": "arpg_rhodynth",
+      "claymore": "arpg_rhodynth",
+      "greathammer": "arpg_rhodynth",
+      "greataxe": "arpg_rhodynth",
+      "chakram": "arpg_rhodynth",
+      "scythe": "arpg_rhodynth",
+      "halberd": "arpg_rhodynth"
     },
     "frames": 12,
     "frametime": 4,
@@ -559,28 +561,29 @@
       "#69d952"
     ],
     "handle": [
-      "#07180e",
-      "#0a2314",
-      "#0d2e1b",
-      "#113921",
-      "#144428",
-      "#174f2f"
+      "#0c2717",
+      "#134125",
+      "#1a5b35",
+      "#227342",
+      "#298c53",
+      "#30a663"
     ],
     "variants": {
-      "longsword": "undergarden_cloggrum",
-      "twinblade": "undergarden_cloggrum",
-      "rapier": "undergarden_forgotten",
-      "katana": "undergarden_forgotten",
-      "sai": "undergarden_forgotten",
-      "spear": "undergarden_cloggrum",
-      "glaive": "undergarden_forgotten",
-      "warglaive": "undergarden_cloggrum",
-      "cutlass": "undergarden_forgotten",
-      "claymore": "undergarden_forgotten",
-      "greathammer": "byg_pendorite",
-      "greataxe": "byg_pendorite",
-      "scythe": "undergarden_forgotten",
-      "halberd": "undergarden_forgotten"
+      "longsword": "arpg_viriwyn",
+      "twinblade": "arpg_viriwyn",
+      "rapier": "arpg_viriwyn",
+      "katana": "arpg_viriwyn",
+      "sai": "arpg_viriwyn",
+      "spear": "arpg_viriwyn",
+      "glaive": "arpg_viriwyn",
+      "warglaive": "arpg_viriwyn",
+      "cutlass": "arpg_viriwyn",
+      "claymore": "arpg_viriwyn",
+      "greathammer": "arpg_viriwyn",
+      "greataxe": "arpg_viriwyn",
+      "chakram": "arpg_viriwyn",
+      "scythe": "arpg_viriwyn",
+      "halberd": "arpg_viriwyn"
     },
     "treatments": [
       {
@@ -615,12 +618,12 @@
       "#69d19d"
     ],
     "handle": [
-      "#071714",
-      "#0b241f",
-      "#0f3029",
-      "#133d34",
-      "#164a3f",
-      "#1a5649"
+      "#0c2722",
+      "#144037",
+      "#1c594c",
+      "#237261",
+      "#2a8c77",
+      "#32a48c"
     ],
     "treatments": [
       {
@@ -639,7 +642,24 @@
           "left"
         ]
       }
-    ]
+    ],
+    "variants": {
+      "longsword": "arpg_phthalium",
+      "twinblade": "arpg_phthalium",
+      "rapier": "arpg_phthalium",
+      "katana": "arpg_phthalium",
+      "sai": "arpg_phthalium",
+      "spear": "arpg_phthalium",
+      "glaive": "arpg_phthalium",
+      "warglaive": "arpg_phthalium",
+      "cutlass": "arpg_phthalium",
+      "claymore": "arpg_phthalium",
+      "greathammer": "arpg_phthalium",
+      "greataxe": "arpg_phthalium",
+      "chakram": "arpg_phthalium",
+      "scythe": "arpg_phthalium",
+      "halberd": "arpg_phthalium"
+    }
   },
   "arpg_core/glykios": {
     "material": [
@@ -657,29 +677,29 @@
       "#95b0e6"
     ],
     "handle": [
-      "#080a17",
-      "#0c1025",
-      "#111533",
-      "#151b41",
-      "#1a214e",
-      "#1e275c"
+      "#0d1026",
+      "#141b3f",
+      "#1d2457",
+      "#242f71",
+      "#2d3a88",
+      "#3544a2"
     ],
     "variants": {
-      "longsword": "byg_pendorite",
-      "twinblade": "byg_pendorite",
-      "rapier": "byg_pendorite",
-      "katana": "byg_pendorite",
-      "sai": "byg_pendorite",
-      "spear": "byg_pendorite",
-      "glaive": "byg_pendorite",
-      "warglaive": "byg_pendorite",
-      "cutlass": "byg_pendorite",
-      "claymore": "byg_pendorite",
-      "greathammer": "byg_pendorite",
-      "greataxe": "byg_pendorite",
-      "chakram": "forbidden_arcanus_draco_arcanus",
-      "scythe": "byg_pendorite",
-      "halberd": "byg_pendorite"
+      "longsword": "arpg_glykios",
+      "twinblade": "arpg_glykios",
+      "rapier": "arpg_glykios",
+      "katana": "arpg_glykios",
+      "sai": "arpg_glykios",
+      "spear": "arpg_glykios",
+      "glaive": "arpg_glykios",
+      "warglaive": "arpg_glykios",
+      "cutlass": "arpg_glykios",
+      "claymore": "arpg_glykios",
+      "greathammer": "arpg_glykios",
+      "greataxe": "arpg_glykios",
+      "chakram": "arpg_glykios",
+      "scythe": "arpg_glykios",
+      "halberd": "arpg_glykios"
     },
     "frames": 8,
     "frametime": 4,
@@ -710,29 +730,29 @@
       "#dad7f7"
     ],
     "handle": [
-      "#100b14",
-      "#19121f",
-      "#23182b",
-      "#2c1f37",
-      "#362543",
-      "#3f2c4f"
+      "#1a1221",
+      "#2b1f35",
+      "#3d2a4b",
+      "#4c365f",
+      "#5e4175",
+      "#6e4d8a"
     ],
     "variants": {
-      "longsword": "twilight_forest_knightmetal",
-      "twinblade": "twilight_forest_knightmetal",
-      "rapier": "twilight_forest_knightmetal",
-      "katana": "twilight_forest_knightmetal",
-      "sai": "twilight_forest_knightmetal",
-      "spear": "twilight_forest_knightmetal",
-      "glaive": "twilight_forest_knightmetal",
-      "warglaive": "twilight_forest_knightmetal",
-      "cutlass": "twilight_forest_knightmetal",
-      "claymore": "twilight_forest_knightmetal",
-      "greathammer": "byg_pendorite",
-      "greataxe": "twilight_forest_knightmetal",
-      "chakram": "twilight_forest_knightmetal",
-      "scythe": "byg_pendorite",
-      "halberd": "twilight_forest_knightmetal"
+      "longsword": "arpg_wyrdbright",
+      "twinblade": "arpg_wyrdbright",
+      "rapier": "arpg_wyrdbright",
+      "katana": "arpg_wyrdbright",
+      "sai": "arpg_wyrdbright",
+      "spear": "arpg_wyrdbright",
+      "glaive": "arpg_wyrdbright",
+      "warglaive": "arpg_wyrdbright",
+      "cutlass": "arpg_wyrdbright",
+      "claymore": "arpg_wyrdbright",
+      "greathammer": "arpg_wyrdbright",
+      "greataxe": "arpg_wyrdbright",
+      "chakram": "arpg_wyrdbright",
+      "scythe": "arpg_wyrdbright",
+      "halberd": "arpg_wyrdbright"
     },
     "frames": 12,
     "frametime": 4,
@@ -768,29 +788,29 @@
       "#ffc338"
     ],
     "handle": [
-      "#0a0a0c",
-      "#111114",
-      "#18191d",
-      "#212227",
-      "#2b2c32",
-      "#36373e"
+      "#17171c",
+      "#26262d",
+      "#353740",
+      "#444651",
+      "#545662",
+      "#646672"
     ],
     "variants": {
-      "longsword": "forbidden_arcanus_reinforced_deorum",
-      "twinblade": "forbidden_arcanus_reinforced_deorum",
-      "rapier": "forbidden_arcanus_reinforced_deorum",
-      "katana": "byg_pendorite",
-      "sai": "byg_pendorite",
-      "spear": "forbidden_arcanus_reinforced_deorum",
-      "glaive": "byg_pendorite",
-      "warglaive": "forbidden_arcanus_reinforced_deorum",
-      "cutlass": "forbidden_arcanus_reinforced_deorum",
-      "claymore": "forbidden_arcanus_reinforced_deorum",
-      "greathammer": "byg_pendorite",
-      "greataxe": "forbidden_arcanus_reinforced_deorum",
-      "chakram": "forbidden_arcanus_reinforced_deorum",
-      "scythe": "forbidden_arcanus_reinforced_deorum",
-      "halberd": "forbidden_arcanus_reinforced_deorum"
+      "longsword": "arpg_auridine",
+      "twinblade": "arpg_auridine",
+      "rapier": "arpg_auridine",
+      "katana": "arpg_auridine",
+      "sai": "arpg_auridine",
+      "spear": "arpg_auridine",
+      "glaive": "arpg_auridine",
+      "warglaive": "arpg_auridine",
+      "cutlass": "arpg_auridine",
+      "claymore": "arpg_auridine",
+      "greathammer": "arpg_auridine",
+      "greataxe": "arpg_auridine",
+      "chakram": "arpg_auridine",
+      "scythe": "arpg_auridine",
+      "halberd": "arpg_auridine"
     },
     "treatments": [
       {
@@ -827,28 +847,29 @@
       "#d9faaf"
     ],
     "handle": [
-      "#131608",
-      "#1d220c",
-      "#272e11",
-      "#313a15",
-      "#3b4619",
-      "#45521e"
+      "#20250e",
+      "#353e16",
+      "#48551f",
+      "#5c6d28",
+      "#718630",
+      "#849d39"
     ],
     "variants": {
-      "longsword": "twilight_forest_steeleaf",
-      "twinblade": "twilight_forest_steeleaf",
-      "rapier": "byg_pendorite",
-      "katana": "byg_pendorite",
-      "sai": "byg_pendorite",
-      "spear": "twilight_forest_steeleaf",
-      "glaive": "twilight_forest_steeleaf",
-      "warglaive": "byg_pendorite",
-      "cutlass": "twilight_forest_ironwood",
-      "claymore": "twilight_forest_steeleaf",
-      "greathammer": "byg_pendorite",
-      "greataxe": "twilight_forest_steeleaf",
-      "scythe": "twilight_forest_steeleaf",
-      "halberd": "twilight_forest_steeleaf"
+      "longsword": "arpg_celadium",
+      "twinblade": "arpg_celadium",
+      "rapier": "arpg_celadium",
+      "katana": "arpg_celadium",
+      "sai": "arpg_celadium",
+      "spear": "arpg_celadium",
+      "glaive": "arpg_celadium",
+      "warglaive": "arpg_celadium",
+      "cutlass": "arpg_celadium",
+      "claymore": "arpg_celadium",
+      "greathammer": "arpg_celadium",
+      "greataxe": "arpg_celadium",
+      "chakram": "arpg_celadium",
+      "scythe": "arpg_celadium",
+      "halberd": "arpg_celadium"
     },
     "treatments": [
       {

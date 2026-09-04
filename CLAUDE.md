@@ -147,6 +147,73 @@ reads at thumbnail size.
   bigger output costs compositing rather than rasterising. `THUMB_LIFT` raises it out of dead
   centre, since the logo claims the bottom of the frame.
 
+## Drawn silhouettes
+
+`forge.py` and `armoury.py` generate weapon geometry instead of borrowing it. This exists for
+a reason beyond quality: every blank in `common/blanks/` is structure extracted from another
+mod's sprites, so a set built only from those is a recolour of other people's art rather than
+the mod's own. `spritegen.py` remains the right tool for reference and the wrong one for
+shipping.
+
+- **`forge.py` draws, `armoury.py` says what to draw.** The two change for different reasons —
+  tuning how a bevel reads is a rendering decision, deciding a scythe's blade sweeps back over
+  the haft is a design one.
+- **One `Stroke` covers most of the vocabulary.** A katana's curved single edge, a scythe's
+  sweep, a spear's straight haft and a warglaive's crescent are the same primitive with
+  different control points and width profiles. That is what makes fifteen weapon types
+  tractable without fifteen drawing routines.
+- **Shading comes from the geometry, not from a source sprite.** Every primitive knows the
+  signed across-distance of each texel, so the lit side of a blade is whichever side faces the
+  light, however the blade curves.
+- **Tone bands are hard steps, and there are three of them.** A blade is 3 texels wide at this
+  canvas, so its pixel centres sample the across-coordinate at roughly -0.67, 0 and +0.67 — a
+  fourth band above 0.62 is unreachable, which is why the first pass came out uniformly bright
+  with no shadow side at all.
+- **`outline()` skips texels below `floor`.** The band tables already put their darkest tone
+  on the shadow side; outlining that texel too took a 3-wide blade down to two visible texels
+  against a dark inventory slot.
+- **Hafts sample higher on their ramp than blades do** (`HAFT_BANDS`). The handle ramp is
+  already the darkest thing in a palette, so sampling its bottom end as well stacks two
+  darkenings and the grip disappears.
+
+### Style: what makes a tier recognisable by shape
+
+A `Style` scales parts rather than replacing them, so one tier's fifteen weapons read as a
+family while still differing from each other as much as they did. The furniture names are what
+carry identity — guards (`cross`, `swept`, `ring`, `tsuba`, `winged`, `none`), pommels
+(`disc`, `faceted`, `spike`, `ring`, `none`), grips (`plain`, `wrapped`, `ridged`) and edges
+(`smooth`, `serrated`, `toothed`, `chipped`).
+
+- **A blade says what the weapon is; the furniture says whose it is.** Furniture is chosen per
+  tier, not per weapon, which is the whole point — a player who has seen one Cryalt weapon
+  knows the next by its faceted pommel and chipped edge before the colour registers.
+- **Grip wrap is the largest improvement available to a handle** at this resolution. A plain
+  rod reads as a dowel however well it is shaded, because a real grip's texture is banding
+  across it rather than shading along it.
+- **Edge treatments cut inward, never outward.** A tooth growing past the silhouette changes
+  the weapon's reach and its fitted preview scale; a notch cut into it does not. They also
+  spare the first fifth of the blade, so the ricasso stays clean.
+- **Only the cutting side is modulated.** Modulating the whole width makes a blade that
+  pulses in thickness — a wavy weapon rather than a serrated one.
+
+### Where forged blanks live
+
+`common/blanks/forged.json`, merged over `blanks.json` by `load_index()`. Same split as the
+palettes and for the same reason: `extract` rewrites `blanks.json` wholesale from the sprite
+tree, and a drawn blank has no sprite to be re-derived from. They carry an empty `sources`
+list, so `verify` correctly skips them — there is no ground truth to compare a drawing to.
+
+Regenerate with `python armoury.py`.
+
+- **`to_blank()` quantises positions to 24 steps.** The geometry produces continuous values;
+  without quantising, a curve mints a fresh slot for nearly every texel and blows past
+  `MAX_SLOTS`. Forged blanks land at 11-13 slots.
+- **`_mostly_grip()` measures grip share by area, not by slot count.** Slot count only tracks
+  area for extracted blanks, where every shade came from a comparable patch of hand-drawn art.
+  A wrapped grip mints a distinct handle slot every few texels, so a greathammer that is 27%
+  grip by area reads as half grip by slot count and gets rejected for a fault it does not
+  have. Measured by area, `chakram/betternether_cincinnasite` is still correctly caught at 87%.
+
 ## Output formats
 
 Each tier is written as both GIF and WebP from a single render pass — rasterising costs far more than encoding, so `create_preview()` builds the frames once and hands them to each saver in `FORMATS`. WebP is the better file at roughly half the bytes; GIF is kept as the fallback for anywhere WebP is unsupported.
