@@ -12,14 +12,25 @@ Sprites are the single source of truth here: they live in `common/sprites/` and 
 
 ```
 python main.py              # JSON + textures, about a second
-python main.py --previews   # ...and the preview GIFs and thumbnail, minutes
+python main.py --previews   # ...and the per-tier preview GIFs, minutes
+python main.py --thumbnail  # ...and the mod thumbnail, seconds
+python main.py --all        # everything
 ```
 
-**Previews are opt-in.** They cost minutes while the JSON and textures — the part a mod
-build actually consumes — take about a second, so rebuilding 39 tiers of spin animation to
-change one recipe is a bad default. `-p` and `--preview` are accepted too; anything else is
-rejected rather than ignored, so a typo'd flag does not silently give a run without the
-previews it asked for.
+**Both render steps are opt-in, and separately so.** They cost minutes while the JSON and
+textures — the part a mod build actually consumes — take about a second, so rebuilding 39
+tiers of spin animation to change one recipe is a bad default. They are separate flags
+because they answer different questions and neither implies the other: the thumbnail
+advertises one mod, the previews document every tier with art.
+
+Short forms `-p`, `-t`, `-a` work, as does `--preview`. Anything else is rejected with exit
+2 rather than ignored, so a typo'd flag cannot silently give a run without the output it
+asked for.
+
+Because the two steps are independent, `preview/` is cleared selectively: a previews run
+removes only the per-mod subfolders, a thumbnail run only the loose `thumbnail.*` files.
+Clearing the whole folder either way would delete output the run has no intention of
+rebuilding.
 
 JSON and texture generation needs only the standard library (`json`, `os`, `shutil`, `time`). Preview GIF rendering additionally needs Pillow, and the 3D renderer needs numpy:
 
@@ -41,8 +52,8 @@ Everything lives in `main.py`. The generation pipeline runs in this order:
 6. **Weapon attributes** (`create_weapon_attributes_date`) — writes weapon attribute JSONs for both loaders.
 7. **Unlock advancements** (`create_unlock_data`) — writes Fabric-only advancement JSONs for recipe unlocking.
 8. **Textures** (`create_texture_data`) — copies each tier × weapon sprite from `common/sprites/` into both loaders, together with its `.png.mcmeta` where one exists. Tiers with no matching sprite are collected in `missing_sprites` and printed as a warning at the end of the run.
-9. **Previews** (`create_preview_data` → `preview.py`) — renders one looping showcase animation per tier to `preview/{mod_id}/{tier}.{gif,webp}`.
-10. **Thumbnail** (`create_thumbnail_data` → `preview.py`) — renders the mod's showcase image to `preview/thumbnail.{gif,webp}`.
+9. **Previews** (`create_preview_data` → `preview.py`, `--previews`) — renders one looping showcase animation per tier to `preview/{mod_id}/{tier}.{gif,webp}`.
+10. **Thumbnail** (`create_thumbnail_data` → `preview.py`, `--thumbnail`) — renders the mod's showcase image to `preview/thumbnail.{gif,webp}`, from the tiers named in `common/data/thumbnail.json`.
 
 Steps 1–8 are driven by `tiers.json`, because recipes, models and advancements need real item IDs. Steps 9–10 are driven by `discover_sprite_tiers()` walking `common/sprites/` instead, so a mod whose art has landed but whose recipes have not still gets a showcase GIF. Those are flagged `[art only, no recipes]` in the run output.
 
@@ -90,14 +101,35 @@ per-tier previews with the two axes swapped: one weapon cycling through **every 
 rather than one material cycling through every weapon. The logo from `common/sprites/LOGO.png`
 is composited over every frame.
 
-`THUMBNAIL_WEAPON` in `main.py` picks the weapon — chakram, because it is the roundest item
-in the set, so its silhouette stays constant while the material changes underneath it and it
-still reads at thumbnail size.
+**The tier list is required, not discovered.** `common/data/thumbnail.json` names which
+tiers the thumbnail may show:
 
-- **Wooden tiers are excluded.** `is_wooden_tier()` tests the tier's *material* item for a
-  `_planks` suffix, not the tier name — `ironwood` is a metal and `turquoise_stone` is not
-  stone-only, so neither the name nor its suffix is a usable signal. Blue Skies' seven wood
-  sets are near-identical and would otherwise eat a quarter of the loop.
+```json
+{ "weapon": "chakram", "tiers": ["arpg_core"] }
+```
+
+`common/sprites/` holds art for forty-odd tiers across a dozen upstream mods, and none of
+those ship in the mod a thumbnail advertises — discovering the list from the sprite tree put
+other people's materials in our showcase. A missing file, an empty `tiers` list, or a
+selector that matches no sprite folder all exit 2, and they do so **before anything is
+cleared or written**, so a thumbnail that was asked for and cannot be built fails with
+nothing half-generated behind it.
+
+A selector is either a mod id, meaning every tier of that mod, or `"mod_id/tier"` for one
+tier exactly; a bare name that is not a mod id is matched against top-level tier folders,
+which is how Blue Skies' woods and gems sit in the tree. Order is preserved, so the config
+also sets the order materials appear in the loop.
+
+`weapon` defaults to `THUMBNAIL_WEAPON` — chakram, because it is the roundest item in the
+set, so its silhouette stays constant while the material changes underneath it and it still
+reads at thumbnail size.
+
+- **Wooden tiers are dropped when a selector expands a whole mod, never when a tier is
+  named outright** — a wildcard gets curated, a name gets obeyed. `is_wooden_tier()` tests
+  the tier's *material* item for a `_planks` suffix, not the tier name — `ironwood` is a
+  metal and `turquoise_stone` is not stone-only, so neither the name nor its suffix is a
+  usable signal. Blue Skies' seven wood sets are near-identical and would otherwise eat a
+  quarter of the loop. `"include_wooden": true` turns the filter off.
 - **The thumbnail spins faster** (`THUMB_SPIN_FRAMES`, `THUMB_HOLD_FRAMES`) because it has
   roughly twice as many entries as any tier has weapons. At the per-tier speed the loop would
   run past 40 seconds.

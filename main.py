@@ -34,6 +34,12 @@ THUMBNAIL_WEAPON = "chakram"
 THUMBNAIL_PATH = "preview/thumbnail"
 LOGO_PATH = f"{SPRITES_DIR}/LOGO.png"
 
+# Which tiers the thumbnail is allowed to show. Required, and deliberately not inferred:
+# common/sprites/ carries art for forty-odd tiers across a dozen upstream mods, and none of
+# those ship in the mod a thumbnail advertises. Discovering the list from the sprite tree
+# put other people's materials in our showcase.
+THUMBNAIL_CONFIG = "common/data/thumbnail.json"
+
 def load_keys(file_path):
     return return_json_data(file_path)
 
@@ -272,39 +278,105 @@ def is_wooden_tier(tier_name):
     tier = tiers.get(tier_name)
     return tier is not None and str(tier.material[1]).endswith("_planks")
 
-def collect_thumbnail_weapons():
-    """Gather THUMBNAIL_WEAPON's sprite from every material in the mod, in tier order.
+def load_thumbnail_config(path=THUMBNAIL_CONFIG):
+    """Read the thumbnail's weapon and tier selectors.
 
-    Wooden tiers are left out: they are seven near-identical entries out of a set of about
-    thirty, and a showcase that spends a quarter of its loop cycling through planks sells
-    the mod short.
-
-    Returns (label, sprite_path) pairs. The label is the tier name rather than the weapon
-    name, since here it is the material that changes from entry to entry.
+    Returns (weapon, selectors, include_wooden). Raises FileNotFoundError if the file is
+    absent and ValueError if it names no tiers — the tier list is required, because the
+    alternative is a showcase built from whatever art happens to be in the tree.
     """
-    weapons = []
-    for mod_id, tier_name in discover_sprite_tiers():
-        if is_wooden_tier(tier_name):
-            continue
-        source = find_sprite(mod_id, tier_name, THUMBNAIL_WEAPON)
-        if source is not None:
-            weapons.append((tier_name, source))
-    return weapons
+    if not os.path.isfile(path):
+        raise FileNotFoundError(path)
+    config = return_json_data(path)
+    selectors = config.get("tiers") or []
+    if not selectors:
+        raise ValueError(f"{path} lists no tiers")
+    return (config.get("weapon", THUMBNAIL_WEAPON), selectors,
+            bool(config.get("include_wooden", False)))
 
-def create_thumbnail_data():
+
+def resolve_thumbnail_tiers(selectors, include_wooden=False):
+    """Turn the config's selectors into (mod_id, tier_name) pairs, in the order given.
+
+    A selector is either a mod id, meaning every tier of that mod, or "mod_id/tier" for one
+    tier exactly. A bare name that is not a mod id is matched against top-level tier
+    folders, which is how Blue Skies' woods and gems sit in the sprite tree.
+
+    Wooden tiers are dropped when a selector expands a whole mod — seven near-identical
+    plank sets would eat a quarter of the loop — but never when a tier is named outright.
+    A wildcard gets curated; a name gets obeyed. `include_wooden` turns the filter off.
+
+    Returns (pairs, unknown) so the caller can refuse rather than quietly showing less than
+    was asked for.
+    """
+    discovered = discover_sprite_tiers()
+    by_mod = {}
+    for mod_id, tier_name in discovered:
+        by_mod.setdefault(mod_id, []).append(tier_name)
+
+    chosen, unknown, seen = [], [], set()
+
+    def take(mod_id, tier_name):
+        if (mod_id, tier_name) not in seen:
+            seen.add((mod_id, tier_name))
+            chosen.append((mod_id, tier_name))
+
+    for selector in selectors:
+        if "/" in selector:
+            mod_id, _, tier_name = selector.partition("/")
+            if (mod_id, tier_name) in discovered:
+                take(mod_id, tier_name)
+            else:
+                unknown.append(selector)
+            continue
+        if selector in by_mod:
+            for tier_name in by_mod[selector]:
+                if include_wooden or not is_wooden_tier(tier_name):
+                    take(selector, tier_name)
+            continue
+        matches = [(m, t) for m, t in discovered if t == selector]
+        if matches:
+            for pair in matches:
+                take(*pair)
+        else:
+            unknown.append(selector)
+    return chosen, unknown
+
+
+def collect_thumbnail_weapons(weapon, pairs):
+    """Gather `weapon`'s sprite for each selected tier, in the order the config gave.
+
+    Returns (label, sprite_path) pairs and the tiers that had no such sprite. The label is
+    the tier name rather than the weapon name, since here it is the material that changes
+    from entry to entry.
+    """
+    weapons, missing = [], []
+    for mod_id, tier_name in pairs:
+        source = find_sprite(mod_id, tier_name, weapon)
+        if source is None:
+            missing.append(f"{mod_id}/{tier_name}" if mod_id else tier_name)
+        else:
+            weapons.append((tier_name, source))
+    return weapons, missing
+
+def create_thumbnail_data(selection):
     """Render the mod's showcase loop to preview/thumbnail.{gif,webp}.
 
     Same spin as the per-tier previews with the axes swapped — one weapon through every
     material instead of one material through every weapon — plus the logo on top.
+    `selection` is (weapon, [(mod_id, tier_name)]) as resolved from THUMBNAIL_CONFIG.
     """
     global count
     preview, mode = resolve_preview_runtime()
     if preview is None:
         return
 
-    weapons = collect_thumbnail_weapons()
+    weapon, pairs = selection
+    weapons, missing = collect_thumbnail_weapons(weapon, pairs)
+    if missing:
+        print(f"  No {weapon} sprite for: {', '.join(missing)}")
     if not weapons:
-        print(f"  No {THUMBNAIL_WEAPON} sprites found, skipping the thumbnail.")
+        print(f"  No {weapon} sprites among the selected tiers, skipping the thumbnail.")
         return
 
     if not os.path.isfile(LOGO_PATH):
@@ -430,13 +502,30 @@ def create_unlock_data():
             write_json(filename, json_data)
 
 #Credit to https://stackoverflow.com/questions/185936/how-to-delete-the-contents-of-a-folder
-def clear_old_data(folders=("fabric", "forge", "preview")):
-    """Empty the generated output folders.
+def clear_preview_data(previews, thumbnail):
+    """Remove only the preview output this run is going to rebuild.
 
-    `preview/` is only cleared on a run that is going to rebuild it. Wiping previews that
-    the run then skips would leave the folder empty rather than stale, which is the worse
-    of the two -- a stale GIF is still a GIF.
+    `preview/` holds two independent things: the per-tier loops, in per-mod subfolders, and
+    the thumbnail, as loose files at the top. Now that the two steps are separately opt-in,
+    clearing the whole folder for a previews-only run would delete a thumbnail that run has
+    no intention of regenerating.
     """
+    if not os.path.isdir("preview"):
+        return
+    for filename in sorted(os.listdir("preview")):
+        path = os.path.join("preview", filename)
+        is_thumb = os.path.isfile(path) and filename.startswith(
+            os.path.basename(THUMBNAIL_PATH))
+        if not (thumbnail if is_thumb else previews and os.path.isdir(path)):
+            continue
+        try:
+            shutil.rmtree(path) if os.path.isdir(path) else os.unlink(path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (path, e))
+
+
+def clear_old_data(folders=("fabric", "forge")):
+    """Empty the generated loader output folders."""
     for folder in folders:
         if not os.path.isdir(folder):
             continue
@@ -458,27 +547,31 @@ def log_and_return_time(message, start_time):
     return time.time()
 
 PREVIEW_FLAGS = ("--previews", "--preview", "-p")
+THUMBNAIL_FLAGS = ("--thumbnail", "-t")
+ALL_FLAGS = ("--all", "-a")
+USAGE = "usage: python main.py [--previews] [--thumbnail] [--all]"
 
 if __name__ == '__main__':
     global SWORD_PATTERNS
     import sys
 
-    # Previews are opt-in because they cost minutes while the JSON and textures -- the part
-    # a mod build actually consumes -- take seconds. Rebuilding 39 tiers of spin animation
-    # to change one recipe is a bad default.
-    render_previews = any(flag in sys.argv[1:] for flag in PREVIEW_FLAGS)
-    unknown = [a for a in sys.argv[1:] if a not in PREVIEW_FLAGS]
+    # Both render steps are opt-in because they cost minutes while the JSON and textures --
+    # the part a mod build actually consumes -- take about a second. Rebuilding 39 tiers of
+    # spin animation to change one recipe is a bad default. They are separately opt-in
+    # because they answer different questions and neither implies the other.
+    args = sys.argv[1:]
+    everything = any(flag in args for flag in ALL_FLAGS)
+    render_previews = everything or any(flag in args for flag in PREVIEW_FLAGS)
+    render_thumbnail = everything or any(flag in args for flag in THUMBNAIL_FLAGS)
+    unknown = [a for a in args
+               if a not in PREVIEW_FLAGS + THUMBNAIL_FLAGS + ALL_FLAGS]
     if unknown:
         print(f"Unknown argument(s): {', '.join(unknown)}")
-        print(f"usage: python main.py [{PREVIEW_FLAGS[0]}]")
+        print(USAGE)
         raise SystemExit(2)
 
     print("Starting data generation...")
     start_time = time.time()
-
-    clear_old_data(("fabric", "forge", "preview") if render_previews
-                   else ("fabric", "forge"))
-    start_time = log_and_return_time("Cleared old data", start_time)
 
     keys = load_keys("common/data/keys.json")
     start_time = log_and_return_time("Loaded keys/ingredients data", start_time)
@@ -488,6 +581,35 @@ if __name__ == '__main__':
 
     SWORD_PATTERNS = return_json_data("common/patterns/sword_patterns.json")
     start_time = log_and_return_time("Loaded sword patterns", start_time)
+
+    # Resolved before anything is cleared or written, so a thumbnail that was asked for and
+    # cannot be built fails with nothing half-generated behind it.
+    thumbnail_selection = None
+    if render_thumbnail:
+        try:
+            weapon, selectors, include_wooden = load_thumbnail_config()
+        except FileNotFoundError:
+            print()
+            print(f"{THUMBNAIL_CONFIG} is missing, and the thumbnail needs it: it says "
+                  f"which tiers belong to the mod being advertised.")
+            print('  example: {"weapon": "chakram", "tiers": ["arpg_core"]}')
+            raise SystemExit(2)
+        except ValueError as e:
+            print()
+            print(f"{e}. The thumbnail needs an explicit tier list.")
+            raise SystemExit(2)
+        pairs, unresolved = resolve_thumbnail_tiers(selectors, include_wooden)
+        if unresolved:
+            print()
+            print(f"{THUMBNAIL_CONFIG}: no sprite folder for {', '.join(unresolved)}")
+            raise SystemExit(2)
+        thumbnail_selection = (weapon, pairs)
+        start_time = log_and_return_time(
+            f"Resolved {len(pairs)} thumbnail tier(s)", start_time)
+
+    clear_old_data()
+    clear_preview_data(render_previews, render_thumbnail)
+    start_time = log_and_return_time("Cleared old data", start_time)
 
     create_recipe_data("fabric")
     start_time = log_and_return_time("Made recipes for Fabric", start_time)
@@ -511,13 +633,15 @@ if __name__ == '__main__':
         print("Rendering preview GIFs...")
         create_preview_data()
         start_time = log_and_return_time("Rendered preview GIFs", start_time)
+    else:
+        print(f"Skipped preview GIFs (pass {PREVIEW_FLAGS[0]} to render them).")
 
+    if render_thumbnail:
         print("Rendering mod thumbnail...")
-        create_thumbnail_data()
+        create_thumbnail_data(thumbnail_selection)
         start_time = log_and_return_time("Rendered mod thumbnail", start_time)
     else:
-        print(f"Skipped previews and thumbnail "
-              f"(pass {PREVIEW_FLAGS[0]} to render them).")
+        print(f"Skipped mod thumbnail (pass {THUMBNAIL_FLAGS[0]} to render it).")
 
     if missing_sprites:
         print(f"\nWARNING: no sprite found for {len(missing_sprites)} item(s):")
