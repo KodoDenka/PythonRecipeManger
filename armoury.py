@@ -14,10 +14,11 @@ fifteen, and the weapons still differ from each other exactly as much as they di
 """
 
 import math
+import os
 from dataclasses import dataclass
 
-from forge import (CANVAS, BLADE_BANDS, FLAT_BANDS, HAFT_BANDS, Canvas, bezier,
-                   outline)
+from forge import (CANVAS, DESIGN, BLADE_BANDS, FLAT_BANDS, HAFT_BANDS, Canvas,
+                   bezier, outline)
 
 
 @dataclass(frozen=True)
@@ -42,6 +43,24 @@ class Style:
 
 
 NEUTRAL = Style()
+
+# Canvas per weapon type, matching what the existing art ships at. Not a free choice: a 16px
+# chakram rendered at 32 is not bigger, only finer than every other item beside it, and the
+# set stops reading as one density.
+SIZES = {"sai": 16, "cutlass": 16, "chakram": 16, "halberd": 48}
+DEFAULT_SIZE = 32
+
+# Hand-built models, for weapons whose sprite is a UV atlas rather than a picture. Same
+# absolute path the preview renderer uses, and overridable the same way.
+TEMPLATES_DIR = os.environ.get(
+    "KNAVESNEEDS_TEMPLATES",
+    "C:/Program Files/GitHub/knavesneeds/common/src/main/resources/assets/knavesneeds"
+    "/models/item/templates",
+)
+
+
+def size_for(weapon):
+    return SIZES.get(weapon, DEFAULT_SIZE)
 
 AXIS_A, AXIS_B = (6.0, 26.0), (27.0, 5.0)
 
@@ -273,17 +292,18 @@ def katana(c, st):
 
 
 def cutlass(c, st):
+    """Also 16px, and also authored heavier for it."""
     a, g = _axis(0.0, 0.30)
-    _, tip = _axis(0.30, 0.92)
-    _grip(c, a, g, st)
-    c.stroke(bow(g, tip, -2.6 * st.curve),
-             ((0.0, 1.10 * st.blade), (0.45, 1.90 * st.blade),
-              (0.88, 1.40 * st.blade), (1.0, 0.0)), edge=_edge(st))
+    _, tip = _axis(0.30, 0.94)
+    _grip(c, a, g, st, 1.7)
+    c.stroke(bow(g, tip, -3.0 * st.curve),
+             ((0.0, 1.90 * st.blade), (0.45, 3.10 * st.blade),
+              (0.88, 2.20 * st.blade), (1.0, 0.0)), edge=_edge(st))
     # the knuckle bow belongs to the weapon rather than the tier -- a cutlass without one
     # stops being a cutlass -- so it is drawn here and the tier's guard sits inside it
-    c.stroke(bow(g, a, 3.4), ((0.0, 0.75), (1.0, 0.75)), FLAT_BANDS)
-    fit_guard(c, g, st, 0.5)
-    fit_pommel(c, a, st, 0.9)
+    c.stroke(bow(g, a, 3.6), ((0.0, 1.25), (1.0, 1.25)), FLAT_BANDS)
+    fit_guard(c, g, st, 0.75)
+    fit_pommel(c, a, st, 1.5)
     return c
 
 
@@ -310,19 +330,24 @@ def twinblade(c, st):
 
 
 def sai(c, st):
-    a, g = _axis(0.08, 0.40)
-    _, tip = _axis(0.40, 0.94)
-    _grip(c, a, g, st, 1.0)
-    c.stroke(seg(g, tip), ((0.0, 0.95 * st.blade), (0.85, 0.80 * st.blade), (1.0, 0.0)))
+    """Ships at 16px, so every feature is authored roughly twice as heavy.
+
+    A design unit buys half as many texels here as it does on a 32px weapon. The prongs at
+    the 32px proportions came out under a texel wide and simply disappeared.
+    """
+    a, g = _axis(0.06, 0.40)
+    _, tip = _axis(0.40, 0.96)
+    _grip(c, a, g, st, 1.8)
+    c.stroke(seg(g, tip), ((0.0, 1.75 * st.blade), (0.85, 1.45 * st.blade), (1.0, 0.0)))
     px, py = _perp()
     for side in (-1, 1):
-        base = (g[0] + px * 1.7 * side, g[1] + py * 1.7 * side)
-        end = (base[0] + (tip[0] - g[0]) * 0.60 + px * 1.5 * side,
-               base[1] + (tip[1] - g[1]) * 0.60 + py * 1.5 * side)
-        c.stroke(seg(base, end), ((0.0, 1.05 * st.blade), (0.8, 0.85 * st.blade),
+        base = (g[0] + px * 2.6 * side, g[1] + py * 2.6 * side)
+        end = (base[0] + (tip[0] - g[0]) * 0.55 + px * 2.2 * side,
+               base[1] + (tip[1] - g[1]) * 0.55 + py * 2.2 * side)
+        c.stroke(seg(base, end), ((0.0, 1.60 * st.blade), (0.8, 1.30 * st.blade),
                                   (1.0, 0.0)))
-    fit_guard(c, g, st, 0.55)
-    fit_pommel(c, a, st, 0.75)
+    fit_guard(c, g, st, 0.85)
+    fit_pommel(c, a, st, 1.30)
     return c
 
 
@@ -376,13 +401,18 @@ def halberd(c, st):
 
 
 def scythe(c, st):
-    end = _haft(c, st, 0.62, 1.0)
-    px, py = _perp()
-    _, far = _axis(0.62, 1.0)
-    heel = (end[0] - px * 0.5, end[1] - py * 0.5)
-    toe = (far[0] - px * 8.4 * st.curve, far[1] - py * 8.4 * st.curve)
-    c.stroke(bow(heel, toe, 3.2 * st.curve, 160),
-             ((0.0, 2.10 * st.blade), (0.55, 1.55 * st.blade), (1.0, 0.0)),
+    """Haft to the upper right, blade sweeping back across the top to the left.
+
+    The blade has to leave the shaft, not hug it. A scythe reads by the gap between the
+    curve and the haft; a blade that merely bends away from the top of a pole is a bent
+    sword, which is what the first version drew. The toe reaches nearly to the far edge of
+    the canvas, the way the hand-drawn silhouette does.
+    """
+    end = _haft(c, st, 0.78, 1.0)
+    heel = (end[0] + 1.2, end[1] - 1.2)
+    toe = (4.5, 6.0)
+    c.stroke(bow(heel, toe, 3.6 * st.curve, 180),
+             ((0.0, 2.20 * st.blade), (0.45, 1.60 * st.blade), (1.0, 0.0)),
              edge=_edge(st))
     return c
 
@@ -403,30 +433,34 @@ def greataxe(c, st):
 
 
 def greathammer(c, st):
-    _haft(c, st, 0.84, 1.0)
-    px, py = _perp()
-    root = _lerp(AXIS_A, AXIS_B, 0.58)
-    top = _lerp(AXIS_A, AXIS_B, 0.90)
-    for side in (-1, 1):
-        c.polygon([(root[0] + px * 0.8 * side, root[1] + py * 0.8 * side),
-                   (root[0] + px * 5.4 * st.blade * side,
-                    root[1] + py * 5.4 * st.blade * side),
-                   (top[0] + px * 5.4 * st.blade * side,
-                    top[1] + py * 5.4 * st.blade * side),
-                   (top[0] + px * 0.8 * side, top[1] + py * 0.8 * side)])
-    c.bar(_lerp(root, top, 0.5), _perp(), 1.2, 3.6, FLAT_BANDS, shade=-0.12)
+    """Not a silhouette. The greathammer is a real 3D model and its sprite is a UV atlas.
+
+    Drawn from the template's own element faces rather than as a picture of a hammer:
+    painting a hammer shape here would map nonsense onto the model's 37 elements in game.
+    Raises when the template is unavailable so `write_forged` can leave the weapon on its
+    extracted blank, rather than emit something that looks plausible in a contact sheet and
+    is wrong in the world.
+    """
+    import forge
+
+    model = forge.load_template(TEMPLATES_DIR, "greathammer")
+    if model is None:
+        raise FileNotFoundError("greathammer template")
+    c.cells.update(forge.uv_atlas(model, c.size))
     return c
 
 
+# A ring's tone has to stay high all the way round. `disc` shades by facing, which on a
+# 2-texel-thick 16px ring sends most of the lower half to the darkest band and breaks the
+# circle -- so the ring gets a compressed set that never bottoms out.
+RING_BANDS = ((-0.45, 1.00), (0.30, 0.78), (1.01, 0.54))
+
+
 def chakram(c, st):
-    centre = (CANVAS / 2, CANVAS / 2)
-    outer = 12.2 * min(1.15, st.blade)
-    c.disc(centre, outer, inner=outer - 2.6 * st.blade)
-    px, py = _perp()
-    inner = outer - 2.6 * st.blade
-    c.stroke(seg((centre[0] - px * inner, centre[1] - py * inner),
-                 (centre[0] - px * outer, centre[1] - py * outer)),
-             ((0.0, 2.0), (1.0, 2.0)), HAFT_BANDS, "handle")
+    """A bare ring at 16px, with no grip -- the hand-drawn one has none either."""
+    centre = (DESIGN / 2.0, DESIGN / 2.0)
+    outer = 13.2 * min(1.10, st.blade)
+    c.disc(centre, outer, inner=outer - 4.6 * st.blade, bands=RING_BANDS)
     return c
 
 
@@ -438,10 +472,16 @@ WEAPONS = {
 }
 
 
-def draw(weapon, style=NEUTRAL, size=CANVAS):
+# Weapons whose sprite is a UV atlas: no silhouette, so no shadow contour either.
+ATLAS_WEAPONS = {"greathammer"}
+
+
+def draw(weapon, style=NEUTRAL, size=None):
     """Build one weapon's cells: {(x, y): (family, ramp position)}."""
-    canvas = Canvas(size)
+    canvas = Canvas(size or size_for(weapon))
     WEAPONS[weapon](canvas, style)
+    if weapon in ATLAS_WEAPONS:
+        return canvas
     # the contour goes on last, over every part, so a head sitting across a haft still gets
     # a termination where it overhangs
     return outline(canvas)
@@ -517,11 +557,17 @@ def write_forged(blanks_dir="common/blanks", index_path="common/blanks/forged.js
 
     styles = styles or STYLES
     index = {"weapons": {}}
-    written = 0
+    written, skipped = 0, set()
     for tier, style in styles.items():
         variant = variant_name(tier)
         for weapon in WEAPONS:
-            image, slots = forge.to_blank(draw(weapon, style).cells)
+            size = size_for(weapon)
+            try:
+                cells = draw(weapon, style, size).cells
+            except FileNotFoundError:
+                skipped.add(weapon)
+                continue
+            image, slots = forge.to_blank(cells, size)
             folder = os.path.join(blanks_dir, weapon)
             os.makedirs(folder, exist_ok=True)
             image.save(os.path.join(folder, f"{variant}.png"))
@@ -535,6 +581,8 @@ def write_forged(blanks_dir="common/blanks", index_path="common/blanks/forged.js
             written += 1
     with open(index_path, "w", encoding="utf-8") as handle:
         json.dump(index, handle, indent=1)
+    if skipped:
+        print(f"  no template, left on the extracted blank: {', '.join(sorted(skipped))}")
     return written
 
 

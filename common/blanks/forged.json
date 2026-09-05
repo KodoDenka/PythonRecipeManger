@@ -3833,8 +3833,8 @@
   "sai": {
    "arpg_nebulium": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
@@ -3853,59 +3853,53 @@
      {
       "colour": "#908600",
       "family": "handle",
-      "position": 0.5,
+      "position": 0.6667,
       "alpha": 255
      },
      {
       "colour": "#908100",
       "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
       "position": 0.9583,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#343434",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#3d3d3d",
       "family": "material",
       "position": 0.2917,
       "alpha": 255
      },
      {
-      "colour": "#4f4f4f",
+      "colour": "#464646",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#585858",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.5833,
       "alpha": 255
      },
      {
-      "colour": "#616161",
+      "colour": "#585858",
       "family": "material",
       "position": 0.625,
       "alpha": 255
      },
      {
-      "colour": "#6a6a6a",
+      "colour": "#616161",
       "family": "material",
       "position": 0.8333,
       "alpha": 255
      },
      {
-      "colour": "#737373",
+      "colour": "#6a6a6a",
       "family": "material",
       "position": 1.0,
       "alpha": 255
@@ -3914,8 +3908,8 @@
    },
    "arpg_erythryl": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
@@ -3934,59 +3928,47 @@
      {
       "colour": "#908600",
       "family": "handle",
-      "position": 0.5,
+      "position": 0.6667,
       "alpha": 255
      },
      {
       "colour": "#908100",
       "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
       "position": 0.9583,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#343434",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#3d3d3d",
       "family": "material",
       "position": 0.2917,
       "alpha": 255
      },
      {
-      "colour": "#4f4f4f",
+      "colour": "#464646",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#585858",
-      "family": "material",
-      "position": 0.5833,
-      "alpha": 255
-     },
-     {
-      "colour": "#616161",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.625,
       "alpha": 255
      },
      {
-      "colour": "#6a6a6a",
+      "colour": "#585858",
       "family": "material",
       "position": 0.8333,
       "alpha": 255
      },
      {
-      "colour": "#737373",
+      "colour": "#616161",
       "family": "material",
       "position": 1.0,
       "alpha": 255
@@ -3995,8 +3977,8 @@
    },
    "arpg_faeglas": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
@@ -4064,569 +4046,8 @@
    },
    "arpg_cryalt": {
     "size": [
-     32,
-     32
-    ],
-    "sources": [],
-    "slots": [
-     {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.4583,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907700",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#907200",
-      "family": "handle",
-      "position": 1.0,
-      "alpha": 255
-     },
-     {
-      "colour": "#4f4f4f",
-      "family": "material",
-      "position": 0.2083,
-      "alpha": 255
-     },
-     {
-      "colour": "#585858",
-      "family": "material",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#616161",
-      "family": "material",
-      "position": 0.375,
-      "alpha": 255
-     },
-     {
-      "colour": "#6a6a6a",
-      "family": "material",
-      "position": 0.5833,
-      "alpha": 255
-     },
-     {
-      "colour": "#737373",
-      "family": "material",
-      "position": 0.625,
-      "alpha": 255
-     },
-     {
-      "colour": "#7c7c7c",
-      "family": "material",
-      "position": 0.8333,
-      "alpha": 255
-     },
-     {
-      "colour": "#858585",
-      "family": "material",
-      "position": 1.0,
-      "alpha": 255
-     }
-    ]
-   },
-   "arpg_hesperynt": {
-    "size": [
-     32,
-     32
-    ],
-    "sources": [],
-    "slots": [
-     {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#3d3d3d",
-      "family": "material",
-      "position": 0.2083,
-      "alpha": 255
-     },
-     {
-      "colour": "#464646",
-      "family": "material",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#4f4f4f",
-      "family": "material",
-      "position": 0.375,
-      "alpha": 255
-     },
-     {
-      "colour": "#585858",
-      "family": "material",
-      "position": 0.5833,
-      "alpha": 255
-     },
-     {
-      "colour": "#616161",
-      "family": "material",
-      "position": 0.625,
-      "alpha": 255
-     },
-     {
-      "colour": "#6a6a6a",
-      "family": "material",
-      "position": 0.8333,
-      "alpha": 255
-     },
-     {
-      "colour": "#737373",
-      "family": "material",
-      "position": 1.0,
-      "alpha": 255
-     }
-    ]
-   },
-   "arpg_rhodynth": {
-    "size": [
-     32,
-     32
-    ],
-    "sources": [],
-    "slots": [
-     {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#3d3d3d",
-      "family": "material",
-      "position": 0.2083,
-      "alpha": 255
-     },
-     {
-      "colour": "#464646",
-      "family": "material",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#4f4f4f",
-      "family": "material",
-      "position": 0.375,
-      "alpha": 255
-     },
-     {
-      "colour": "#585858",
-      "family": "material",
-      "position": 0.5833,
-      "alpha": 255
-     },
-     {
-      "colour": "#616161",
-      "family": "material",
-      "position": 0.625,
-      "alpha": 255
-     },
-     {
-      "colour": "#6a6a6a",
-      "family": "material",
-      "position": 0.8333,
-      "alpha": 255
-     },
-     {
-      "colour": "#737373",
-      "family": "material",
-      "position": 1.0,
-      "alpha": 255
-     }
-    ]
-   },
-   "arpg_viriwyn": {
-    "size": [
-     32,
-     32
-    ],
-    "sources": [],
-    "slots": [
-     {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
-      "family": "material",
-      "position": 0.2083,
-      "alpha": 255
-     },
-     {
-      "colour": "#343434",
-      "family": "material",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#3d3d3d",
-      "family": "material",
-      "position": 0.625,
-      "alpha": 255
-     },
-     {
-      "colour": "#464646",
-      "family": "material",
-      "position": 1.0,
-      "alpha": 255
-     }
-    ]
-   },
-   "arpg_phthalium": {
-    "size": [
-     32,
-     32
-    ],
-    "sources": [],
-    "slots": [
-     {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.4583,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907700",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#907200",
-      "family": "handle",
-      "position": 1.0,
-      "alpha": 255
-     },
-     {
-      "colour": "#4f4f4f",
-      "family": "material",
-      "position": 0.2083,
-      "alpha": 255
-     },
-     {
-      "colour": "#585858",
-      "family": "material",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#616161",
-      "family": "material",
-      "position": 0.375,
-      "alpha": 255
-     },
-     {
-      "colour": "#6a6a6a",
-      "family": "material",
-      "position": 0.5833,
-      "alpha": 255
-     },
-     {
-      "colour": "#737373",
-      "family": "material",
-      "position": 0.625,
-      "alpha": 255
-     },
-     {
-      "colour": "#7c7c7c",
-      "family": "material",
-      "position": 0.8333,
-      "alpha": 255
-     },
-     {
-      "colour": "#858585",
-      "family": "material",
-      "position": 1.0,
-      "alpha": 255
-     }
-    ]
-   },
-   "arpg_glykios": {
-    "size": [
-     32,
-     32
-    ],
-    "sources": [],
-    "slots": [
-     {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#3d3d3d",
-      "family": "material",
-      "position": 0.2083,
-      "alpha": 255
-     },
-     {
-      "colour": "#464646",
-      "family": "material",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#4f4f4f",
-      "family": "material",
-      "position": 0.375,
-      "alpha": 255
-     },
-     {
-      "colour": "#585858",
-      "family": "material",
-      "position": 0.5833,
-      "alpha": 255
-     },
-     {
-      "colour": "#616161",
-      "family": "material",
-      "position": 0.625,
-      "alpha": 255
-     },
-     {
-      "colour": "#6a6a6a",
-      "family": "material",
-      "position": 0.8333,
-      "alpha": 255
-     },
-     {
-      "colour": "#737373",
-      "family": "material",
-      "position": 1.0,
-      "alpha": 255
-     }
-    ]
-   },
-   "arpg_wyrdbright": {
-    "size": [
-     32,
-     32
-    ],
-    "sources": [],
-    "slots": [
-     {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#3d3d3d",
-      "family": "material",
-      "position": 0.2083,
-      "alpha": 255
-     },
-     {
-      "colour": "#464646",
-      "family": "material",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#4f4f4f",
-      "family": "material",
-      "position": 0.375,
-      "alpha": 255
-     },
-     {
-      "colour": "#585858",
-      "family": "material",
-      "position": 0.5833,
-      "alpha": 255
-     },
-     {
-      "colour": "#616161",
-      "family": "material",
-      "position": 0.625,
-      "alpha": 255
-     },
-     {
-      "colour": "#6a6a6a",
-      "family": "material",
-      "position": 0.8333,
-      "alpha": 255
-     },
-     {
-      "colour": "#737373",
-      "family": "material",
-      "position": 1.0,
-      "alpha": 255
-     }
-    ]
-   },
-   "arpg_auridine": {
-    "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
@@ -4722,10 +4143,10 @@
      }
     ]
    },
-   "arpg_celadium": {
+   "arpg_hesperynt": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
@@ -4744,13 +4165,208 @@
      {
       "colour": "#908600",
       "family": "handle",
-      "position": 0.5,
+      "position": 0.6667,
       "alpha": 255
      },
      {
       "colour": "#908100",
       "family": "handle",
+      "position": 0.9583,
+      "alpha": 255
+     },
+     {
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2083,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
+      "family": "material",
+      "position": 0.375,
+      "alpha": 255
+     },
+     {
+      "colour": "#4f4f4f",
+      "family": "material",
+      "position": 0.625,
+      "alpha": 255
+     },
+     {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.8333,
+      "alpha": 255
+     },
+     {
+      "colour": "#616161",
+      "family": "material",
+      "position": 1.0,
+      "alpha": 255
+     }
+    ]
+   },
+   "arpg_rhodynth": {
+    "size": [
+     16,
+     16
+    ],
+    "sources": [],
+    "slots": [
+     {
+      "colour": "#909000",
+      "family": "handle",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#908b00",
+      "family": "handle",
+      "position": 0.4167,
+      "alpha": 255
+     },
+     {
+      "colour": "#908600",
+      "family": "handle",
       "position": 0.6667,
+      "alpha": 255
+     },
+     {
+      "colour": "#908100",
+      "family": "handle",
+      "position": 0.9583,
+      "alpha": 255
+     },
+     {
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2083,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
+      "family": "material",
+      "position": 0.375,
+      "alpha": 255
+     },
+     {
+      "colour": "#4f4f4f",
+      "family": "material",
+      "position": 0.5833,
+      "alpha": 255
+     },
+     {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.625,
+      "alpha": 255
+     },
+     {
+      "colour": "#616161",
+      "family": "material",
+      "position": 0.8333,
+      "alpha": 255
+     },
+     {
+      "colour": "#6a6a6a",
+      "family": "material",
+      "position": 1.0,
+      "alpha": 255
+     }
+    ]
+   },
+   "arpg_viriwyn": {
+    "size": [
+     16,
+     16
+    ],
+    "sources": [],
+    "slots": [
+     {
+      "colour": "#909000",
+      "family": "handle",
+      "position": 0.4167,
+      "alpha": 255
+     },
+     {
+      "colour": "#908b00",
+      "family": "handle",
+      "position": 0.6667,
+      "alpha": 255
+     },
+     {
+      "colour": "#908600",
+      "family": "handle",
+      "position": 0.9583,
+      "alpha": 255
+     },
+     {
+      "colour": "#2b2b2b",
+      "family": "material",
+      "position": 0.2083,
+      "alpha": 255
+     },
+     {
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.625,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
+      "family": "material",
+      "position": 1.0,
+      "alpha": 255
+     }
+    ]
+   },
+   "arpg_phthalium": {
+    "size": [
+     16,
+     16
+    ],
+    "sources": [],
+    "slots": [
+     {
+      "colour": "#909000",
+      "family": "handle",
+      "position": 0.4167,
+      "alpha": 255
+     },
+     {
+      "colour": "#908b00",
+      "family": "handle",
+      "position": 0.5,
+      "alpha": 255
+     },
+     {
+      "colour": "#908600",
+      "family": "handle",
+      "position": 0.6667,
+      "alpha": 255
+     },
+     {
+      "colour": "#908100",
+      "family": "handle",
+      "position": 0.875,
       "alpha": 255
      },
      {
@@ -4760,43 +4376,361 @@
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
-      "family": "material",
-      "position": 0.2083,
+      "colour": "#907700",
+      "family": "handle",
+      "position": 1.0,
       "alpha": 255
      },
      {
       "colour": "#464646",
       "family": "material",
-      "position": 0.2917,
+      "position": 0.2083,
       "alpha": 255
      },
      {
       "colour": "#4f4f4f",
       "family": "material",
-      "position": 0.375,
+      "position": 0.2917,
       "alpha": 255
      },
      {
       "colour": "#585858",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.375,
       "alpha": 255
      },
      {
       "colour": "#616161",
       "family": "material",
-      "position": 0.625,
+      "position": 0.5833,
       "alpha": 255
      },
      {
       "colour": "#6a6a6a",
       "family": "material",
-      "position": 0.8333,
+      "position": 0.625,
       "alpha": 255
      },
      {
       "colour": "#737373",
+      "family": "material",
+      "position": 0.8333,
+      "alpha": 255
+     },
+     {
+      "colour": "#7c7c7c",
+      "family": "material",
+      "position": 1.0,
+      "alpha": 255
+     }
+    ]
+   },
+   "arpg_glykios": {
+    "size": [
+     16,
+     16
+    ],
+    "sources": [],
+    "slots": [
+     {
+      "colour": "#909000",
+      "family": "handle",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#908b00",
+      "family": "handle",
+      "position": 0.4167,
+      "alpha": 255
+     },
+     {
+      "colour": "#908600",
+      "family": "handle",
+      "position": 0.6667,
+      "alpha": 255
+     },
+     {
+      "colour": "#908100",
+      "family": "handle",
+      "position": 0.9583,
+      "alpha": 255
+     },
+     {
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2083,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
+      "family": "material",
+      "position": 0.375,
+      "alpha": 255
+     },
+     {
+      "colour": "#4f4f4f",
+      "family": "material",
+      "position": 0.5833,
+      "alpha": 255
+     },
+     {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.625,
+      "alpha": 255
+     },
+     {
+      "colour": "#616161",
+      "family": "material",
+      "position": 0.8333,
+      "alpha": 255
+     },
+     {
+      "colour": "#6a6a6a",
+      "family": "material",
+      "position": 1.0,
+      "alpha": 255
+     }
+    ]
+   },
+   "arpg_wyrdbright": {
+    "size": [
+     16,
+     16
+    ],
+    "sources": [],
+    "slots": [
+     {
+      "colour": "#909000",
+      "family": "handle",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#908b00",
+      "family": "handle",
+      "position": 0.4167,
+      "alpha": 255
+     },
+     {
+      "colour": "#908600",
+      "family": "handle",
+      "position": 0.6667,
+      "alpha": 255
+     },
+     {
+      "colour": "#908100",
+      "family": "handle",
+      "position": 0.9583,
+      "alpha": 255
+     },
+     {
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2083,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
+      "family": "material",
+      "position": 0.375,
+      "alpha": 255
+     },
+     {
+      "colour": "#4f4f4f",
+      "family": "material",
+      "position": 0.5833,
+      "alpha": 255
+     },
+     {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.625,
+      "alpha": 255
+     },
+     {
+      "colour": "#616161",
+      "family": "material",
+      "position": 0.8333,
+      "alpha": 255
+     },
+     {
+      "colour": "#6a6a6a",
+      "family": "material",
+      "position": 1.0,
+      "alpha": 255
+     }
+    ]
+   },
+   "arpg_auridine": {
+    "size": [
+     16,
+     16
+    ],
+    "sources": [],
+    "slots": [
+     {
+      "colour": "#909000",
+      "family": "handle",
+      "position": 0.4167,
+      "alpha": 255
+     },
+     {
+      "colour": "#908b00",
+      "family": "handle",
+      "position": 0.4583,
+      "alpha": 255
+     },
+     {
+      "colour": "#908600",
+      "family": "handle",
+      "position": 0.5,
+      "alpha": 255
+     },
+     {
+      "colour": "#908100",
+      "family": "handle",
+      "position": 0.875,
+      "alpha": 255
+     },
+     {
+      "colour": "#907c00",
+      "family": "handle",
+      "position": 0.9583,
+      "alpha": 255
+     },
+     {
+      "colour": "#907700",
+      "family": "handle",
+      "position": 1.0,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
+      "family": "material",
+      "position": 0.2083,
+      "alpha": 255
+     },
+     {
+      "colour": "#4f4f4f",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.375,
+      "alpha": 255
+     },
+     {
+      "colour": "#616161",
+      "family": "material",
+      "position": 0.5833,
+      "alpha": 255
+     },
+     {
+      "colour": "#6a6a6a",
+      "family": "material",
+      "position": 0.625,
+      "alpha": 255
+     },
+     {
+      "colour": "#737373",
+      "family": "material",
+      "position": 0.8333,
+      "alpha": 255
+     },
+     {
+      "colour": "#7c7c7c",
+      "family": "material",
+      "position": 1.0,
+      "alpha": 255
+     }
+    ]
+   },
+   "arpg_celadium": {
+    "size": [
+     16,
+     16
+    ],
+    "sources": [],
+    "slots": [
+     {
+      "colour": "#909000",
+      "family": "handle",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#908b00",
+      "family": "handle",
+      "position": 0.4167,
+      "alpha": 255
+     },
+     {
+      "colour": "#908600",
+      "family": "handle",
+      "position": 0.6667,
+      "alpha": 255
+     },
+     {
+      "colour": "#908100",
+      "family": "handle",
+      "position": 0.9583,
+      "alpha": 255
+     },
+     {
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2083,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
+      "family": "material",
+      "position": 0.375,
+      "alpha": 255
+     },
+     {
+      "colour": "#4f4f4f",
+      "family": "material",
+      "position": 0.5833,
+      "alpha": 255
+     },
+     {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.625,
+      "alpha": 255
+     },
+     {
+      "colour": "#616161",
+      "family": "material",
+      "position": 0.8333,
+      "alpha": 255
+     },
+     {
+      "colour": "#6a6a6a",
       "family": "material",
       "position": 1.0,
       "alpha": 255
@@ -7549,8 +7483,8 @@
   "cutlass": {
    "arpg_nebulium": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
@@ -7567,55 +7501,43 @@
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#343434",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.2917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#343434",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#4f4f4f",
+      "colour": "#3d3d3d",
       "family": "material",
       "position": 0.5833,
       "alpha": 255
      },
      {
-      "colour": "#585858",
+      "colour": "#464646",
       "family": "material",
       "position": 0.625,
       "alpha": 255
      },
      {
-      "colour": "#616161",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.8333,
       "alpha": 255
      },
      {
-      "colour": "#6a6a6a",
+      "colour": "#585858",
       "family": "material",
       "position": 1.0,
       "alpha": 255
@@ -7624,8 +7546,8 @@
    },
    "arpg_erythryl": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
@@ -7642,55 +7564,43 @@
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#343434",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.2917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#343434",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#4f4f4f",
+      "colour": "#3d3d3d",
       "family": "material",
       "position": 0.5833,
       "alpha": 255
      },
      {
-      "colour": "#585858",
+      "colour": "#464646",
       "family": "material",
       "position": 0.625,
       "alpha": 255
      },
      {
-      "colour": "#616161",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.8333,
       "alpha": 255
      },
      {
-      "colour": "#6a6a6a",
+      "colour": "#585858",
       "family": "material",
       "position": 1.0,
       "alpha": 255
@@ -7699,8 +7609,8 @@
    },
    "arpg_faeglas": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
@@ -7717,49 +7627,37 @@
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
-      "family": "material",
-      "position": 0.2083,
-      "alpha": 255
-     },
-     {
-      "colour": "#343434",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2917,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#343434",
       "family": "material",
       "position": 0.5833,
       "alpha": 255
      },
      {
-      "colour": "#4f4f4f",
+      "colour": "#3d3d3d",
       "family": "material",
       "position": 0.625,
       "alpha": 255
      },
      {
-      "colour": "#585858",
+      "colour": "#464646",
       "family": "material",
       "position": 0.8333,
       "alpha": 255
      },
      {
-      "colour": "#616161",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 1.0,
       "alpha": 255
@@ -7768,107 +7666,8 @@
    },
    "arpg_cryalt": {
     "size": [
-     32,
-     32
-    ],
-    "sources": [],
-    "slots": [
-     {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.4583,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907700",
-      "family": "handle",
-      "position": 0.875,
-      "alpha": 255
-     },
-     {
-      "colour": "#907200",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#906d00",
-      "family": "handle",
-      "position": 1.0,
-      "alpha": 255
-     },
-     {
-      "colour": "#585858",
-      "family": "material",
-      "position": 0.2083,
-      "alpha": 255
-     },
-     {
-      "colour": "#616161",
-      "family": "material",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#6a6a6a",
-      "family": "material",
-      "position": 0.375,
-      "alpha": 255
-     },
-     {
-      "colour": "#737373",
-      "family": "material",
-      "position": 0.5833,
-      "alpha": 255
-     },
-     {
-      "colour": "#7c7c7c",
-      "family": "material",
-      "position": 0.625,
-      "alpha": 255
-     },
-     {
-      "colour": "#858585",
-      "family": "material",
-      "position": 0.8333,
-      "alpha": 255
-     },
-     {
-      "colour": "#8e8e8e",
-      "family": "material",
-      "position": 1.0,
-      "alpha": 255
-     }
-    ]
-   },
-   "arpg_hesperynt": {
-    "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
@@ -7888,156 +7687,6 @@
       "colour": "#908600",
       "family": "handle",
       "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#343434",
-      "family": "material",
-      "position": 0.2083,
-      "alpha": 255
-     },
-     {
-      "colour": "#3d3d3d",
-      "family": "material",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#464646",
-      "family": "material",
-      "position": 0.375,
-      "alpha": 255
-     },
-     {
-      "colour": "#4f4f4f",
-      "family": "material",
-      "position": 0.5833,
-      "alpha": 255
-     },
-     {
-      "colour": "#585858",
-      "family": "material",
-      "position": 0.625,
-      "alpha": 255
-     },
-     {
-      "colour": "#616161",
-      "family": "material",
-      "position": 0.8333,
-      "alpha": 255
-     },
-     {
-      "colour": "#6a6a6a",
-      "family": "material",
-      "position": 1.0,
-      "alpha": 255
-     }
-    ]
-   },
-   "arpg_rhodynth": {
-    "size": [
-     32,
-     32
-    ],
-    "sources": [],
-    "slots": [
-     {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#343434",
-      "family": "material",
-      "position": 0.2083,
-      "alpha": 255
-     },
-     {
-      "colour": "#3d3d3d",
-      "family": "material",
-      "position": 0.2917,
-      "alpha": 255
-     },
-     {
-      "colour": "#464646",
-      "family": "material",
-      "position": 0.375,
-      "alpha": 255
-     },
-     {
-      "colour": "#4f4f4f",
-      "family": "material",
-      "position": 0.5833,
-      "alpha": 255
-     },
-     {
-      "colour": "#585858",
-      "family": "material",
-      "position": 0.625,
-      "alpha": 255
-     },
-     {
-      "colour": "#616161",
-      "family": "material",
-      "position": 0.8333,
-      "alpha": 255
-     },
-     {
-      "colour": "#6a6a6a",
-      "family": "material",
-      "position": 1.0,
-      "alpha": 255
-     }
-    ]
-   },
-   "arpg_viriwyn": {
-    "size": [
-     32,
-     32
-    ],
-    "sources": [],
-    "slots": [
-     {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
       "alpha": 255
      },
      {
@@ -8084,99 +7733,252 @@
      }
     ]
    },
-   "arpg_phthalium": {
+   "arpg_hesperynt": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
       "colour": "#909000",
       "family": "handle",
-      "position": 0.2917,
+      "position": 0.4167,
       "alpha": 255
      },
      {
       "colour": "#908b00",
       "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.4583,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
       "position": 0.5,
       "alpha": 255
      },
      {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907700",
-      "family": "handle",
-      "position": 0.875,
-      "alpha": 255
-     },
-     {
-      "colour": "#907200",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#906d00",
-      "family": "handle",
-      "position": 1.0,
-      "alpha": 255
-     },
-     {
-      "colour": "#585858",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#616161",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.2917,
       "alpha": 255
      },
      {
-      "colour": "#6a6a6a",
+      "colour": "#343434",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#737373",
+      "colour": "#3d3d3d",
       "family": "material",
       "position": 0.5833,
       "alpha": 255
      },
      {
-      "colour": "#7c7c7c",
+      "colour": "#464646",
       "family": "material",
       "position": 0.625,
       "alpha": 255
      },
      {
-      "colour": "#858585",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.8333,
       "alpha": 255
      },
      {
-      "colour": "#8e8e8e",
+      "colour": "#585858",
+      "family": "material",
+      "position": 1.0,
+      "alpha": 255
+     }
+    ]
+   },
+   "arpg_rhodynth": {
+    "size": [
+     16,
+     16
+    ],
+    "sources": [],
+    "slots": [
+     {
+      "colour": "#909000",
+      "family": "handle",
+      "position": 0.4167,
+      "alpha": 255
+     },
+     {
+      "colour": "#908b00",
+      "family": "handle",
+      "position": 0.5,
+      "alpha": 255
+     },
+     {
+      "colour": "#222222",
+      "family": "material",
+      "position": 0.2083,
+      "alpha": 255
+     },
+     {
+      "colour": "#2b2b2b",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.375,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.5833,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
+      "family": "material",
+      "position": 0.625,
+      "alpha": 255
+     },
+     {
+      "colour": "#4f4f4f",
+      "family": "material",
+      "position": 0.8333,
+      "alpha": 255
+     },
+     {
+      "colour": "#585858",
+      "family": "material",
+      "position": 1.0,
+      "alpha": 255
+     }
+    ]
+   },
+   "arpg_viriwyn": {
+    "size": [
+     16,
+     16
+    ],
+    "sources": [],
+    "slots": [
+     {
+      "colour": "#909000",
+      "family": "handle",
+      "position": 0.4167,
+      "alpha": 255
+     },
+     {
+      "colour": "#908b00",
+      "family": "handle",
+      "position": 0.6667,
+      "alpha": 255
+     },
+     {
+      "colour": "#222222",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#2b2b2b",
+      "family": "material",
+      "position": 0.375,
+      "alpha": 255
+     },
+     {
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.5833,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.625,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
+      "family": "material",
+      "position": 0.8333,
+      "alpha": 255
+     },
+     {
+      "colour": "#4f4f4f",
+      "family": "material",
+      "position": 1.0,
+      "alpha": 255
+     }
+    ]
+   },
+   "arpg_phthalium": {
+    "size": [
+     16,
+     16
+    ],
+    "sources": [],
+    "slots": [
+     {
+      "colour": "#909000",
+      "family": "handle",
+      "position": 0.4167,
+      "alpha": 255
+     },
+     {
+      "colour": "#908b00",
+      "family": "handle",
+      "position": 0.5,
+      "alpha": 255
+     },
+     {
+      "colour": "#908600",
+      "family": "handle",
+      "position": 0.6667,
+      "alpha": 255
+     },
+     {
+      "colour": "#2b2b2b",
+      "family": "material",
+      "position": 0.2083,
+      "alpha": 255
+     },
+     {
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.375,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
+      "family": "material",
+      "position": 0.5833,
+      "alpha": 255
+     },
+     {
+      "colour": "#4f4f4f",
+      "family": "material",
+      "position": 0.625,
+      "alpha": 255
+     },
+     {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.8333,
+      "alpha": 255
+     },
+     {
+      "colour": "#616161",
       "family": "material",
       "position": 1.0,
       "alpha": 255
@@ -8185,8 +7987,8 @@
    },
    "arpg_glykios": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
@@ -8203,55 +8005,43 @@
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#343434",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.2917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#343434",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#4f4f4f",
+      "colour": "#3d3d3d",
       "family": "material",
       "position": 0.5833,
       "alpha": 255
      },
      {
-      "colour": "#585858",
+      "colour": "#464646",
       "family": "material",
       "position": 0.625,
       "alpha": 255
      },
      {
-      "colour": "#616161",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.8333,
       "alpha": 255
      },
      {
-      "colour": "#6a6a6a",
+      "colour": "#585858",
       "family": "material",
       "position": 1.0,
       "alpha": 255
@@ -8260,73 +8050,67 @@
    },
    "arpg_wyrdbright": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
       "colour": "#909000",
       "family": "handle",
-      "position": 0.4167,
+      "position": 0.2917,
       "alpha": 255
      },
      {
       "colour": "#908b00",
       "family": "handle",
-      "position": 0.5,
+      "position": 0.4167,
       "alpha": 255
      },
      {
       "colour": "#908600",
       "family": "handle",
-      "position": 0.6667,
+      "position": 0.5,
       "alpha": 255
      },
      {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#343434",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#343434",
       "family": "material",
       "position": 0.2917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#3d3d3d",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#4f4f4f",
+      "colour": "#464646",
       "family": "material",
       "position": 0.5833,
       "alpha": 255
      },
      {
-      "colour": "#585858",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.625,
       "alpha": 255
      },
      {
-      "colour": "#616161",
+      "colour": "#585858",
       "family": "material",
       "position": 0.8333,
       "alpha": 255
      },
      {
-      "colour": "#6a6a6a",
+      "colour": "#616161",
       "family": "material",
       "position": 1.0,
       "alpha": 255
@@ -8335,97 +8119,67 @@
    },
    "arpg_auridine": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
       "colour": "#909000",
       "family": "handle",
-      "position": 0.2917,
+      "position": 0.4167,
       "alpha": 255
      },
      {
       "colour": "#908b00",
       "family": "handle",
-      "position": 0.4167,
+      "position": 0.5,
       "alpha": 255
      },
      {
       "colour": "#908600",
       "family": "handle",
-      "position": 0.4583,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
       "position": 0.6667,
       "alpha": 255
      },
      {
-      "colour": "#907700",
-      "family": "handle",
-      "position": 0.875,
-      "alpha": 255
-     },
-     {
-      "colour": "#907200",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#906d00",
-      "family": "handle",
-      "position": 1.0,
-      "alpha": 255
-     },
-     {
-      "colour": "#585858",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#616161",
+      "colour": "#343434",
       "family": "material",
       "position": 0.2917,
       "alpha": 255
      },
      {
-      "colour": "#6a6a6a",
+      "colour": "#3d3d3d",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#737373",
+      "colour": "#464646",
       "family": "material",
       "position": 0.5833,
       "alpha": 255
      },
      {
-      "colour": "#7c7c7c",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.625,
       "alpha": 255
      },
      {
-      "colour": "#858585",
+      "colour": "#585858",
       "family": "material",
       "position": 0.8333,
       "alpha": 255
      },
      {
-      "colour": "#8e8e8e",
+      "colour": "#616161",
       "family": "material",
       "position": 1.0,
       "alpha": 255
@@ -8434,73 +8188,61 @@
    },
    "arpg_celadium": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
       "colour": "#909000",
       "family": "handle",
-      "position": 0.4167,
+      "position": 0.2917,
       "alpha": 255
      },
      {
       "colour": "#908b00",
       "family": "handle",
-      "position": 0.5,
+      "position": 0.4167,
       "alpha": 255
      },
      {
       "colour": "#908600",
       "family": "handle",
-      "position": 0.6667,
+      "position": 0.5,
       "alpha": 255
      },
      {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#343434",
-      "family": "material",
-      "position": 0.2083,
-      "alpha": 255
-     },
-     {
-      "colour": "#3d3d3d",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.2917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#343434",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#4f4f4f",
+      "colour": "#3d3d3d",
       "family": "material",
       "position": 0.5833,
       "alpha": 255
      },
      {
-      "colour": "#585858",
+      "colour": "#464646",
       "family": "material",
       "position": 0.625,
       "alpha": 255
      },
      {
-      "colour": "#616161",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.8333,
       "alpha": 255
      },
      {
-      "colour": "#6a6a6a",
+      "colour": "#585858",
       "family": "material",
       "position": 1.0,
       "alpha": 255
@@ -9449,75 +9191,81 @@
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
+      "colour": "#101010",
+      "family": "material",
+      "position": 0.0833,
       "alpha": 255
      },
      {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
+      "colour": "#191919",
+      "family": "material",
+      "position": 0.125,
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.25,
       "alpha": 255
      },
      {
-      "colour": "#4f4f4f",
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.3333,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#585858",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.4583,
       "alpha": 255
      },
      {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.5,
+      "alpha": 255
+     },
+     {
       "colour": "#616161",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.5417,
       "alpha": 255
      },
      {
       "colour": "#6a6a6a",
       "family": "material",
-      "position": 0.7083,
+      "position": 0.625,
       "alpha": 255
      },
      {
       "colour": "#737373",
       "family": "material",
-      "position": 0.8333,
+      "position": 0.7917,
+      "alpha": 255
+     },
+     {
+      "colour": "#7c7c7c",
+      "family": "material",
+      "position": 1.0,
       "alpha": 255
      }
     ]
@@ -9530,75 +9278,81 @@
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
+      "colour": "#101010",
+      "family": "material",
+      "position": 0.0833,
       "alpha": 255
      },
      {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
+      "colour": "#191919",
+      "family": "material",
+      "position": 0.125,
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.25,
       "alpha": 255
      },
      {
-      "colour": "#4f4f4f",
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.3333,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#585858",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.4583,
       "alpha": 255
      },
      {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.5,
+      "alpha": 255
+     },
+     {
       "colour": "#616161",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.5417,
       "alpha": 255
      },
      {
       "colour": "#6a6a6a",
       "family": "material",
-      "position": 0.7083,
+      "position": 0.625,
       "alpha": 255
      },
      {
       "colour": "#737373",
       "family": "material",
-      "position": 0.8333,
+      "position": 0.7917,
+      "alpha": 255
+     },
+     {
+      "colour": "#7c7c7c",
+      "family": "material",
+      "position": 1.0,
       "alpha": 255
      }
     ]
@@ -9611,63 +9365,81 @@
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
+      "colour": "#101010",
+      "family": "material",
+      "position": 0.0833,
       "alpha": 255
      },
      {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
+      "colour": "#191919",
+      "family": "material",
+      "position": 0.125,
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#343434",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.25,
       "alpha": 255
      },
      {
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
       "colour": "#3d3d3d",
       "family": "material",
-      "position": 0.375,
+      "position": 0.3333,
       "alpha": 255
      },
      {
       "colour": "#464646",
       "family": "material",
-      "position": 0.4583,
+      "position": 0.375,
       "alpha": 255
      },
      {
       "colour": "#4f4f4f",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.4583,
       "alpha": 255
      },
      {
       "colour": "#585858",
       "family": "material",
-      "position": 0.7083,
+      "position": 0.5,
       "alpha": 255
      },
      {
       "colour": "#616161",
       "family": "material",
-      "position": 0.8333,
+      "position": 0.5417,
+      "alpha": 255
+     },
+     {
+      "colour": "#6a6a6a",
+      "family": "material",
+      "position": 0.625,
+      "alpha": 255
+     },
+     {
+      "colour": "#737373",
+      "family": "material",
+      "position": 0.7917,
+      "alpha": 255
+     },
+     {
+      "colour": "#7c7c7c",
+      "family": "material",
+      "position": 1.0,
       "alpha": 255
      }
     ]
@@ -9680,93 +9452,81 @@
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
+      "colour": "#101010",
+      "family": "material",
+      "position": 0.0833,
       "alpha": 255
      },
      {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
+      "colour": "#191919",
+      "family": "material",
+      "position": 0.125,
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.4583,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907700",
-      "family": "handle",
-      "position": 0.875,
-      "alpha": 255
-     },
-     {
-      "colour": "#907200",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#906d00",
-      "family": "handle",
-      "position": 1.0,
-      "alpha": 255
-     },
-     {
-      "colour": "#585858",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#616161",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.25,
       "alpha": 255
      },
      {
-      "colour": "#6a6a6a",
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.3333,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#737373",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.4583,
       "alpha": 255
      },
      {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.5,
+      "alpha": 255
+     },
+     {
+      "colour": "#616161",
+      "family": "material",
+      "position": 0.5417,
+      "alpha": 255
+     },
+     {
+      "colour": "#6a6a6a",
+      "family": "material",
+      "position": 0.625,
+      "alpha": 255
+     },
+     {
+      "colour": "#737373",
+      "family": "material",
+      "position": 0.7917,
+      "alpha": 255
+     },
+     {
       "colour": "#7c7c7c",
       "family": "material",
-      "position": 0.5833,
-      "alpha": 255
-     },
-     {
-      "colour": "#858585",
-      "family": "material",
-      "position": 0.7083,
-      "alpha": 255
-     },
-     {
-      "colour": "#8e8e8e",
-      "family": "material",
-      "position": 0.8333,
+      "position": 1.0,
       "alpha": 255
      }
     ]
@@ -9779,75 +9539,81 @@
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
+      "colour": "#101010",
+      "family": "material",
+      "position": 0.0833,
       "alpha": 255
      },
      {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
+      "colour": "#191919",
+      "family": "material",
+      "position": 0.125,
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.25,
       "alpha": 255
      },
      {
-      "colour": "#4f4f4f",
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.3333,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#585858",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.4583,
       "alpha": 255
      },
      {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.5,
+      "alpha": 255
+     },
+     {
       "colour": "#616161",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.5417,
       "alpha": 255
      },
      {
       "colour": "#6a6a6a",
       "family": "material",
-      "position": 0.7083,
+      "position": 0.625,
       "alpha": 255
      },
      {
       "colour": "#737373",
       "family": "material",
-      "position": 0.8333,
+      "position": 0.7917,
+      "alpha": 255
+     },
+     {
+      "colour": "#7c7c7c",
+      "family": "material",
+      "position": 1.0,
       "alpha": 255
      }
     ]
@@ -9860,75 +9626,81 @@
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
+      "colour": "#101010",
+      "family": "material",
+      "position": 0.0833,
       "alpha": 255
      },
      {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
+      "colour": "#191919",
+      "family": "material",
+      "position": 0.125,
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.25,
       "alpha": 255
      },
      {
-      "colour": "#4f4f4f",
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.3333,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#585858",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.4583,
       "alpha": 255
      },
      {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.5,
+      "alpha": 255
+     },
+     {
       "colour": "#616161",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.5417,
       "alpha": 255
      },
      {
       "colour": "#6a6a6a",
       "family": "material",
-      "position": 0.7083,
+      "position": 0.625,
       "alpha": 255
      },
      {
       "colour": "#737373",
       "family": "material",
-      "position": 0.8333,
+      "position": 0.7917,
+      "alpha": 255
+     },
+     {
+      "colour": "#7c7c7c",
+      "family": "material",
+      "position": 1.0,
       "alpha": 255
      }
     ]
@@ -9941,63 +9713,81 @@
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
+      "colour": "#101010",
+      "family": "material",
+      "position": 0.0833,
       "alpha": 255
      },
      {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
+      "colour": "#191919",
+      "family": "material",
+      "position": 0.125,
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#343434",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.25,
       "alpha": 255
      },
      {
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
       "colour": "#3d3d3d",
       "family": "material",
-      "position": 0.375,
+      "position": 0.3333,
       "alpha": 255
      },
      {
       "colour": "#464646",
       "family": "material",
-      "position": 0.4583,
+      "position": 0.375,
       "alpha": 255
      },
      {
       "colour": "#4f4f4f",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.4583,
       "alpha": 255
      },
      {
       "colour": "#585858",
       "family": "material",
-      "position": 0.7083,
+      "position": 0.5,
       "alpha": 255
      },
      {
       "colour": "#616161",
       "family": "material",
-      "position": 0.8333,
+      "position": 0.5417,
+      "alpha": 255
+     },
+     {
+      "colour": "#6a6a6a",
+      "family": "material",
+      "position": 0.625,
+      "alpha": 255
+     },
+     {
+      "colour": "#737373",
+      "family": "material",
+      "position": 0.7917,
+      "alpha": 255
+     },
+     {
+      "colour": "#7c7c7c",
+      "family": "material",
+      "position": 1.0,
       "alpha": 255
      }
     ]
@@ -10010,93 +9800,81 @@
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
+      "colour": "#101010",
+      "family": "material",
+      "position": 0.0833,
       "alpha": 255
      },
      {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
+      "colour": "#191919",
+      "family": "material",
+      "position": 0.125,
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.4583,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907700",
-      "family": "handle",
-      "position": 0.875,
-      "alpha": 255
-     },
-     {
-      "colour": "#907200",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#906d00",
-      "family": "handle",
-      "position": 1.0,
-      "alpha": 255
-     },
-     {
-      "colour": "#585858",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#616161",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.25,
       "alpha": 255
      },
      {
-      "colour": "#6a6a6a",
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.3333,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#737373",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.4583,
       "alpha": 255
      },
      {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.5,
+      "alpha": 255
+     },
+     {
+      "colour": "#616161",
+      "family": "material",
+      "position": 0.5417,
+      "alpha": 255
+     },
+     {
+      "colour": "#6a6a6a",
+      "family": "material",
+      "position": 0.625,
+      "alpha": 255
+     },
+     {
+      "colour": "#737373",
+      "family": "material",
+      "position": 0.7917,
+      "alpha": 255
+     },
+     {
       "colour": "#7c7c7c",
       "family": "material",
-      "position": 0.5833,
-      "alpha": 255
-     },
-     {
-      "colour": "#858585",
-      "family": "material",
-      "position": 0.7083,
-      "alpha": 255
-     },
-     {
-      "colour": "#8e8e8e",
-      "family": "material",
-      "position": 0.8333,
+      "position": 1.0,
       "alpha": 255
      }
     ]
@@ -10109,75 +9887,81 @@
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
+      "colour": "#101010",
+      "family": "material",
+      "position": 0.0833,
       "alpha": 255
      },
      {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
+      "colour": "#191919",
+      "family": "material",
+      "position": 0.125,
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.25,
       "alpha": 255
      },
      {
-      "colour": "#4f4f4f",
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.3333,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#585858",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.4583,
       "alpha": 255
      },
      {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.5,
+      "alpha": 255
+     },
+     {
       "colour": "#616161",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.5417,
       "alpha": 255
      },
      {
       "colour": "#6a6a6a",
       "family": "material",
-      "position": 0.7083,
+      "position": 0.625,
       "alpha": 255
      },
      {
       "colour": "#737373",
       "family": "material",
-      "position": 0.8333,
+      "position": 0.7917,
+      "alpha": 255
+     },
+     {
+      "colour": "#7c7c7c",
+      "family": "material",
+      "position": 1.0,
       "alpha": 255
      }
     ]
@@ -10190,75 +9974,81 @@
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
+      "colour": "#101010",
+      "family": "material",
+      "position": 0.0833,
       "alpha": 255
      },
      {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
+      "colour": "#191919",
+      "family": "material",
+      "position": 0.125,
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.25,
       "alpha": 255
      },
      {
-      "colour": "#4f4f4f",
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.3333,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#585858",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.4583,
       "alpha": 255
      },
      {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.5,
+      "alpha": 255
+     },
+     {
       "colour": "#616161",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.5417,
       "alpha": 255
      },
      {
       "colour": "#6a6a6a",
       "family": "material",
-      "position": 0.7083,
+      "position": 0.625,
       "alpha": 255
      },
      {
       "colour": "#737373",
       "family": "material",
-      "position": 0.8333,
+      "position": 0.7917,
+      "alpha": 255
+     },
+     {
+      "colour": "#7c7c7c",
+      "family": "material",
+      "position": 1.0,
       "alpha": 255
      }
     ]
@@ -10271,93 +10061,81 @@
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
+      "colour": "#101010",
+      "family": "material",
+      "position": 0.0833,
       "alpha": 255
      },
      {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
+      "colour": "#191919",
+      "family": "material",
+      "position": 0.125,
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.4583,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907700",
-      "family": "handle",
-      "position": 0.875,
-      "alpha": 255
-     },
-     {
-      "colour": "#907200",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#906d00",
-      "family": "handle",
-      "position": 1.0,
-      "alpha": 255
-     },
-     {
-      "colour": "#585858",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#616161",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.25,
       "alpha": 255
      },
      {
-      "colour": "#6a6a6a",
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.3333,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#737373",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.4583,
       "alpha": 255
      },
      {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.5,
+      "alpha": 255
+     },
+     {
+      "colour": "#616161",
+      "family": "material",
+      "position": 0.5417,
+      "alpha": 255
+     },
+     {
+      "colour": "#6a6a6a",
+      "family": "material",
+      "position": 0.625,
+      "alpha": 255
+     },
+     {
+      "colour": "#737373",
+      "family": "material",
+      "position": 0.7917,
+      "alpha": 255
+     },
+     {
       "colour": "#7c7c7c",
       "family": "material",
-      "position": 0.5833,
-      "alpha": 255
-     },
-     {
-      "colour": "#858585",
-      "family": "material",
-      "position": 0.7083,
-      "alpha": 255
-     },
-     {
-      "colour": "#8e8e8e",
-      "family": "material",
-      "position": 0.8333,
+      "position": 1.0,
       "alpha": 255
      }
     ]
@@ -10370,75 +10148,81 @@
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.2917,
+      "colour": "#101010",
+      "family": "material",
+      "position": 0.0833,
       "alpha": 255
      },
      {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.4167,
+      "colour": "#191919",
+      "family": "material",
+      "position": 0.125,
       "alpha": 255
      },
      {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.5,
-      "alpha": 255
-     },
-     {
-      "colour": "#908100",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#907c00",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
       "position": 0.25,
       "alpha": 255
      },
      {
-      "colour": "#4f4f4f",
+      "colour": "#343434",
+      "family": "material",
+      "position": 0.2917,
+      "alpha": 255
+     },
+     {
+      "colour": "#3d3d3d",
+      "family": "material",
+      "position": 0.3333,
+      "alpha": 255
+     },
+     {
+      "colour": "#464646",
       "family": "material",
       "position": 0.375,
       "alpha": 255
      },
      {
-      "colour": "#585858",
+      "colour": "#4f4f4f",
       "family": "material",
       "position": 0.4583,
       "alpha": 255
      },
      {
+      "colour": "#585858",
+      "family": "material",
+      "position": 0.5,
+      "alpha": 255
+     },
+     {
       "colour": "#616161",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.5417,
       "alpha": 255
      },
      {
       "colour": "#6a6a6a",
       "family": "material",
-      "position": 0.7083,
+      "position": 0.625,
       "alpha": 255
      },
      {
       "colour": "#737373",
       "family": "material",
-      "position": 0.8333,
+      "position": 0.7917,
+      "alpha": 255
+     },
+     {
+      "colour": "#7c7c7c",
+      "family": "material",
+      "position": 1.0,
       "alpha": 255
      }
     ]
@@ -11451,612 +11235,396 @@
   "chakram": {
    "arpg_nebulium": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
+      "colour": "#101010",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#343434",
+      "colour": "#191919",
       "family": "material",
-      "position": 0.375,
+      "position": 0.5417,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.7917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
-      "position": 0.8333,
+      "position": 1.0,
       "alpha": 255
      }
     ]
    },
    "arpg_erythryl": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
+      "colour": "#101010",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#343434",
+      "colour": "#191919",
       "family": "material",
-      "position": 0.375,
+      "position": 0.5417,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.7917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
-      "position": 0.8333,
+      "position": 1.0,
       "alpha": 255
      }
     ]
    },
    "arpg_faeglas": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
+      "colour": "#101010",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#343434",
+      "colour": "#191919",
       "family": "material",
-      "position": 0.375,
+      "position": 0.5417,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.7917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
-      "position": 0.8333,
+      "position": 1.0,
       "alpha": 255
      }
     ]
    },
    "arpg_cryalt": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
+      "colour": "#101010",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#343434",
+      "colour": "#191919",
       "family": "material",
-      "position": 0.375,
+      "position": 0.5417,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.7917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
-      "position": 0.8333,
+      "position": 1.0,
       "alpha": 255
      }
     ]
    },
    "arpg_hesperynt": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
+      "colour": "#101010",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#343434",
+      "colour": "#191919",
       "family": "material",
-      "position": 0.375,
+      "position": 0.5417,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.7917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
-      "position": 0.8333,
+      "position": 1.0,
       "alpha": 255
      }
     ]
    },
    "arpg_rhodynth": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
+      "colour": "#101010",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#343434",
+      "colour": "#191919",
       "family": "material",
-      "position": 0.375,
+      "position": 0.5417,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.7917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
-      "position": 0.8333,
+      "position": 1.0,
       "alpha": 255
      }
     ]
    },
    "arpg_viriwyn": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
+      "colour": "#101010",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#343434",
+      "colour": "#191919",
       "family": "material",
-      "position": 0.375,
+      "position": 0.5417,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.7917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
-      "position": 0.8333,
+      "position": 1.0,
       "alpha": 255
      }
     ]
    },
    "arpg_phthalium": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
+      "colour": "#101010",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#343434",
+      "colour": "#191919",
       "family": "material",
-      "position": 0.375,
+      "position": 0.5417,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.7917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
-      "position": 0.8333,
+      "position": 1.0,
       "alpha": 255
      }
     ]
    },
    "arpg_glykios": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
+      "colour": "#101010",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#343434",
+      "colour": "#191919",
       "family": "material",
-      "position": 0.375,
+      "position": 0.5417,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.7917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
-      "position": 0.8333,
+      "position": 1.0,
       "alpha": 255
      }
     ]
    },
    "arpg_wyrdbright": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
+      "colour": "#101010",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#343434",
+      "colour": "#191919",
       "family": "material",
-      "position": 0.375,
+      "position": 0.5417,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.7917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
-      "position": 0.8333,
+      "position": 1.0,
       "alpha": 255
      }
     ]
    },
    "arpg_auridine": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
+      "colour": "#101010",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#343434",
+      "colour": "#191919",
       "family": "material",
-      "position": 0.375,
+      "position": 0.5417,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.7917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
-      "position": 0.8333,
+      "position": 1.0,
       "alpha": 255
      }
     ]
    },
    "arpg_celadium": {
     "size": [
-     32,
-     32
+     16,
+     16
     ],
     "sources": [],
     "slots": [
      {
-      "colour": "#909000",
-      "family": "handle",
-      "position": 0.4167,
-      "alpha": 255
-     },
-     {
-      "colour": "#908b00",
-      "family": "handle",
-      "position": 0.6667,
-      "alpha": 255
-     },
-     {
-      "colour": "#908600",
-      "family": "handle",
-      "position": 0.9583,
-      "alpha": 255
-     },
-     {
-      "colour": "#2b2b2b",
+      "colour": "#101010",
       "family": "material",
       "position": 0.2083,
       "alpha": 255
      },
      {
-      "colour": "#343434",
+      "colour": "#191919",
       "family": "material",
-      "position": 0.375,
+      "position": 0.5417,
       "alpha": 255
      },
      {
-      "colour": "#3d3d3d",
+      "colour": "#222222",
       "family": "material",
-      "position": 0.5833,
+      "position": 0.7917,
       "alpha": 255
      },
      {
-      "colour": "#464646",
+      "colour": "#2b2b2b",
       "family": "material",
-      "position": 0.8333,
+      "position": 1.0,
       "alpha": 255
      }
     ]
@@ -12853,8 +12421,8 @@
   "halberd": {
    "arpg_nebulium": {
     "size": [
-     32,
-     32
+     48,
+     48
     ],
     "sources": [],
     "slots": [
@@ -12934,8 +12502,8 @@
    },
    "arpg_erythryl": {
     "size": [
-     32,
-     32
+     48,
+     48
     ],
     "sources": [],
     "slots": [
@@ -13015,8 +12583,8 @@
    },
    "arpg_faeglas": {
     "size": [
-     32,
-     32
+     48,
+     48
     ],
     "sources": [],
     "slots": [
@@ -13084,8 +12652,8 @@
    },
    "arpg_cryalt": {
     "size": [
-     32,
-     32
+     48,
+     48
     ],
     "sources": [],
     "slots": [
@@ -13183,8 +12751,8 @@
    },
    "arpg_hesperynt": {
     "size": [
-     32,
-     32
+     48,
+     48
     ],
     "sources": [],
     "slots": [
@@ -13264,8 +12832,8 @@
    },
    "arpg_rhodynth": {
     "size": [
-     32,
-     32
+     48,
+     48
     ],
     "sources": [],
     "slots": [
@@ -13345,8 +12913,8 @@
    },
    "arpg_viriwyn": {
     "size": [
-     32,
-     32
+     48,
+     48
     ],
     "sources": [],
     "slots": [
@@ -13414,8 +12982,8 @@
    },
    "arpg_phthalium": {
     "size": [
-     32,
-     32
+     48,
+     48
     ],
     "sources": [],
     "slots": [
@@ -13513,8 +13081,8 @@
    },
    "arpg_glykios": {
     "size": [
-     32,
-     32
+     48,
+     48
     ],
     "sources": [],
     "slots": [
@@ -13594,8 +13162,8 @@
    },
    "arpg_wyrdbright": {
     "size": [
-     32,
-     32
+     48,
+     48
     ],
     "sources": [],
     "slots": [
@@ -13675,8 +13243,8 @@
    },
    "arpg_auridine": {
     "size": [
-     32,
-     32
+     48,
+     48
     ],
     "sources": [],
     "slots": [
@@ -13774,8 +13342,8 @@
    },
    "arpg_celadium": {
     "size": [
-     32,
-     32
+     48,
+     48
     ],
     "sources": [],
     "slots": [

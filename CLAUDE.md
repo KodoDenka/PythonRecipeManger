@@ -176,6 +176,44 @@ shipping.
   already the darkest thing in a palette, so sampling its bottom end as well stacks two
   darkenings and the grip disappears.
 
+### Canvas size is per weapon type, and it is not a free choice
+
+Weapons are described once in a fixed 32-unit **design space** (`forge.DESIGN`) and rasterised
+into whatever canvas the type actually ships at — `armoury.SIZES`: 16px for sai, cutlass and
+chakram, 48px for halberd, 32px for the rest. `Canvas.k` maps between the two, so one
+description serves all three densities.
+
+Getting this wrong is invisible in a contact sheet and obvious in an inventory. Minecraft maps
+every item texture onto the same quad, so resolution is **detail, not size** — a 16px chakram
+rendered at 32 is not bigger, it is finer than every item beside it, and the set stops reading
+as one density. The first version of the forge drew everything at 32.
+
+- **The 16px weapons carry their own proportions**, roughly twice as heavy. A design unit buys
+  half as many texels there, so the sai's prongs at the 32px numbers came out under a texel
+  wide and vanished entirely.
+- **`RING_BANDS` exists because `disc` shades by facing.** On a 2-texel-thick 16px ring that
+  sends most of the lower half to the darkest band and visibly breaks the circle, so the
+  chakram gets a compressed set that never bottoms out.
+
+### Weapons whose sprite is not a picture
+
+`greathammer` has a hand-built model with 37 elements, and its sprite is a **UV atlas** — the
+element faces packed into a 32px sheet. The blocky look of the hand-drawn one is not a defect,
+it is what a correct atlas looks like, and drawing a hammer silhouette there maps nonsense onto
+the model in game.
+
+`forge.uv_atlas()` fills each face's UV rectangle with a tone chosen by which way the face
+points, plus a darker rim so abutting rectangles stay separable. Elements below `head_volume`
+are shaded down as haft, which separates the greathammer's 34 small shaft cubes from its single
+large head. `ATLAS_WEAPONS` skips the shadow contour for these, since there is no silhouette.
+
+- **The haft stays material family, not handle.** The extracted greathammer blank has 0% handle
+  slots — in game that shaft is tier-coloured, and switching it to the grip ramp would be a
+  design change disguised as a port.
+- It needs `TEMPLATES_DIR`, which resolves on one machine only. `write_forged` skips a weapon
+  whose template is missing and reports it, leaving the tier on its extracted blank rather than
+  emitting something that looks plausible in a sheet and is wrong in the world.
+
 ### Style: what makes a tier recognisable by shape
 
 A `Style` scales parts rather than replacing them, so one tier's fifteen weapons read as a

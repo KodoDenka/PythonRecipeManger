@@ -24,10 +24,15 @@ treatments, animation, previews — works on these without changes.
 
 import math
 
-# Canvas for every generated weapon. The existing blanks are a mix of 16 and 32; uniform 32
-# is the finer of the two, and since Minecraft maps every item texture onto the same quad,
-# more texels buys detail rather than size.
-CANVAS = 32
+# Weapons are described in a fixed 32-unit design space and rasterised into whatever canvas
+# the weapon type actually ships at. Those sizes are not free: the existing art is 16px for
+# sai, cutlass and chakram, 32px for most, and 48px for halberd, and a weapon that arrives
+# at the wrong one is drawn at the wrong density beside every other item in the set. Since
+# Minecraft maps every item texture onto the same quad, resolution is detail, not size --
+# rendering a 16px chakram at 32 does not make it bigger, it makes it finer than it should
+# be.
+DESIGN = 32
+CANVAS = DESIGN
 
 # Light direction in canvas space, x right and y down. Upper-left, matching the existing art
 # and vanilla's own items -- a set lit from a different corner than the vanilla tools it sits
@@ -106,7 +111,14 @@ class Canvas:
 
     def __init__(self, size=CANVAS):
         self.size = size
+        # design units -> canvas texels. Geometry is written once at DESIGN and every
+        # primitive samples through this, so one description serves 16, 32 and 48.
+        self.k = size / float(DESIGN)
         self.cells = {}
+
+    def _design(self, x, y):
+        """Centre of canvas texel (x, y) in design coordinates."""
+        return (x + 0.5) / self.k, (y + 0.5) / self.k
 
     def put(self, x, y, family, position):
         if 0 <= x < self.size and 0 <= y < self.size:
@@ -123,13 +135,13 @@ class Canvas:
         either way.
         """
         widest = max(w for _, w in widths)
-        x0 = max(0, int(min(c[0] for c in curve) - widest - 1))
-        x1 = min(self.size, int(max(c[0] for c in curve) + widest + 2))
-        y0 = max(0, int(min(c[1] for c in curve) - widest - 1))
-        y1 = min(self.size, int(max(c[1] for c in curve) + widest + 2))
+        x0 = max(0, int((min(c[0] for c in curve) - widest - 1) * self.k))
+        x1 = min(self.size, int((max(c[0] for c in curve) + widest + 2) * self.k))
+        y0 = max(0, int((min(c[1] for c in curve) - widest - 1) * self.k))
+        y1 = min(self.size, int((max(c[1] for c in curve) + widest + 2) * self.k))
         for y in range(y0, y1):
             for x in range(x0, x1):
-                px, py = x + 0.5, y + 0.5
+                px, py = self._design(x, y)
                 best = None
                 for cx, cy, tx, ty in curve:
                     d2 = (px - cx) ** 2 + (py - cy) ** 2
@@ -171,7 +183,7 @@ class Canvas:
         """A filled circle, or an annulus when `inner` is set. Pommels, tsuba, chakram."""
         for y in range(self.size):
             for x in range(self.size):
-                px, py = x + 0.5, y + 0.5
+                px, py = self._design(x, y)
                 d = math.hypot(px - centre[0], py - centre[1])
                 if d > radius or d < inner:
                     continue
@@ -192,7 +204,7 @@ class Canvas:
         lo, hi = min(span), max(span)
         for y in range(self.size):
             for x in range(self.size):
-                px, py = x + 0.5, y + 0.5
+                px, py = self._design(x, y)
                 if not self._inside(points, px, py):
                     continue
                 t = ((px * LIGHT[0] + py * LIGHT[1]) - lo) / max(1e-6, hi - lo)
@@ -223,7 +235,8 @@ class Canvas:
         px_, py_ = -dy, dx
         for y in range(self.size):
             for x in range(self.size):
-                gx, gy = x + 0.5 - centre[0], y + 0.5 - centre[1]
+                dx_, dy_ = self._design(x, y)
+                gx, gy = dx_ - centre[0], dy_ - centre[1]
                 across = gx * dx + gy * dy
                 along = gx * px_ + gy * py_
                 if abs(across) > half_length:
@@ -302,7 +315,7 @@ EDGES = {"smooth": smooth, "serrated": serrated, "toothed": toothed, "chipped": 
 
 # --- export to a spritegen blank ----------------------------------------------------
 
-def to_blank(cells, size=CANVAS, steps=24):
+def to_blank(cells, size=CANVAS, steps=24):  # noqa: size is the canvas, not DESIGN
     """Turn drawn cells into a blank PNG plus its slot table.
 
     A blank stores one grey per distinct (family, position) pair, and `spritegen.render()`
@@ -337,3 +350,64 @@ def to_blank(cells, size=CANVAS, steps=24):
     for (x, y), key in quantised.items():
         pixels[x, y] = keys[key] + (255,)
     return image, slots
+
+
+# --- UV atlases for hand-built 3D models --------------------------------------------
+
+# How lit each face of a cube is, viewed the way an item model is shown in a GUI slot:
+# the north face points at the viewer, and the light is above and to the left.
+FACE_TONE = {"up": 1.00, "north": 0.80, "west": 0.64, "east": 0.50, "south": 0.38,
+             "down": 0.24}
+
+
+def uv_atlas(model, size, texture="#layer0", head_volume=60.0, haft_shade=0.62):
+    """Paint a texture for a model that carries real geometry, by filling its UV rectangles.
+
+    A weapon whose template has an `elements` list does not use its sprite as a picture. The
+    greathammer's is a UV atlas -- 37 elements' faces packed into a 32px sheet -- so drawing
+    a hammer silhouette onto it would map nonsense onto the model in game. The blocky look of
+    the hand-drawn one is not a defect; it is what a correct atlas looks like.
+
+    Each face is filled flat with a tone chosen by which way it points, then given a darker
+    border so neighbouring rectangles stay separable at this density. Elements smaller than
+    `head_volume` are treated as haft and shaded down, which for the greathammer separates
+    the 34 small cubes of the shaft from the single large head.
+    """
+    cells = {}
+    scale = size / 16.0
+    for element in model.get("elements", []):
+        span = [b - a for a, b in zip(element["from"], element["to"])]
+        volume = abs(span[0] * span[1] * span[2])
+        shade = 1.0 if volume >= head_volume else haft_shade
+        for name, face in (element.get("faces") or {}).items():
+            if face.get("texture") != texture or "uv" not in face:
+                continue
+            u0, v0, u1, v1 = face["uv"]
+            x0, x1 = sorted((u0 * scale, u1 * scale))
+            y0, y1 = sorted((v0 * scale, v1 * scale))
+            tone = FACE_TONE.get(name, 0.5) * shade
+            rect = [(x, y)
+                    for y in range(int(math.floor(y0)), int(math.ceil(y1)))
+                    for x in range(int(math.floor(x0)), int(math.ceil(x1)))
+                    if 0 <= x < size and 0 <= y < size]
+            for x, y in rect:
+                cells[(x, y)] = ("material", tone)
+            # darker rim, so two abutting faces do not merge into one flat slab
+            for x, y in rect:
+                if (x <= math.floor(x0) or x >= math.ceil(x1) - 1
+                        or y <= math.floor(y0) or y >= math.ceil(y1) - 1):
+                    cells[(x, y)] = ("material", max(0.08, tone * 0.55))
+    return cells
+
+
+def load_template(templates_dir, weapon):
+    """The hand-built model for a weapon, or None if it has no geometry of its own."""
+    import json
+    import os
+
+    path = os.path.join(templates_dir, f"{weapon}.json")
+    if not os.path.isfile(path):
+        return None
+    with open(path, "r", encoding="utf-8") as handle:
+        model = json.load(handle)
+    return model if model.get("elements") else None
