@@ -1,10 +1,14 @@
 """Dependency-free JSON I/O shared by the generator-adjacent tooling.
 
-The write convention here is deliberately identical to ``main.py``'s ``write_json``:
-UTF-8, ``indent=2``, ``ensure_ascii=False``, and ``newline=""`` so json's ``"\n"``
-stays LF on Windows too, matching the mod repo's ``.gitattributes`` (``* text eol=lf``).
-Keeping this in one stdlib-only module lets the GUI edit ``tiers.json``/``keys.json``
-with byte-identical formatting to the generator, so runs produce clean diffs.
+The write convention here matches the **source data** under ``common/``: UTF-8,
+``indent=2``, ``ensure_ascii=False``, and ``newline=""`` so json's ``"\n"`` stays LF on
+Windows too, matching the mod repo's ``.gitattributes`` (``* text eol=lf``). Keeping it in
+one stdlib-only module lets the GUI rewrite ``tiers.json``/``keys.json`` in the shape they
+are already committed in, so an edit through the GUI produces a one-line diff.
+
+Note this is *not* ``main.py``'s ``write_json``, which writes the generator's **output**
+at ``indent=4`` to match the mod repo's existing data pack files. The two indents belong to
+two different trees and are not a drift to be reconciled.
 
 No third-party imports here — this stays importable by the stdlib-only core.
 """

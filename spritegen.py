@@ -31,6 +31,7 @@ Needs Pillow. `main.py` does not import this — sprite generation is an authori
 by hand, not part of the per-run JSON pipeline.
 """
 
+import glob
 import json
 import os
 import colorsys
@@ -86,7 +87,11 @@ ALPHA_FLOOR = 32
 MATERIAL_STOPS = 12
 HANDLE_STOPS = 6
 
-WEAPONS_PATH = "common/patterns/sword_patterns.json"
+# Patterns are per Minecraft version, but sprites are not: one drawing of a katana serves
+# every version that has a katana. So the weapon list is the union across all of them,
+# which also means a weapon added to only the newest version still gets blanks and a
+# palette here.
+PATTERNS_GLOB = "common/patterns/*/sword_patterns.json"
 
 
 @dataclass(frozen=True, slots=True)
@@ -224,8 +229,16 @@ def sample_ramp(ramp, position):
 # --- sprite discovery --------------------------------------------------------------
 
 def load_weapons():
-    with open(WEAPONS_PATH, "r", encoding="utf-8") as handle:
-        return list(json.load(handle).keys())
+    """Every weapon name any version defines a pattern for, in first-seen order."""
+    weapons = []
+    for path in sorted(glob.glob(PATTERNS_GLOB)):
+        with open(path, "r", encoding="utf-8") as handle:
+            for name in json.load(handle):
+                if name not in weapons:
+                    weapons.append(name)
+    if not weapons:
+        raise FileNotFoundError(f"No pattern files matched {PATTERNS_GLOB}")
+    return weapons
 
 
 def discover_sprites(weapons):

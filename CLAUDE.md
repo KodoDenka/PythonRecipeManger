@@ -4,18 +4,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this project does
 
-This is a data generation tool for a Minecraft mod ("knavesneeds"). It programmatically creates JSON files for crafting recipes, item models, weapon attributes, and recipe unlock advancements, and copies the matching item sprites out of `common/sprites/` — targeting both Fabric and Forge mod loaders.
+This is a data generation tool for a Minecraft mod ("knavesneeds"). It programmatically creates JSON files for crafting recipes, item models, weapon attributes, and recipe unlock advancements, and copies the matching item sprites out of `common/sprites/` — targeting both mod loaders of whichever Minecraft version is selected.
 
 Sprites are the single source of truth here: they live in `common/sprites/` and are exported into each loader's asset tree by the generator, rather than being copied into the downstream mod projects by hand.
+
+There are three entry points, and only the first is part of the generation pipeline:
+
+- `main.py` — the generator. Stdlib-only, and importable without side effects.
+- `python -m gui` — a PySide6 editor for the tier, key and pattern data, which shells out to `main.py` to generate. Needs PySide6; nothing else does.
+- `spritegen.py` — a hand-run sprite authoring tool, described near the end of this file.
 
 ## Running the generator
 
 ```
-python main.py              # JSON + textures, about a second
-python main.py --previews   # ...and the per-tier preview GIFs, minutes
-python main.py --thumbnail  # ...and the mod thumbnail, seconds
-python main.py --all        # everything
+python main.py                       # 1.21.1 JSON + textures into ./fabric and ./neoforge
+python main.py --mc 1.20.1           # ...the 1.20.1 profile instead (./fabric, ./forge)
+python main.py --mc 1.21.1 <path>    # ...into a multiloader mod project root
+python main.py --previews            # ...and the per-tier preview GIFs, minutes
+python main.py --thumbnail           # ...and the mod thumbnail, seconds
+python main.py --all                 # everything
 ```
+
+`--mc` (`-m`, or `--mc=<version>`) picks the Minecraft version; it defaults to `1.21.1`, and the known versions are the keys of `VERSION_PROFILES` in `main.py`. The GUI reads that dict to fill its version selector, so adding a version there offers it in both places at once.
+
+A bare path argument is the **multiloader mod project root** to generate into, and output lands in `<root>/<loader>/src/main/resources/`. Omit it and the run stages into the local `./<loader>` folders instead, which is the safe default: those are gitignored scratch space that holds nothing but generated files. `.env` holds a saved path per version as `MOD_PATH_<version with dots as underscores>` — see `.env.example` — which is what the GUI's output-path box reads and writes. `main.py` itself does not read `.env`; the GUI passes the path on the command line.
 
 **Both render steps are opt-in, and separately so.** They cost minutes while the JSON and
 textures — the part a mod build actually consumes — take about a second, so rebuilding 39
@@ -25,7 +37,10 @@ advertises one mod, the previews document every tier with art.
 
 Short forms `-p`, `-t`, `-a` work, as does `--preview`. Anything else is rejected with exit
 2 rather than ignored, so a typo'd flag cannot silently give a run without the output it
-asked for.
+asked for — and, now that a run can write into a real mod checkout, cannot silently give a
+run that writes somewhere other than where it was pointed. An unknown `--mc` version, a
+missing `--mc` value, an output root that does not exist, and a second bare path argument
+are all exit 2 as well.
 
 Because the two steps are independent, `preview/` is cleared selectively: a previews run
 removes only the per-mod subfolders, a thumbnail run only the loose `thumbnail.*` files.
@@ -38,28 +53,124 @@ JSON and texture generation needs only the standard library (`json`, `os`, `shut
 pip install -r requirements.txt
 ```
 
-Both are imported lazily, and the run degrades in stages rather than failing: without numpy previews fall back to the 2D sprite renderer, and without Pillow the GIF step is skipped entirely with a warning. Every JSON file and texture is produced either way. The script clears and regenerates `fabric/` and `forge/` on every run, and `preview/` only on a run that is going to rebuild it — wiping previews the run then skips would leave the folder empty rather than stale, and a stale GIF is the better of the two. All three are gitignored.
+Both are imported lazily, and the run degrades in stages rather than failing: without numpy previews fall back to the 2D sprite renderer, and without Pillow the GIF step is skipped entirely with a warning. Every JSON file and texture is produced either way. PySide6 is needed only by `python -m gui`; the generator never imports Qt.
+
+**How the previous run's output is cleared depends on where it went**, and the two cases are not the same risk:
+
+- **Staging locally** (no path argument), `./<loader>` is emptied wholesale. Those folders hold nothing but generated files, and that is what drops a tier you have since deleted from `tiers.json`. The loader folders are the *current profile's* — a 1.21.1 run does not touch a `./forge` left behind by a 1.20.1 one. All of `./fabric`, `./forge`, `./neoforge` and `preview/` are gitignored.
+- **Writing into a mod project**, it cannot: those trees also hold the hand-written lang files, item model templates and loader metadata the mod is built from. So the run deletes per tier instead, walking only the directories `generated_dirs()` names and leaving everything else alone.
+
+The rule that makes the scoped clear safe is **clear exactly what you are about to write**. `generated_dirs()` therefore omits the recipe folder of a tier the run generates no recipe for, so the hand-written smithing and ritual recipes described under "Tiers that are not crafted" survive a run. The cost of scoping is that a tier *removed* from `tiers.json` is no longer cleaned out of a mod project, because nothing left in the data still names it.
 
 ## Architecture
 
-Everything lives in `main.py`. The generation pipeline runs in this order:
+The generator lives in `main.py`. The generation pipeline runs in this order, and every step from 1 to 9 is scoped to the version `--mc` selected:
 
-1. **Keys** (`common/data/keys.json`) — loaded into a local dict mapping identifier → `[prefix, "namespace:identifier"]`.
-2. **Tiers** (`common/data/tiers.json`) — loaded and resolved against the keys dict into the global `tiers` dict of `TierClass` instances. Each tier has a `mod_id`, plus resolved `material`, `handle`, and `binder` key tuples.
-3. **Pattern loading** — reads `common/patterns/sword_patterns.json` into `SWORD_PATTERNS`. Each entry maps a weapon name to its 3-row crafting grid using `M` (material), `H` (handle), `B` (binder) placeholders.
-4. **Recipe generation** (`create_recipe_data`) — iterates all tiers × all sword patterns and writes shaped crafting recipe JSONs. Binder key is only included if `B` appears in the pattern.
-5. **Model generation** (`create_model_date`) — writes item model JSONs for both loaders.
-6. **Weapon attributes** (`create_weapon_attributes_date`) — writes weapon attribute JSONs for both loaders.
-7. **Unlock advancements** (`create_unlock_data`) — writes Fabric-only advancement JSONs for recipe unlocking.
-8. **Textures** (`create_texture_data`) — copies each tier × weapon sprite from `common/sprites/` into both loaders, together with its `.png.mcmeta` where one exists. Tiers with no matching sprite are collected in `missing_sprites` and printed as a warning at the end of the run.
-9. **Previews** (`create_preview_data` → `preview.py`, `--previews`) — renders one looping showcase animation per tier to `preview/{mod_id}/{tier}.{gif,webp}`.
-10. **Thumbnail** (`create_thumbnail_data` → `preview.py`, `--thumbnail`) — renders the mod's showcase image to `preview/thumbnail.{gif,webp}`, from the tiers named in `common/data/thumbnail.json`.
+1. **Mods** (`common/data/<version>/mods.json`) — loaded into the global `mods` dict of `ModClass` instances, one per upstream mod: its data pack `namespace`, the `loaders` it has a build for, and its `loaded_id`. Then **crafting rules** (`parts.json`, `smithing.json`, `rituals.json`, all optional) — see "Tiers that are not crafted".
+2. **Keys** (`common/data/<version>/keys.json`) — loaded into a local dict mapping identifier → `[prefix, "namespace:identifier"]`.
+3. **Tiers** (`common/data/<version>/tiers.json`) — loaded and resolved against the keys dict into the global `tiers` dict of `TierClass` instances. Each tier has a `mod_id`, plus resolved `material`, `handle`, and `binder` key tuples, and an optional `invisible_variant` flag.
+4. **Pattern loading** — reads `common/patterns/<version>/sword_patterns.json` into `SWORD_PATTERNS`, and the optional `tier_patterns.json` into `TIER_PATTERNS`. Each base entry maps a weapon name to its 3-row crafting grid using `M` (material), `H` (handle), `B` (binder) placeholders; an override replaces that grid for one tier's weapon, letting a tier add or drop a binder without forking the whole pattern set.
+5. **Recipe generation** (`create_recipe_data`) — iterates all tiers × all sword patterns and writes shaped crafting recipe JSONs, once per loader the tier's mod actually ships on. Binder key is only included if `B` appears in the resolved pattern.
+6. **Model generation** (`create_model_date`) — writes item model JSONs. A tier flagged `invisible_variant` gets a second `_invisible` model and an `overrides` block on the first.
+7. **Weapon attributes** (`create_weapon_attributes_date`) — writes weapon attribute JSONs.
+8. **Unlock advancements** (`create_unlock_data`) — writes the advancement JSONs that unlock each recipe, per loader.
+9. **Textures** (`create_texture_data`) — copies each tier × weapon sprite from `common/sprites/` into each of the mod's loaders, together with its `.png.mcmeta` where one exists. Tiers with no matching sprite are collected in `missing_sprites` and printed as a warning at the end of the run.
+10. **Previews** (`create_preview_data` → `preview.py`, `--previews`) — renders one looping showcase animation per tier to `preview/{mod_id}/{tier}.{gif,webp}`.
+11. **Thumbnail** (`create_thumbnail_data` → `preview.py`, `--thumbnail`) — renders the mod's showcase image to `preview/thumbnail.{gif,webp}`, from the tiers named in `common/data/thumbnail.json`.
 
-Steps 1–8 are driven by `tiers.json`, because recipes, models and advancements need real item IDs. Steps 9–10 are driven by `discover_sprite_tiers()` walking `common/sprites/` instead, so a mod whose art has landed but whose recipes have not still gets a showcase GIF. Those are flagged `[art only, no recipes]` in the run output.
+Steps 5 to 9 all write only to the loaders in `mod_loaders()`, the intersection of the version's loaders and the mod's own. Blue Skies has no Fabric build, so generating Fabric recipes for it ships files that can never load — and on 1.21.1 would create a `blue_skies` namespace in the Fabric jar that exists nowhere else.
+
+Steps 1–9 are driven by `tiers.json`, because recipes, models and advancements need real item IDs, and are therefore per version. Steps 10–11 are driven by `discover_sprite_tiers()` walking `common/sprites/` instead, so a mod whose art has landed but whose recipes have not still gets a showcase GIF. Those are flagged `[art only, no recipes]` in the run output. Being sprite-driven, they are also the same for every version — `preview/` and `common/data/thumbnail.json` are not versioned, because the art is not.
+
+The three packages beside the generator are not part of that pipeline. `core/` is a stdlib-only data layer over the same JSON files (plus `.env`), `catalog/` reads item ids and icons out of installed mod jars into `.cache/`, and `gui/` is the PySide6 editor built on both. The dependency runs one way: `gui/` imports `main.py` — for `VERSION_PROFILES`, and to run it as a subprocess — and `main.py` imports none of them.
 
 Both preview steps share `resolve_preview_runtime()`, which imports `preview.py` and settles on a renderer once so a missing dependency warns a single time rather than once per step.
 
 `main.py` holds the JSON pipeline. `preview.py` is kept apart because it is the sole consumer of the optional Pillow dependency in that pipeline, and `render3d.py` because it is the only consumer of numpy. `spritegen.py` is not part of the pipeline at all — it is a sprite-authoring tool run by hand, and `main.py` does not import it.
+
+## Minecraft versions
+
+A version is a `VersionProfile` in `main.py` plus a folder of data under `common/data/<version>/`
+and `common/patterns/<version>/`. Every field of the profile is something that changed between
+1.20.1 and 1.21.1, and **each was read off the corresponding mod repo rather than inferred**,
+because getting one wrong produces files the game loads without complaint and then silently
+ignores.
+
+| | 1.20.1 | 1.21.1 |
+|---|---|---|
+| `loaders` | `fabric`, `forge` | `fabric`, `neoforge` |
+| `recipe_dir` | `data/<ns>/recipes/` | `data/<ns>/recipe/` |
+| `advancement_dir` | `data/<ns>/advancements/` | `data/<ns>/advancement/` |
+| result block | `{"item": id}` | `{"id": id, "count": 1}` |
+| `conditional_advancements` | no | yes |
+| `item_predicate` | `{"items": [id]}`, tags in a `tag` field | `{"items": id}`, a tag is `#`-prefixed |
+
+`conditional_advancements` is the one that is easy to miss: 1.21 repeats the recipe's load
+conditions on the unlock advancement, and without them the advancement loads for a mod that is
+not installed and its `rewards` clause points at a recipe that does not exist.
+
+Loader conditions live in `LOADER_CONDITIONS`, keyed by **loader rather than by version**,
+because the spelling belongs to the loader — Fabric's has not changed across these versions,
+and NeoForge's is Forge's with a different prefix.
+
+### mods.json
+
+`common/data/<version>/mods.json` describes each upstream mod, and every field but the key has
+a default, so an entry only states what it does differently:
+
+```json
+"twilight_forest": { "namespace": "knavesneeds", "loaders": ["fabric", "forge"], "loaded_id": "twilightforest" }
+```
+
+- `namespace` (default `knavesneeds`) — the data pack namespace this mod's recipes and models
+  are written under. Blue Skies is the one mod with its own.
+- `loaders` (default: all of the version's) — the loaders the mod actually has a build for.
+- `loaded_id` (default: the key) — the mod's **runtime** id, which is what a load condition has
+  to name. It is not always the folder name: the 1.20.1 data calls Twilight Forest
+  `twilight_forest` throughout its paths, but the mod's actual id is `twilightforest`, so a
+  condition built from the folder name never matches and the recipe never loads. 1.21.1 renamed
+  the folder to match and needs no `loaded_id`.
+
+This table is what replaced the hardcoded Blue Skies special cases that used to sit in
+`get_result_item()` and in a `namespace = ... if mod_id == "blue_skies"` line in each `create_*`
+function. Adding a mod with unusual conventions is now a data change, not a code change.
+
+### Tiers that are not crafted
+
+Not every tier comes from a crafting bench, and three optional files per version say so. Each
+one's own `_comment` is the specification; the short version:
+
+- `parts.json` — Better End never crafts a tool from ingots. It forges a blade on an anvil,
+  smiths a handle separately, and joins the two. Its tiers get **no shaped recipe**.
+- `smithing.json` — Better Nether's `cincinnasite_diamond` is a smithing *upgrade* of our own
+  cincinnasite weapon of the same shape. **No shaped recipe.**
+- `rituals.json` — Forbidden Arcanus' `draco_arcanus` comes out of a Hephaestus Forge ritual.
+  **No shaped recipe and no unlock advancement** — the ritual is the only way in, and an
+  advancement would advertise a recipe book entry that does not exist.
+
+A shaped recipe for one of these is not merely unused: it is a second and wrong way to obtain a
+weapon the host mod means you to earn.
+
+The tiers in the first two still get an unlock advancement, but it watches for the **smithing
+template** rather than the tier material (`ADVANCEMENT_TRIGGER`) — a material that never passes
+through your inventory on the way to the weapon cannot be what unlocks it.
+
+**Only the exclusions are implemented.** The recipes these tiers should get *instead* — Better
+End's anvil head plus assembly `smithing_transform`, Better Nether's upgrade transform,
+Forbidden Arcanus' forge ritual — are fully described in those files, down to anvil levels and
+ritual costs, but nothing generates them yet; they are still maintained by hand in the mod repo.
+That is why `generated_dirs()` leaves those tiers' recipe folders out of the clear step. See the
+TODO on `load_crafting_rules()`.
+
+### Invisible variants
+
+A tier with `"invisible_variant": true` in `tiers.json` — currently only Souls Weapons'
+`translucent` — gets two models per weapon instead of one: the normal model gains an `overrides`
+block keyed on the `knavesneeds:invisible` predicate, and a companion `_invisible` model carries
+a `display` transform scaling the third-person hands to zero. Both share the one sprite, so the
+variant costs a model file and no extra art. "Invisible" here means only that the item is not
+drawn in the hand of a player someone else is looking at; it still draws in the inventory and in
+first person.
 
 ## Preview GIFs
 
@@ -157,11 +268,25 @@ Note that Pillow's WebP *reader* does not expose per-frame durations — `info["
 
 ## Output path conventions
 
-- Blue Skies items use the namespace `blues_skies`; all others use `knavesneeds`.
-- Blue Skies result items are `blue_skies:{tier}/{weapon}`; others are `knavesneeds:{mod_id}/{tier}/{weapon}`.
-- Fabric conditions use `fabric:load_conditions` / `fabric:all_mods_loaded`; Forge uses `conditions` / `forge:mod_loaded`.
+- **One item path drives everything.** `get_item_path()` returns `{mod_id}/{tier}/{weapon}` for
+  a mod in the shared `knavesneeds` namespace, and `{tier}/{weapon}` for a mod with a namespace
+  of its own — Blue Skies has already said which mod it is by being in the `blue_skies`
+  namespace, so repeating the mod id would give `blue_skies:blue_skies/pyrope/longsword`. The
+  recipe, model, advancement and weapon-attribute paths and the result item id are all built
+  from that one function, so an item's id and the four files describing it cannot drift apart.
+- Result items are therefore `blue_skies:{tier}/{weapon}` for Blue Skies and
+  `knavesneeds:{mod_id}/{tier}/{weapon}` for everything else.
+- The namespace is **`blue_skies`, with no `s` on `blue`.** An earlier `blues_skies` typo sent
+  every Blue Skies model to a namespace the mod does not have, where nothing could resolve it.
+  The spelling now comes from `mods.json` rather than from a literal in each writer.
+- Load conditions per loader: Fabric `fabric:load_conditions` / `fabric:all_mods_loaded`, Forge
+  `conditions` / `forge:mod_loaded`, NeoForge `neoforge:conditions` / `neoforge:mod_loaded`. All
+  three name the mod's `loaded_id`, not its `mod_id`.
 - Models and textures both use the singular `item` subfolder, set once as `ITEM_ROOT` in `main.py`. Every model `parent`, `layer0` reference, and output path derives from it, so the generated JSON and the files on disk cannot disagree.
-- Textures always go to the `knavesneeds` namespace, even for Blue Skies tiers whose *models* live under `blues_skies` — the sprites ship with this mod regardless of which mod the tier comes from.
+- **Textures are the exception to the item path**: they always go to the `knavesneeds` namespace
+  *and* always keep the full `{mod_id}/{tier}/{weapon}`, even for Blue Skies tiers whose models
+  live under `blue_skies`. The sprites ship with this mod regardless of which mod the tier comes
+  from, so they cannot collapse the mod id the way a namespaced model can.
 - An animated sprite is a vertical strip of frames plus a sibling `.png.mcmeta` naming the frame time. The two must travel together: without the `.mcmeta` the game has no reason to think the PNG is anything but one very tall texture, so the strip ships as a stretched still. `create_texture_data` copies the `.mcmeta` alongside the sprite for exactly that reason, and reports how many it moved.
 
 ## Sprite layout
@@ -171,9 +296,17 @@ Note that Pillow's WebP *reader* does not expose per-frame durations — `info["
 ```
 common/sprites/{mod_id}/{tier}/{tier}_{weapon}.png
 common/sprites/{mod_id}/{tier}/{weapon}.png
+common/sprites/{loaded_id}/{tier}/{tier}_{weapon}.png   # only if it differs from mod_id
+common/sprites/{loaded_id}/{tier}/{weapon}.png
 common/sprites/{tier}/{tier}_{weapon}.png          # tier at top level (Blue Skies woods/gems)
 common/sprites/{tier}/{weapon}.png
 ```
+
+The `loaded_id` pair exists because **the sprite tree is shared by every version while the mod
+id is not.** The Twilight Forest art sits in `common/sprites/twilightforest/`, which is what
+1.21.1 calls the mod; 1.20.1 calls the same mod `twilight_forest` and would otherwise find none
+of its own art. Only the *source* folder is looked up both ways — the texture's output path
+still uses the version's own `mod_id`, so it keeps matching the model that points at it.
 
 A sprite only exports as a **texture** if a tier in `tiers.json` references it, so adding art alone is not enough to make an item appear in game. **Preview GIFs** are the exception and cover every sprite folder found on disk.
 
@@ -358,10 +491,14 @@ nearest the median brings it inside 1%.
 
 ## Extending the project
 
-**Add a new weapon type**: add an entry to `common/patterns/sword_patterns.json` with a 3×3 pattern using `M`, `H`, `B` placeholders (use spaces for empty cells). No Python changes needed.
+**Add a new weapon type**: add an entry to `common/patterns/<version>/sword_patterns.json` with a 3×3 pattern using `M`, `H`, `B` placeholders (use spaces for empty cells), for each version that should have it. No Python changes needed. It will want a sprite per tier and an item model template in the mod repo before it renders.
 
 **Draw a new tier's sprites**: write a material ramp and run `python spritegen.py generate <tier> --from <existing-tier>`, or pass a hand-written `Palette` — see the palette-swapping section above. Copy the result out of `generated_sprites/` into `common/sprites/`; nothing generates into the sprite tree automatically.
 
-**Add a new mod/material tier**: add the mod's items to `common/data/keys.json`, then add entries to `common/data/tiers.json` referencing those key names, and drop the sprites into `common/sprites/` in one of the layouts above. No Python changes needed for standard tiers. Run `python main.py` and check the warning block — it lists any tier × weapon whose sprite could not be found.
+**Add a new mod/material tier**: add the mod's items to `common/data/<version>/keys.json`, then add entries to `common/data/<version>/tiers.json` referencing those key names, and drop the sprites into `common/sprites/` in one of the layouts above. No Python changes needed for standard tiers. Run `python main.py --mc <version>` and check the warning block — it lists any tier × weapon whose sprite could not be found. The tier and key files are per version, so a material that exists in only one version is added to only that one; the sprites are shared.
 
-**Add a new supported mod with a custom namespace**: add items to `common/data/keys.json`, add tiers to `common/data/tiers.json`, then update `get_result_item()` and the `namespace` local variable in each `create_*` function if the mod needs non-default namespace/path conventions (Blue Skies is the existing example).
+**Add a new supported mod**: add items to `common/data/<version>/keys.json`, add tiers to `tiers.json`, and add an entry to `mods.json` giving its `namespace`, `loaders` and `loaded_id` where those differ from the defaults. This no longer needs a Python change — the Blue Skies special cases that used to be hardcoded in `get_result_item()` and in each `create_*` function are now read from `mods.json`.
+
+**Add a new Minecraft version**: add a `VersionProfile` to `VERSION_PROFILES` in `main.py`, and create `common/data/<version>/` (`keys.json`, `tiers.json`, `mods.json`) and `common/patterns/<version>/` (`sword_patterns.json`, `tier_patterns.json`). Copying the nearest existing version's folder and editing it is the intended route. The GUI picks the new version up from `VERSION_PROFILES` with no change of its own. Fill the profile in from a real mod repo of that version rather than from memory of what Mojang renamed — that is how the existing two were built, and it is the only way to catch things like 1.21's conditional advancements.
+
+**Give a tier a different recipe shape**: add it to `common/patterns/<version>/tier_patterns.json` as `{tier: {weapon: [row, row, row]}}`, or paint it in the GUI's pattern editor. The override replaces the base grid for that one tier and weapon; every other tier keeps the base.

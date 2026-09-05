@@ -4,3 +4,6 @@ pillow>=10.0
 # Used by the 3D model renderer (render3d.py). Without it previews fall back to the 2D
 # sprite-squash renderer.
 numpy>=1.24
+# Only needed for the data-editing GUI (`python -m gui`). The generator itself, including
+# `python main.py`, stays stdlib-only and never imports Qt.
+PySide6>=6.5

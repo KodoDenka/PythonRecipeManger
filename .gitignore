@@ -2,6 +2,7 @@
 /data/
 /fabric/
 /forge/
+/neoforge/
 /preview/
 __pycache__/
 /generated_sprites/

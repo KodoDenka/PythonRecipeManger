@@ -10,8 +10,123 @@ class TierClass:
     material: list[str]
     handle: list[str]
     binder: list[str]
+    # Souls Weapons' translucent tier turns invisible in hand. The item needs a second
+    # model the game swaps to on a predicate, so the tier declares the flag and
+    # create_model_date() writes the pair.
+    invisible_variant: bool = False
+
+@dataclass(frozen=True, slots=True)
+class ModClass:
+    """One upstream mod: where its generated files live, and how a recipe tests for it.
+
+    `namespace` is the data pack namespace the mod's recipes and models are written under.
+    A mod with its own namespace (Blue Skies) already says which mod it belongs to by the
+    namespace alone, so its item paths drop the mod id — see `get_item_path()`.
+
+    `loaded_id` is the mod's *runtime* id, which is what a load condition has to name. It
+    is not always the folder name: the 1.20.1 data calls Twilight Forest `twilight_forest`
+    throughout its paths, but the mod's actual id is `twilightforest`, so a condition built
+    from the folder name would never match and the recipe would never load.
+    """
+    mod_id: str
+    namespace: str
+    loaders: tuple[str, ...]
+    loaded_id: str
+
+@dataclass(frozen=True, slots=True)
+class VersionProfile:
+    """The data pack conventions of one Minecraft version.
+
+    Every field here is something that changed between 1.20.1 and 1.21.1, and each was read
+    off the corresponding mod repo rather than inferred, because getting one wrong produces
+    files the game loads without complaint and then silently ignores.
+
+    - `loaders` — 1.21 replaced Forge with NeoForge.
+    - `recipe_dir` / `advancement_dir` — 1.21 made the data pack folder names singular.
+    - `result_key` / `result_count` — a 1.20 recipe result is `{"item": id}`; a 1.21 one is
+      `{"id": id, "count": n}`.
+    - `conditional_advancements` — 1.21 repeats the recipe's load conditions on the unlock
+      advancement. Without them the advancement loads for a mod that is not installed.
+    - `item_predicate` — how an inventory_changed trigger names an item. "list" is 1.20's
+      `{"items": [id]}` with tags in a separate `tag` field; "string" is 1.21's
+      `{"items": id}`, where a tag is the same field with a `#` prefix.
+    """
+    loaders: tuple[str, ...]
+    recipe_dir: str
+    advancement_dir: str
+    result_key: str
+    result_count: bool
+    conditional_advancements: bool
+    item_predicate: str
+
+# Keyed by the --mc argument. The GUI reads this dict to populate its version selector, so
+# adding a version here is all it takes to offer it there too.
+VERSION_PROFILES: dict[str, VersionProfile] = {
+    "1.20.1": VersionProfile(
+        loaders=("fabric", "forge"),
+        recipe_dir="recipes",
+        advancement_dir="advancements",
+        result_key="item",
+        result_count=False,
+        conditional_advancements=False,
+        item_predicate="list",
+    ),
+    "1.21.1": VersionProfile(
+        loaders=("fabric", "neoforge"),
+        recipe_dir="recipe",
+        advancement_dir="advancement",
+        result_key="id",
+        result_count=True,
+        conditional_advancements=True,
+        item_predicate="string",
+    ),
+}
+
+DEFAULT_VERSION = "1.21.1"
+
+# How each loader spells "only load this if that mod is present". Keyed by loader rather
+# than by version because the spelling belongs to the loader: Fabric's has not changed
+# across these versions, and NeoForge's is Forge's with a different prefix.
+LOADER_CONDITIONS = {
+    "fabric": ("fabric:load_conditions",
+               lambda mod: {"condition": "fabric:all_mods_loaded", "values": [mod]}),
+    "forge": ("conditions",
+              lambda mod: {"type": "forge:mod_loaded", "modid": mod}),
+    "neoforge": ("neoforge:conditions",
+                 lambda mod: {"type": "neoforge:mod_loaded", "modid": mod}),
+}
+
+# The namespace this mod's own assets live under. Mods listed in mods.json with a different
+# namespace (Blue Skies) get their recipes and models written there instead.
+DEFAULT_NAMESPACE = "knavesneeds"
 
 tiers: dict[str, TierClass] = {}
+mods: dict[str, ModClass] = {}
+# Base grids, and the per-tier overrides that replace them for one tier's weapon.
+SWORD_PATTERNS: dict = {}
+TIER_PATTERNS: dict = {}
+
+# Not every tier is crafted at a bench. Better End forges its weapons from a head and a
+# handle, Better Nether's cincinnasite_diamond is a smithing upgrade of our own
+# cincinnasite weapon, and Forbidden Arcanus' draco_arcanus comes out of a Hephaestus Forge
+# ritual. parts.json / smithing.json / rituals.json declare those tiers, and the generator
+# has to stay off them: a shaped recipe for one is not merely unused, it is a second and
+# wrong way to obtain a weapon the host mod means you to earn.
+#
+# Writing the smithing, anvil and ritual recipes themselves is not implemented yet — see
+# the TODO by load_crafting_rules(). Until it is, these tiers keep their models, weapon
+# attributes and textures, and the run leaves their recipe folders alone entirely.
+NO_RECIPE_TIERS: set[str] = set()
+NO_ADVANCEMENT_TIERS: set[str] = set()
+# tier -> the item whose acquisition unlocks the recipe, when it is not the tier material.
+# A smithing recipe is unlocked by holding its template, not by mining its ore.
+ADVANCEMENT_TRIGGER: dict[str, str] = {}
+
+# Set from --mc before anything reads them.
+PROFILE: VersionProfile = VERSION_PROFILES[DEFAULT_VERSION]
+# Where generated files land. None means the local ./<loader> staging folders; a path means
+# a multiloader mod project root, and output goes to <root>/<loader>/src/main/resources/.
+OUTPUT_ROOT: str | None = None
 
 count = 0
 
@@ -40,6 +155,14 @@ LOGO_PATH = f"{SPRITES_DIR}/LOGO.png"
 # put other people's materials in our showcase.
 THUMBNAIL_CONFIG = "common/data/thumbnail.json"
 
+def data_dir(version):
+    """Where a version's keys/tiers/mods live."""
+    return f"common/data/{version}"
+
+def patterns_dir(version):
+    """Where a version's base grids and per-tier overrides live."""
+    return f"common/patterns/{version}"
+
 def load_keys(file_path):
     return return_json_data(file_path)
 
@@ -51,7 +174,96 @@ def load_tiers(file_path, keys):
             material=keys[entry["material"]],
             handle=keys[entry["handle"]],
             binder=keys[entry["binder"]],
+            invisible_variant=bool(entry.get("invisible_variant", False)),
         )
+
+def load_mods(file_path):
+    """Read mods.json into the global `mods` table.
+
+    Every field but `mod_id` has a default, so an entry only has to state what it does
+    differently: most mods ship under the knavesneeds namespace, load on every loader the
+    version supports, and are named the same at runtime as in their paths.
+    """
+    raw = return_json_data(file_path)
+    for mod_id, entry in raw.items():
+        mods[mod_id] = ModClass(
+            mod_id=mod_id,
+            namespace=entry.get("namespace", DEFAULT_NAMESPACE),
+            loaders=tuple(entry.get("loaders", PROFILE.loaders)),
+            loaded_id=entry.get("loaded_id", mod_id),
+        )
+
+def load_crafting_rules(version):
+    """Read the tiers that are obtained some way other than a shaped recipe.
+
+    All three files are optional — 1.20.1 declares none of them — and each one's own
+    `_comment` is the specification for what it means.
+
+    TODO: only the *exclusions* are implemented. The recipes these tiers should get
+    instead — Better End's anvil head plus assembly smithing_transform, Better Nether's
+    upgrade transform, Forbidden Arcanus' forge ritual — are fully described in the data
+    but nothing generates them yet, so those recipes are still maintained by hand in the
+    mod repo. Until that lands, `generated_dirs()` deliberately leaves their recipe folders
+    out of the clear step so a run cannot delete the hand-written ones.
+    """
+    parts_path = f"{data_dir(version)}/parts.json"
+    if os.path.isfile(parts_path):
+        for mod_id, entry in return_json_data(parts_path).items():
+            if mod_id.startswith("_"):
+                continue
+            template = entry.get("assembly", {}).get("template")
+            for tier_name in entry.get("tiers", {}):
+                NO_RECIPE_TIERS.add(tier_name)
+                if template:
+                    ADVANCEMENT_TRIGGER[tier_name] = template
+
+    smithing_path = f"{data_dir(version)}/smithing.json"
+    if os.path.isfile(smithing_path):
+        for tier_name, entry in return_json_data(smithing_path).items():
+            if tier_name.startswith("_"):
+                continue
+            NO_RECIPE_TIERS.add(tier_name)
+            if entry.get("template"):
+                ADVANCEMENT_TRIGGER[tier_name] = entry["template"]
+
+    rituals_path = f"{data_dir(version)}/rituals.json"
+    if os.path.isfile(rituals_path):
+        for tier_name in return_json_data(rituals_path):
+            if tier_name.startswith("_"):
+                continue
+            # No bench recipe and no unlock advancement: the ritual is the only way in,
+            # and an advancement would advertise a recipe book entry that does not exist.
+            NO_RECIPE_TIERS.add(tier_name)
+            NO_ADVANCEMENT_TIERS.add(tier_name)
+
+def has_shaped_recipe(tier_name):
+    return tier_name not in NO_RECIPE_TIERS
+
+def has_advancement(tier_name):
+    return tier_name not in NO_ADVANCEMENT_TIERS
+
+def get_mod(mod_id):
+    """The ModClass for a tier's mod.
+
+    A tier naming a mod that mods.json has never heard of would otherwise generate files
+    under guessed conventions, so fall back to the plainest ones rather than crashing —
+    the run reports the tier either way through its missing sprites.
+    """
+    mod = mods.get(mod_id)
+    if mod is None:
+        mod = ModClass(mod_id=mod_id, namespace=DEFAULT_NAMESPACE,
+                       loaders=PROFILE.loaders, loaded_id=mod_id)
+        mods[mod_id] = mod
+    return mod
+
+def mod_loaders(mod):
+    """The loaders this mod's files are written for: the ones it and the version share.
+
+    Blue Skies has no Fabric build, so generating Fabric recipes for it ships files that
+    can never load — and on 1.21.1 would create a `blue_skies` namespace in the Fabric jar
+    that exists nowhere else.
+    """
+    return [loader for loader in PROFILE.loaders if loader in mod.loaders]
 
 def return_json_data(file_path):
 
@@ -70,29 +282,75 @@ def return_json_data(file_path):
 
 def create_recipe_data(loader):
     for tier_name, tier in tiers.items():
+        mod = get_mod(tier.mod_id)
+        if loader not in mod_loaders(mod) or not has_shaped_recipe(tier_name):
+            continue
         for sword in SWORD_PATTERNS:
             create_shaped_recipe(
                 sword=sword,
                 name=tier_name,
-                mod_id=tier.mod_id,
+                mod=mod,
                 material=tier.material,
                 handle=tier.handle,
                 binder=tier.binder,
                 loader=loader,
             )
 
-def get_loader_conditions(mod_id, loader):
-    if loader == "fabric":
-        return "fabric:load_conditions", [{"condition": "fabric:all_mods_loaded", "values": [mod_id]}]
-    elif loader == "forge":
-        return "conditions", [{"type": "forge:mod_loaded", "modid": mod_id}]
-    print("Loader not recognized or supported.")
-    return None, []
+def get_loader_conditions(mod, loader):
+    """The "only load me if that mod is present" wrapper for one loader.
 
-def get_result_item(mod_id, name, sword):
-    if mod_id == "blue_skies":
-        return f"blue_skies:{name}/{sword}"
-    return f"knavesneeds:{mod_id}/{name}/{sword}"
+    Built from the mod's `loaded_id`, not its folder name — see ModClass.
+    """
+    entry = LOADER_CONDITIONS.get(loader)
+    if entry is None:
+        print(f"Loader not recognized or supported: {loader}")
+        return None, []
+    field, build = entry
+    return field, [build(mod.loaded_id)]
+
+def get_item_path(mod, name, sword):
+    """The `{tier}/{weapon}` path an item is known by within its namespace.
+
+    A mod with its own namespace has already said which mod it is by the namespace, so the
+    mod id is dropped: Blue Skies' pyrope longsword is `blue_skies:pyrope/longsword`, not
+    `blue_skies:blue_skies/pyrope/longsword`. Everything else shares the knavesneeds
+    namespace with every other mod and has to keep the mod id to stay unique.
+
+    Recipes, models, advancements and weapon attributes all key off this, so an item's id
+    and the paths of the four files describing it cannot drift apart.
+    """
+    if mod.namespace != DEFAULT_NAMESPACE:
+        return f"{name}/{sword}"
+    return f"{mod.mod_id}/{name}/{sword}"
+
+def get_result_item(mod, name, sword):
+    return f"{mod.namespace}:{get_item_path(mod, name, sword)}"
+
+def get_loader_root(loader):
+    """The folder that `data/` and `assets/` sit directly inside, for one loader.
+
+    Local runs stage into ./<loader>; a run given a mod project root writes into that
+    project's resource tree instead.
+    """
+    if OUTPUT_ROOT is None:
+        return loader
+    return f"{OUTPUT_ROOT}/{loader}/src/main/resources"
+
+def get_recipe_path(loader, mod, name, sword):
+    return (f"{get_loader_root(loader)}/data/{mod.namespace}/{PROFILE.recipe_dir}/"
+            f"{get_item_path(mod, name, sword)}.json")
+
+def get_advancement_path(loader, mod, name, sword):
+    return (f"{get_loader_root(loader)}/data/{mod.namespace}/{PROFILE.advancement_dir}/"
+            f"recipes/{get_item_path(mod, name, sword)}.json")
+
+def get_attributes_path(loader, mod, name, sword):
+    return (f"{get_loader_root(loader)}/data/{mod.namespace}/weapon_attributes/"
+            f"{get_item_path(mod, name, sword)}.json")
+
+def get_model_path(loader, mod, name, sword):
+    return (f"{get_loader_root(loader)}/assets/{mod.namespace}/models/{ITEM_ROOT}/"
+            f"{get_item_path(mod, name, sword)}.json")
 
 def write_json(path: str, data: dict) -> None:
     global count
@@ -110,14 +368,17 @@ def copy_file(src: str, dest: str) -> None:
 def get_texture_ref(mod_id, name, sword):
     """The "layer0" texture id an item model points at.
 
-    Always in the knavesneeds namespace, even for tiers whose models live under the
-    blues_skies namespace, because the sprites ship with this mod.
+    Always in the knavesneeds namespace, and always keeping the full mod id, even for tiers
+    whose models live under another mod's namespace and drop it — the sprites ship with this
+    mod regardless of which mod the tier comes from, so they cannot borrow that namespace's
+    implied identity the way a model can. See get_item_path().
     """
     return f"knavesneeds:{ITEM_ROOT}/{mod_id}/{name}/{sword}"
 
 def get_texture_path(loader, mod_id, name, sword):
     """Where the sprite for get_texture_ref() has to land for the game to resolve it."""
-    return f"{loader}/assets/knavesneeds/textures/{ITEM_ROOT}/{mod_id}/{name}/{sword}.png"
+    return (f"{get_loader_root(loader)}/assets/knavesneeds/textures/{ITEM_ROOT}/"
+            f"{mod_id}/{name}/{sword}.png")
 
 def find_sprite(mod_id, name, sword):
     """Locate a source sprite in common/sprites, or None if it hasn't been drawn.
@@ -128,13 +389,24 @@ def find_sprite(mod_id, name, sword):
     Candidates are exact filenames built from the weapon name, which is what keeps variant
     art out: Better End's `*_head.png` alternates and the stray `*2.png` / `*3.png` drafts
     can never match, because no weapon is named `chakram_head` or `claymore2`.
+
+    A mod whose `loaded_id` differs from its `mod_id` is looked up under both, because the
+    sprite tree is shared by every version while the mod id is not: the art sits in
+    `common/sprites/twilightforest/`, which is what 1.21.1 calls the mod, but 1.20.1 calls
+    the same mod `twilight_forest` and would otherwise find none of it.
     """
-    candidates = [
-        f"{SPRITES_DIR}/{mod_id}/{name}/{name}_{sword}.png",
-        f"{SPRITES_DIR}/{mod_id}/{name}/{sword}.png",
-        f"{SPRITES_DIR}/{name}/{name}_{sword}.png",
-        f"{SPRITES_DIR}/{name}/{sword}.png",
-    ]
+    mod = mods.get(mod_id)
+    mod_dirs = [mod_id]
+    if mod is not None and mod.loaded_id != mod_id:
+        mod_dirs.append(mod.loaded_id)
+
+    candidates = []
+    for mod_dir in mod_dirs:
+        candidates.append(f"{SPRITES_DIR}/{mod_dir}/{name}/{name}_{sword}.png")
+        candidates.append(f"{SPRITES_DIR}/{mod_dir}/{name}/{sword}.png")
+    candidates.append(f"{SPRITES_DIR}/{name}/{name}_{sword}.png")
+    candidates.append(f"{SPRITES_DIR}/{name}/{sword}.png")
+
     for candidate in candidates:
         if os.path.isfile(candidate):
             return candidate
@@ -194,7 +466,7 @@ def create_texture_data():
             # together or the strip ships as a stretched still.
             meta = source + ".mcmeta"
             has_meta = os.path.exists(meta)
-            for loader in ["fabric", "forge"]:
+            for loader in mod_loaders(get_mod(tier.mod_id)):
                 dest = get_texture_path(loader, tier.mod_id, tier_name, sword)
                 copy_file(source, dest)
                 if has_meta:
@@ -388,21 +660,36 @@ def create_thumbnail_data(selection):
     print(f"  {THUMBNAIL_PATH}.{{{formats}}} "
           f"({len(weapons)} materials, {frames} frames, {mode})")
 
-def get_pattern(sword):
-    """Return the 3-row grid for a weapon.
+def get_pattern(sword, name=None):
+    """Return the 3-row grid for a weapon, honouring a tier's override if it has one.
 
     Entries in sword_patterns.json wrap the grid in a {"pattern": [...]} object, but
-    tolerate a bare list too so either shape works.
+    tolerate a bare list too so either shape works. tier_patterns.json stores overrides as
+    bare lists keyed tier -> weapon, letting one tier change a recipe's shape — adding or
+    dropping a binder, say — without forking the whole pattern set.
     """
+    override = TIER_PATTERNS.get(name, {}).get(sword) if name else None
+    if override is not None:
+        return override
     entry = SWORD_PATTERNS.get(sword, [])
     if isinstance(entry, dict):
         return entry.get("pattern", [])
     return entry
 
-def create_shaped_recipe(sword, name, mod_id, material, handle, binder, loader):
-    pattern = get_pattern(sword)
-    result = get_result_item(mod_id, name, sword)
-    condition_type, conditions = get_loader_conditions(mod_id, loader)
+def get_result(mod, name, sword):
+    """The recipe's `result` block, in this version's shape.
+
+    1.20 names the item under `item` and leaves the count implicit; 1.21 renamed the field
+    to `id` and writes the count out.
+    """
+    result = {PROFILE.result_key: get_result_item(mod, name, sword)}
+    if PROFILE.result_count:
+        result["count"] = 1
+    return result
+
+def create_shaped_recipe(sword, name, mod, material, handle, binder, loader):
+    pattern = get_pattern(sword, name)
+    condition_type, conditions = get_loader_conditions(mod, loader)
 
     recipe_keys = {
         "H": {str(handle[0]): str(handle[1])},
@@ -418,19 +705,26 @@ def create_shaped_recipe(sword, name, mod_id, material, handle, binder, loader):
         "category": "equipment",
         "key": recipe_keys,
         "pattern": pattern,
-        "result": {"item": result}
+        "result": get_result(mod, name, sword)
     }
 
-    namespace = "blues_skies" if mod_id == "blue_skies" else "knavesneeds"
-    filename = f"{loader}/data/{namespace}/recipes/{mod_id}/{name}/{sword}.json"
+    write_json(get_recipe_path(loader, mod, name, sword), json_data)
 
-    write_json(filename, json_data)
+# The predicate the game switches the held model on, and the transform that hides it.
+# Scaling the third-person hands to zero is what "invisible" means here: the item still
+# exists and still draws in the inventory and in first person, it just is not rendered in
+# the hand of a player someone else is looking at.
+INVISIBLE_PREDICATE = "knavesneeds:invisible"
+INVISIBLE_SUFFIX = "_invisible"
+INVISIBLE_DISPLAY = {
+    "thirdperson_righthand": {"scale": [0, 0, 0]},
+    "thirdperson_lefthand": {"scale": [0, 0, 0]},
+}
 
 def create_model_date():
     for tier_name, tier in tiers.items():
+        mod = get_mod(tier.mod_id)
         for sword in SWORD_PATTERNS:
-
-            namespace = "blues_skies" if tier.mod_id == "blue_skies" else "knavesneeds"
 
             json_data = {
                 "parent" : f"knavesneeds:{ITEM_ROOT}/templates/{sword}",
@@ -439,39 +733,77 @@ def create_model_date():
                 }
             }
 
+            hidden_data = None
+            if tier.invisible_variant:
+                item_path = get_item_path(mod, tier_name, sword)
+                # Both models share the one sprite; only the display transform differs, so
+                # the variant costs a model file and no extra art.
+                hidden_data = {**json_data, "display": INVISIBLE_DISPLAY}
+                json_data = {**json_data, "overrides": [{
+                    "predicate": {INVISIBLE_PREDICATE: 1},
+                    "model": f"{mod.namespace}:{ITEM_ROOT}/{item_path}{INVISIBLE_SUFFIX}",
+                }]}
 
-            for loader in ["fabric", "forge"]:
-                filename = f"{loader}/assets/{namespace}/models/{ITEM_ROOT}/{tier.mod_id}/{tier_name}/{sword}.json"
-                write_json(filename, json_data)
+            for loader in mod_loaders(mod):
+                path = get_model_path(loader, mod, tier_name, sword)
+                write_json(path, json_data)
+                if hidden_data is not None:
+                    write_json(f"{path[:-len('.json')]}{INVISIBLE_SUFFIX}.json",
+                               hidden_data)
 
 
 def create_weapon_attributes_date():
     for tier_name, tier in tiers.items():
+        mod = get_mod(tier.mod_id)
         for sword in SWORD_PATTERNS:
 
             json_data = {
                 "parent": f"knavesneeds:{sword}"
             }
 
-            namespace = "blues_skies" if tier.mod_id == "blue_skies" else "knavesneeds"
-            filename = f"fabric/data/{namespace}/weapon_attributes/{tier.mod_id}/{tier_name}/{sword}.json"
-            write_json(filename, json_data)
-            filename = f"forge/data/{namespace}/weapon_attributes/{tier.mod_id}/{tier_name}/{sword}.json"
-            write_json(filename, json_data)
+            for loader in mod_loaders(mod):
+                write_json(get_attributes_path(loader, mod, tier_name, sword), json_data)
+
+def get_material_predicate(material):
+    """How an inventory_changed trigger names the tier's material.
+
+    1.20 keeps items and tags in separate fields — `{"items": [id]}` against
+    `{"tag": id}`. 1.21 merged them into one item-or-tag string, with `#` marking a tag.
+    """
+    prefix, value = str(material[0]), str(material[1])
+    if PROFILE.item_predicate == "string":
+        return {"items": f"#{value}" if prefix == "tag" else value}
+    if prefix == "tag":
+        return {"tag": value}
+    return {"items": [value]}
+
+def get_unlock_material(tier_name, tier):
+    """The item the unlock advancement watches for.
+
+    Normally the tier's own material — you mine the ore, you learn the recipe. A tier
+    obtained by smithing is unlocked by its template instead, since its material never
+    passes through your inventory on the way to the weapon.
+    """
+    trigger = ADVANCEMENT_TRIGGER.get(tier_name)
+    if trigger is not None:
+        return ["item", trigger]
+    return tier.material
 
 def create_unlock_data():
     for tier_name, tier in tiers.items():
+        if not has_advancement(tier_name):
+            continue
+        mod = get_mod(tier.mod_id)
         for sword in SWORD_PATTERNS:
-            result = get_result_item(tier.mod_id, tier_name, sword)
+            result = get_result_item(mod, tier_name, sword)
             json_data = {
                 "parent": "minecraft:recipes/root",
                 "criteria": {
                     "has_material": {
                         "conditions": {
                             "items": [
-                                {
-                                    "items": tier.material
-                                }
+                                get_material_predicate(
+                                    get_unlock_material(tier_name, tier))
                             ]
                         },
                         "trigger": "minecraft:inventory_changed"
@@ -497,9 +829,15 @@ def create_unlock_data():
                 "sends_telemetry_event": False
             }
 
-            namespace = "blues_skies" if tier.mod_id == "blue_skies" else "knavesneeds"
-            filename = f"fabric/data/{namespace}/advancements/recipes/{tier.mod_id}/{tier_name}/{sword}.json"
-            write_json(filename, json_data)
+            for loader in mod_loaders(mod):
+                # 1.21 repeats the recipe's load conditions here. Without them the unlock
+                # advancement loads even when the mod it belongs to is absent, and the
+                # rewards clause then points at a recipe that does not exist.
+                data = json_data
+                if PROFILE.conditional_advancements:
+                    field, conditions = get_loader_conditions(mod, loader)
+                    data = {field: conditions, **json_data}
+                write_json(get_advancement_path(loader, mod, tier_name, sword), data)
 
 #Credit to https://stackoverflow.com/questions/185936/how-to-delete-the-contents-of-a-folder
 def clear_preview_data(previews, thumbnail):
@@ -524,20 +862,68 @@ def clear_preview_data(previews, thumbnail):
             print('Failed to delete %s. Reason: %s' % (path, e))
 
 
-def clear_old_data(folders=("fabric", "forge")):
-    """Empty the generated loader output folders."""
-    for folder in folders:
-        if not os.path.isdir(folder):
-            continue
-        for filename in os.listdir(folder):
-            file_path = os.path.join(folder, filename)
-            try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except Exception as e:
-                print('Failed to delete %s. Reason: %s' % (file_path, e))
+def generated_dirs(loader, mod, tier_name):
+    """Every directory this run will write into for one tier on one loader.
+
+    Only those: a tier the generator does not write recipes for keeps its recipe folder,
+    because the recipes there are the hand-written smithing and ritual ones this tool
+    cannot yet produce. Clearing exactly what the run is about to write is what makes the
+    scoped clear safe — anything it skips writing, it also skips deleting.
+    """
+    base = get_loader_root(loader)
+    item_dir = os.path.dirname(get_item_path(mod, tier_name, "any"))
+    dirs = []
+    if has_shaped_recipe(tier_name):
+        dirs.append(f"{base}/data/{mod.namespace}/{PROFILE.recipe_dir}/{item_dir}")
+    if has_advancement(tier_name):
+        dirs.append(
+            f"{base}/data/{mod.namespace}/{PROFILE.advancement_dir}/recipes/{item_dir}")
+    dirs.append(f"{base}/data/{mod.namespace}/weapon_attributes/{item_dir}")
+    dirs.append(f"{base}/assets/{mod.namespace}/models/{ITEM_ROOT}/{item_dir}")
+    dirs.append(f"{base}/assets/knavesneeds/textures/{ITEM_ROOT}/{mod.mod_id}/{tier_name}")
+    return dirs
+
+
+def clear_old_data():
+    """Remove the previous run's output, and only that.
+
+    A local run stages into ./<loader>, which holds nothing but generated files, so those
+    folders are emptied wholesale — that is what drops a tier you have since deleted.
+
+    A run writing into a mod project cannot do the same: those trees also hold the hand
+    written lang files, item model templates and loader metadata the mod is built from.
+    So it deletes per tier instead, walking the five directories `generated_dirs()` names
+    and leaving everything else untouched. The cost is that a tier removed from tiers.json
+    is no longer cleaned up, since nothing left in the data still names it.
+    """
+    if OUTPUT_ROOT is None:
+        for loader in PROFILE.loaders:
+            if not os.path.isdir(loader):
+                continue
+            for filename in os.listdir(loader):
+                file_path = os.path.join(loader, filename)
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    print('Failed to delete %s. Reason: %s' % (file_path, e))
+        return
+
+    cleared = 0
+    for tier_name, tier in tiers.items():
+        mod = get_mod(tier.mod_id)
+        for loader in mod_loaders(mod):
+            for path in generated_dirs(loader, mod, tier_name):
+                if not os.path.isdir(path):
+                    continue
+                try:
+                    shutil.rmtree(path)
+                    cleared += 1
+                except Exception as e:
+                    print('Failed to delete %s. Reason: %s' % (path, e))
+    print(f"  Cleared {cleared} generated folder(s) under {OUTPUT_ROOT}.")
 
 
 
@@ -549,38 +935,107 @@ def log_and_return_time(message, start_time):
 PREVIEW_FLAGS = ("--previews", "--preview", "-p")
 THUMBNAIL_FLAGS = ("--thumbnail", "-t")
 ALL_FLAGS = ("--all", "-a")
-USAGE = "usage: python main.py [--previews] [--thumbnail] [--all]"
+VERSION_FLAGS = ("--mc", "-m")
+USAGE = ("usage: python main.py [--mc <version>] [<mod-project-root>] "
+         "[--previews] [--thumbnail] [--all]")
+
+def parse_args(args):
+    """Split the command line into (version, output_root, previews, thumbnail).
+
+    A bare word is the mod project root to generate into; leaving it off stages to the
+    local ./<loader> folders instead. Anything unrecognised is rejected with exit 2 rather
+    than ignored, so a typo'd flag cannot quietly give a run without the output it asked
+    for — and, now that a run can write into a real mod checkout, cannot quietly give a run
+    that writes somewhere other than where it was pointed.
+    """
+    version = DEFAULT_VERSION
+    output_root = None
+    everything = False
+    previews = thumbnail = False
+    unknown, extra_paths = [], []
+
+    index = 0
+    while index < len(args):
+        arg = args[index]
+        if arg in VERSION_FLAGS:
+            index += 1
+            if index >= len(args):
+                print(f"{arg} needs a version, one of: {', '.join(VERSION_PROFILES)}")
+                print(USAGE)
+                raise SystemExit(2)
+            version = args[index]
+        elif arg.startswith("--mc="):
+            version = arg.partition("=")[2]
+        elif arg in ALL_FLAGS:
+            everything = True
+        elif arg in PREVIEW_FLAGS:
+            previews = True
+        elif arg in THUMBNAIL_FLAGS:
+            thumbnail = True
+        elif arg.startswith("-"):
+            unknown.append(arg)
+        elif output_root is None:
+            output_root = arg
+        else:
+            extra_paths.append(arg)
+        index += 1
+
+    if unknown:
+        print(f"Unknown argument(s): {', '.join(unknown)}")
+        print(USAGE)
+        raise SystemExit(2)
+    if extra_paths:
+        print(f"Only one output root can be given; also got: {', '.join(extra_paths)}")
+        print(USAGE)
+        raise SystemExit(2)
+    if version not in VERSION_PROFILES:
+        print(f"Unknown Minecraft version: {version}")
+        print(f"Known versions: {', '.join(VERSION_PROFILES)}")
+        raise SystemExit(2)
+    if output_root is not None and not os.path.isdir(output_root):
+        print(f"Output root does not exist: {output_root}")
+        print("Give the multiloader mod project root, or omit it to stage locally.")
+        raise SystemExit(2)
+
+    return version, output_root, everything or previews, everything or thumbnail
 
 if __name__ == '__main__':
-    global SWORD_PATTERNS
     import sys
 
     # Both render steps are opt-in because they cost minutes while the JSON and textures --
     # the part a mod build actually consumes -- take about a second. Rebuilding 39 tiers of
     # spin animation to change one recipe is a bad default. They are separately opt-in
     # because they answer different questions and neither implies the other.
-    args = sys.argv[1:]
-    everything = any(flag in args for flag in ALL_FLAGS)
-    render_previews = everything or any(flag in args for flag in PREVIEW_FLAGS)
-    render_thumbnail = everything or any(flag in args for flag in THUMBNAIL_FLAGS)
-    unknown = [a for a in args
-               if a not in PREVIEW_FLAGS + THUMBNAIL_FLAGS + ALL_FLAGS]
-    if unknown:
-        print(f"Unknown argument(s): {', '.join(unknown)}")
-        print(USAGE)
-        raise SystemExit(2)
+    MC_VERSION, OUTPUT_ROOT, render_previews, render_thumbnail = parse_args(sys.argv[1:])
+    PROFILE = VERSION_PROFILES[MC_VERSION]
 
-    print("Starting data generation...")
+    print(f"Starting data generation for Minecraft {MC_VERSION} "
+          f"({'/'.join(PROFILE.loaders)})...")
+    if OUTPUT_ROOT is None:
+        print(f"  Staging locally into ./{', ./'.join(PROFILE.loaders)}")
+    else:
+        print(f"  Writing into {OUTPUT_ROOT}")
     start_time = time.time()
 
-    keys = load_keys("common/data/keys.json")
+    load_mods(f"{data_dir(MC_VERSION)}/mods.json")
+    load_crafting_rules(MC_VERSION)
+    start_time = log_and_return_time(
+        f"Loaded {len(mods)} mod profile(s), {len(NO_RECIPE_TIERS)} non-crafted tier(s)",
+        start_time)
+
+    keys = load_keys(f"{data_dir(MC_VERSION)}/keys.json")
     start_time = log_and_return_time("Loaded keys/ingredients data", start_time)
 
-    load_tiers("common/data/tiers.json", keys)
-    start_time = log_and_return_time("Loaded tiers", start_time)
+    load_tiers(f"{data_dir(MC_VERSION)}/tiers.json", keys)
+    start_time = log_and_return_time(f"Loaded {len(tiers)} tiers", start_time)
 
-    SWORD_PATTERNS = return_json_data("common/patterns/sword_patterns.json")
-    start_time = log_and_return_time("Loaded sword patterns", start_time)
+    SWORD_PATTERNS = return_json_data(f"{patterns_dir(MC_VERSION)}/sword_patterns.json")
+    # Per-tier overrides are optional; a version that has none just has an empty file.
+    overrides_path = f"{patterns_dir(MC_VERSION)}/tier_patterns.json"
+    TIER_PATTERNS = return_json_data(overrides_path) if os.path.isfile(overrides_path) else {}
+    overridden = sum(len(swords) for swords in TIER_PATTERNS.values())
+    start_time = log_and_return_time(
+        f"Loaded {len(SWORD_PATTERNS)} patterns ({overridden} tier override(s))", start_time)
 
     # Resolved before anything is cleared or written, so a thumbnail that was asked for and
     # cannot be built fails with nothing half-generated behind it.
@@ -611,11 +1066,10 @@ if __name__ == '__main__':
     clear_preview_data(render_previews, render_thumbnail)
     start_time = log_and_return_time("Cleared old data", start_time)
 
-    create_recipe_data("fabric")
-    start_time = log_and_return_time("Made recipes for Fabric", start_time)
-
-    create_recipe_data("forge")
-    start_time = log_and_return_time("Made recipes for Forge", start_time)
+    for mc_loader in PROFILE.loaders:
+        create_recipe_data(mc_loader)
+        start_time = log_and_return_time(
+            f"Made recipes for {mc_loader.capitalize()}", start_time)
 
     create_model_date()
     start_time = log_and_return_time("Created model data", start_time)
