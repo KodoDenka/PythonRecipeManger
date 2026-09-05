@@ -1,0 +1,44 @@
+{
+  "_comment": [
+    "Tiers whose weapons are assembled from parts instead of crafted whole, because that is how",
+    "the host mod builds its own tools. A tier listed here gets NO shaped recipe. Instead each",
+    "weapon gets a head item, and the weapon itself is a smithing_transform of that head.",
+    "",
+    "Better End never crafts a tool from ingots. It forges a blade on an anvil, smiths a handle",
+    "separately, then joins the two with the tool assembly template. Ours does the same:",
+    "  1. head   - anvil recipe, <count> tier ingots -> knavesneeds:<mod>/<tier>/<weapon>_head",
+    "  2. weapon - smithing_transform, template + head + betterend:<tier>_sword_handle",
+    "",
+    "anvil_level / anvil_damage / anvil_tools per tier are copied from Better End's own",
+    "*_sword_blade recipes - the sword row specifically, since ours are weapons and their tool",
+    "heads use a harsher tool tag. The head's ingot count is NOT invented either: it reuses the",
+    "same per-shape material count the old shaped recipes used, read straight out of",
+    "sword_patterns.json, so switching Better End onto smithing changes the method without",
+    "quietly changing what a weapon costs.",
+    "",
+    "head_templates lists weapons whose head has a hand-authored 3D model in the mod's",
+    "item/templates/. Everything else is a flat minecraft:item/generated sprite. greathammer is",
+    "there because its head is geometry rather than a drawn sprite - and it is also the one shape",
+    "with no *_head.png, so its head model falls back to the ordinary greathammer texture."
+  ],
+
+  "betterend": {
+    "suffix": "_head",
+    "part_recipe": {
+      "type": "bclib:smithing",
+      "input_from": "tier_material",
+      "count_from": "pattern_material"
+    },
+    "assembly": {
+      "type": "minecraft:smithing_transform",
+      "template": "betterend:tool_assembly_smithing_template",
+      "addition": "betterend:{tier}_sword_handle"
+    },
+    "head_templates": ["greathammer"],
+    "tiers": {
+      "aeternium":  { "anvil_level": 5, "anvil_damage": 6, "anvil_tools": "betterend:anvil_tool/diamond" },
+      "terminite":  { "anvil_level": 3, "anvil_damage": 3, "anvil_tools": "betterend:anvil_tool/diamond" },
+      "thallasium": { "anvil_level": 2, "anvil_damage": 2, "anvil_tools": "betterend:anvil_tool/iron" }
+    }
+  }
+}

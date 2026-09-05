@@ -121,7 +121,10 @@ MIN_BRIGHTNESS = 0.55
 # this project the way sprites did — probably common/models/ and common/sprites/overlays/
 # — once there is a story for keeping them in step with the Blockbench sources they are
 # authored from. Until then, override with KNAVESNEEDS_TEMPLATES.
-MOD_REPO = "C:/Program Files/GitHub/knavesneeds"
+MOD_REPO = os.environ.get(
+    "KNAVESNEEDS_REPO",
+    "F:/minecraft dev/Knaves' Needs Mod/knaves_needs-1.20.1-multiloader",
+)
 TEMPLATES_DIR = os.environ.get(
     "KNAVESNEEDS_TEMPLATES",
     f"{MOD_REPO}/common/src/main/resources/assets/knavesneeds/models/item/templates",

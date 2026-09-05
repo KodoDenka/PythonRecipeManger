@@ -1,0 +1,12 @@
+{
+  "twilight_forest":   { "namespace": "knavesneeds", "loaders": ["fabric", "forge"], "loaded_id": "twilightforest" },
+  "blue_skies":        { "namespace": "blue_skies",  "loaders": ["forge"] },
+  "undergarden":       { "namespace": "knavesneeds", "loaders": ["forge"] },
+
+  "betterend":         { "namespace": "knavesneeds", "loaders": ["fabric", "forge"] },
+  "betternether":      { "namespace": "knavesneeds", "loaders": ["fabric", "forge"] },
+  "soulsweapons":      { "namespace": "knavesneeds", "loaders": ["fabric", "forge"] },
+  "amethyst_imbuement": { "namespace": "knavesneeds", "loaders": ["fabric", "forge"] },
+  "forbidden_arcanus": { "namespace": "knavesneeds", "loaders": ["fabric", "forge"] },
+  "deeperdarker":      { "namespace": "knavesneeds", "loaders": ["fabric", "forge"] }
+}

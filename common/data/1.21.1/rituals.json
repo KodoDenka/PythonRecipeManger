@@ -1,0 +1,55 @@
+{
+  "_comment": [
+    "Tiers whose weapons are obtained through a host mod's own ritual/forge system instead of a",
+    "crafting bench. A tier listed here gets NO shaped recipe and NO unlock advancement - the",
+    "ritual is the only way to get it, which is the whole point.",
+    "",
+    "Forbidden Arcanus' Draco Arcanus gear comes out of a tier-2 Hephaestus Forge ritual that",
+    "transmutes the netherite version of the same item, so ours transmutes Simply Swords'",
+    "netherite weapon of the same shape - simplyswords:netherite_longsword -> our Draco Arcanus",
+    "longsword. Simply Swords is a required dependency, so that input always exists.",
+    "",
+    "Every cost below is lifted straight from one of Forbidden Arcanus' own four Draco Arcanus",
+    "armour rituals - nothing is invented. Their costs scale with the armour slot; ours scale with",
+    "weapon weight instead, using Simply Swords' damage classes:",
+    "  light    = their boots      (2 scale, 2 obsidiansteel)",
+    "  medium   = their helmet     (2 scale, 3 obsidiansteel)",
+    "  standard = their leggings   (3 scale, 3 obsidiansteel)",
+    "  heavy    = their chestplate (4 scale, 3 obsidiansteel)",
+    "Retune here if it plays wrong - the generator reads these numbers, nothing is hardcoded."
+  ],
+
+  "draco_arcanus": {
+    "registry": "forbidden_arcanus/hephaestus_forge/ritual",
+    "magic_circle": "forbidden_arcanus:create_item",
+    "result_type": "forbidden_arcanus:transmute_input",
+    "forge_tier": 2,
+    "main_ingredient": "simplyswords:netherite_{weapon}",
+
+    "weapon_classes": {
+      "light":  ["twinblade", "sai", "chakram"],
+      "medium": ["rapier", "katana", "spear"],
+      "heavy":  ["claymore", "greathammer", "greataxe", "scythe", "halberd"]
+    },
+    "default_class": "standard",
+
+    "costs": {
+      "light": {
+        "inputs":   { "forbidden_arcanus:dragon_scale": 2, "forbidden_arcanus:obsidiansteel_ingot": 2 },
+        "essences": { "aureal": 700, "blood": 405, "experience": 370, "souls": 5 }
+      },
+      "medium": {
+        "inputs":   { "forbidden_arcanus:dragon_scale": 2, "forbidden_arcanus:obsidiansteel_ingot": 3 },
+        "essences": { "aureal": 820, "blood": 475, "experience": 420, "souls": 6 }
+      },
+      "standard": {
+        "inputs":   { "forbidden_arcanus:dragon_scale": 3, "forbidden_arcanus:obsidiansteel_ingot": 3 },
+        "essences": { "aureal": 1000, "blood": 565, "experience": 540, "souls": 7 }
+      },
+      "heavy": {
+        "inputs":   { "forbidden_arcanus:dragon_scale": 4, "forbidden_arcanus:obsidiansteel_ingot": 3 },
+        "essences": { "aureal": 1300, "blood": 625, "experience": 760, "souls": 9 }
+      }
+    }
+  }
+}

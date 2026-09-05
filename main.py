@@ -656,4 +656,3 @@ if __name__ == '__main__':
         print("These items will render as missing textures in game.")
 
     print(f"\nFinished! Created {count} files.")
-
