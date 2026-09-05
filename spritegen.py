@@ -43,10 +43,6 @@ PALETTES_PATH = "common/data/palettes.json"
 # PALETTES_PATH wholesale -- anything typed by hand in there would be lost on the next run.
 CUSTOM_PALETTES_PATH = "common/data/palettes_custom.json"
 BLANKS_INDEX = "common/blanks/blanks.json"
-
-# Blanks drawn by forge.py rather than extracted from existing art. Kept apart from
-# BLANKS_INDEX because `extract` rewrites that file wholesale.
-FORGED_INDEX = "common/blanks/forged.json"
 # Generated sprites land here rather than in common/sprites, so a run can never clobber
 # hand-drawn art. Copy out of it once a tier looks right.
 GENERATED_DIR = "generated_sprites"
@@ -652,19 +648,8 @@ def extract(limit=MAX_SLOTS):
 # --- rendering ---------------------------------------------------------------------
 
 def load_index():
-    """Extracted blanks, with any forged ones layered over the top.
-
-    Same split as the palettes and for the same reason: `extract` rewrites BLANKS_INDEX
-    wholesale from the sprite tree, so blanks that were drawn rather than extracted have to
-    live in their own file or they vanish on the next run.
-    """
     with open(BLANKS_INDEX, "r", encoding="utf-8") as handle:
-        index = json.load(handle)
-    if os.path.exists(FORGED_INDEX):
-        with open(FORGED_INDEX, "r", encoding="utf-8") as handle:
-            for weapon, variants in json.load(handle).get("weapons", {}).items():
-                index["weapons"].setdefault(weapon, {}).update(variants)
-    return index
+        return json.load(handle)
 
 
 def load_palettes():
@@ -725,8 +710,6 @@ def _shade(weapon, variant, palette, spec):
             colour = sample_ramp(palette.handle, slot["position"])
         key = hex_to_rgb(slot["colour"]) + (slot["alpha"],)
         lookup[key] = (tuple(colour) + (slot["alpha"],), slot["family"], slot["position"])
-
-    from PIL import Image
 
     blank = Image.open(f"{BLANKS_DIR}/{weapon}/{variant}.png").convert("RGBA")
     pixels, family, position = [], [], []
@@ -834,21 +817,18 @@ def generate(tier, palette, variants=None, out_dir=None, preview=False):
 
 
 def _grip_share(weapon, variant, spec):
-    # noqa: the PIL import is lazy everywhere else in this module for the same reason
     """Fraction of a blank's painted texels that belong to the handle family.
 
-    Measured by area rather than by slot count. Slot count only tracks area for extracted
-    blanks, where every shade came from a comparable patch of hand-drawn art. A forged blank
-    breaks that: a wrapped grip mints a distinct handle slot every few texels, so a
-    greathammer that is one tenth grip by area reads as half grip by slot count and gets
-    rejected for a fault it does not have.
+    Measured by area rather than by slot count. Slot count is only a proxy for area, and a
+    weak one: a blank whose grip carries many near-identical shades reads as far more grip
+    than it is. Area is what actually decides whether the material ramp shows.
     """
+    from PIL import Image
+
     handle = {hex_to_rgb(s["colour"]) + (s["alpha"],)
               for s in spec["slots"] if s["family"] == "handle"}
     if not handle:
         return 0.0
-    from PIL import Image
-
     blank = Image.open(f"{BLANKS_DIR}/{weapon}/{variant}.png").convert("RGBA")
     painted = grip = 0
     for pixel in _pixels(blank):
@@ -865,6 +845,11 @@ def _mostly_grip(weapon, variant, spec, base_spec):
     Judged against the same weapon's base blank rather than an absolute threshold: a spear
     is legitimately half shaft, so 45% handle means nothing there and everything on a
     chakram, which has no grip at all.
+
+    Both known-bad blanks separate more clearly by area than by slot count --
+    chakram/betternether_cincinnasite at 87% against 80%, longsword/undergarden_utherium at
+    78% against 67% -- so the area measure is the stricter of the two as well as the more
+    honest one.
     """
     if not base_spec:
         return False
