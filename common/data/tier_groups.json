@@ -1,0 +1,67 @@
+{
+  "_comment": [
+    "The progression tiers of the knavesneeds material set, in order.",
+    "",
+    "`materials` is ordered, and that order is the order a tier's materials appear on a",
+    "preview sheet. Each entry is a sprite selector in the same form thumbnail.json uses:",
+    "'mod_id/tier' for one tier, or a bare name matched against top-level sprite folders.",
+    "",
+    "A material flagged `\"vanilla\": true` is built from a vanilla Minecraft ingot rather",
+    "than from one of ours. Those wear Simply Swords' own art, copied into",
+    "common/sprites/simplyswords/ from the mod jar, so a sheet shows the reference the new",
+    "materials are pitched against rather than four blank rows. sheetgen.py labels them so",
+    "an artist can tell the reference rows from the work.",
+    "",
+    "Copper has no `sprites` because no copper weapon art exists: Simply Swords ships",
+    "iron, gold, diamond and netherite, and its only copper texture is a single longsword",
+    "in the MythicMetals compat set. It is listed anyway, and drawn as an empty row, so the",
+    "gap is visible instead of silently absent.",
+    "",
+    "This file is read by sheetgen.py only. The generation pipeline in main.py is driven by",
+    "tiers.json and does not know about progression tiers."
+  ],
+  "tiers": [
+    {
+      "name": "Tier I",
+      "materials": [
+        { "label": "Copper", "vanilla": true },
+        { "label": "Iron", "sprites": "simplyswords/iron", "vanilla": true },
+        { "label": "Gold", "sprites": "simplyswords/gold", "vanilla": true }
+      ]
+    },
+    {
+      "name": "Tier II",
+      "materials": [
+        { "label": "Diamond", "sprites": "simplyswords/diamond", "vanilla": true },
+        { "label": "Auridian", "sprites": "arpg_core/auridian" },
+        { "label": "Viriwyn", "sprites": "arpg_core/viriwyn" }
+      ]
+    },
+    {
+      "name": "Tier III",
+      "materials": [
+        { "label": "Netherite", "sprites": "simplyswords/netherite", "vanilla": true },
+        { "label": "Glykios", "sprites": "arpg_core/glykios" },
+        { "label": "Celadium", "sprites": "arpg_core/celadium" }
+      ]
+    },
+    {
+      "name": "Tier IV",
+      "materials": [
+        { "label": "Cryalt", "sprites": "arpg_core/cryalt" },
+        { "label": "Wyrdbright", "sprites": "arpg_core/wyrdbright" },
+        { "label": "Phthalium", "sprites": "arpg_core/phthalium" }
+      ]
+    },
+    {
+      "name": "Tier V",
+      "materials": [
+        { "label": "Nebulium", "sprites": "arpg_core/nebulium" },
+        { "label": "Erythryl", "sprites": "arpg_core/erythryl" },
+        { "label": "Faeglas", "sprites": "arpg_core/faeglas" },
+        { "label": "Rhodynth", "sprites": "arpg_core/rhodynth" },
+        { "label": "Hesperynt", "sprites": "arpg_core/hesperynt" }
+      ]
+    }
+  ]
+}

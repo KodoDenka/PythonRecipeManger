@@ -8,11 +8,12 @@ This is a data generation tool for a Minecraft mod ("knavesneeds"). It programma
 
 Sprites are the single source of truth here: they live in `common/sprites/` and are exported into each loader's asset tree by the generator, rather than being copied into the downstream mod projects by hand.
 
-There are three entry points, and only the first is part of the generation pipeline:
+There are four entry points, and only the first is part of the generation pipeline:
 
 - `main.py` — the generator. Stdlib-only, and importable without side effects.
 - `python -m gui` — a PySide6 editor for the tier, key and pattern data, which shells out to `main.py` to generate. Needs PySide6; nothing else does.
 - `spritegen.py` — a hand-run sprite authoring tool, described near the end of this file.
+- `sheetgen.py` — a hand-run contact-sheet tool for showing the art to people, described under "Tier sheets".
 
 ## Running the generator
 
@@ -258,6 +259,73 @@ reads at thumbnail size.
   bigger output costs compositing rather than rasterising. `THUMB_LIFT` raises it out of dead
   centre, since the logo claims the bottom of the frame.
 
+## Tier sheets
+
+`sheetgen.py` renders the material set as static contact sheets for showing to people —
+an artist briefing, mainly. It is hand-run and not part of the pipeline: it reads
+`common/sprites/` and writes PNGs to `sheets/` (gitignored), and `main.py` does not import
+it.
+
+```
+python sheetgen.py            # one sheet per tier, plus the all-tiers overview
+python sheetgen.py --tier 4   # just that one
+```
+
+One sheet per progression tier, a row per material and a column per weapon, plus an
+overview stacking all seventeen materials in progression order. The per-tier sheets answer
+"do these three read as siblings"; the overview answers "does the set read as a
+progression".
+
+**The sheets go in `sheets/`, not in `preview/`.** A `--previews` run rmtrees every
+subfolder of `preview/`, so a `preview/sheets/` would be deleted by the next preview
+render.
+
+- **Every weapon is drawn at the same size.** Sprites are 16/32/48px by weapon type, but
+  the game maps each onto the same 16×16 quad, so scaling each sprite to its own pixel
+  count would tell an artist the halberd is three times the size of the sai. Scale factors
+  are integers (6x/3x/2x onto a 96px cell) so the upscale stays nearest-neighbour crisp.
+- **The greathammer is rasterised from its model; every other weapon is its sprite,
+  pasted.** Greathammer is the one weapon with an `elements` template, so its PNG is a UV
+  atlas for that model rather than a flat item sprite — pasted straight in, it reads as a
+  scrambled block of coloured squares in every material, which is also true of the
+  hand-drawn reference tiers. The other fourteen are `minecraft:item/generated`, whose
+  in-game look *is* the sprite. Rendering those through `render3d` too would cost the
+  `bloom` haloes, which sit below the alpha 128 `build_quads` extrudes at and would
+  silently vanish from exactly the materials that use them.
+- Rasterising needs numpy and the mod's model templates (`preview.TEMPLATES_DIR`, the same
+  sibling checkout the previews want). Missing either warns once and falls back to the raw
+  atlas, since the other fourteen columns are unaffected either way.
+- Animated materials are shown on **frame 0**, and the sheet does not say which those are.
+  A still is what gets marked up, and the preview GIFs already show the motion properly.
+- **The only caption is `no art yet`, on a row with no art.** No footer, no frame counts,
+  no "still" labels, no marking of which rows borrow Simply Swords' art. These sheets go to
+  people who already know the set and are shown alongside a written brief; a label on every
+  row for something the reader knows just crowds the art. A row without a caption centres
+  its name.
+
+### tier_groups.json
+
+`common/data/tier_groups.json` is the progression: five tiers, seventeen materials, in
+order. `sheetgen.py` is its only reader — `main.py` is driven by `tiers.json` and knows
+nothing about progression tiers.
+
+A material names a sprite folder in `"sprites"` — a selector in the same form
+`thumbnail.json` uses — and the five built from vanilla ingots rather than from one of our
+materials are additionally flagged `"vanilla": true`.
+
+The vanilla tiers wear **Simply Swords' own art**, copied into
+`common/sprites/simplyswords/` from the mod jar, which is the reference the twelve new
+materials are pitched against — so a sheet shows the whole progression rather than four
+blank rows. Nothing marks those rows as borrowed on the sheet itself; the `vanilla` flag is
+descriptive only, and no code currently reads it.
+
+**Copper is the one material with no art at all**, and is deliberately left with no
+`sprites`. Simply Swords ships iron, gold, diamond and netherite; its only copper texture
+is a single longsword in the MythicMetals compat set, which is that mod's copper and not a
+weapon set. Copper stays in the list and draws as an empty row, so the gap is visible
+rather than silently absent. An empty cell is a hollow box rather than nothing, so a gap
+reads as a gap and not as a sprite that failed to load.
+
 ## Output formats
 
 Each tier is written as both GIF and WebP from a single render pass — rasterising costs far more than encoding, so `create_preview()` builds the frames once and hands them to each saver in `FORMATS`. WebP is the better file at roughly half the bytes; GIF is kept as the fallback for anywhere WebP is unsupported.
@@ -445,6 +513,22 @@ PNG with a `.png.mcmeta` beside it naming the frame time in ticks. That is the s
 format, not a preview. `generate(..., preview=True)` additionally writes a GIF per animated
 weapon, which the game never reads and a person browsing the folder does.
 
+**Animation is reserved for Tier V**, the top of the progression in
+`common/data/tier_groups.json` — currently nebulium, erythryl, rhodynth and hesperynt.
+Glykios and wyrdbright were authored animated and were turned back into stills by setting
+their `frames` to 1 and regenerating; movement reads as *rarity*, so spending it three
+tiers down leaves nothing for the top tier to escalate to. Faeglas sits in Tier V and is
+still, which is fine — the rule is that nothing below Tier V animates, not that everything
+in it must.
+
+Turning an animation off is a one-number change (`frames` back to 8, 12, whatever it was)
+followed by a regenerate, because the palette keeps the whole description of the effect.
+The treatment list is untouched either way: `glykios`' `sparkle` and `wyrdbright`'s `pulse`
+still apply, they just resolve to a single frame. Note that a treatment carrying a phase —
+`sparkle`'s `twinkle`, here — does not necessarily land on frame 0 of the strip it used to
+produce, so a de-animated tier is not always pixel-identical to its old first frame.
+Wyrdbright's `pulse` was; glykios' sparkle specks moved slightly.
+
 ### Grips and silhouettes
 
 - **A tier that omits `handle` inherits the same wooden grip as every other tier.** All
@@ -494,6 +578,8 @@ nearest the median brings it inside 1%.
 **Add a new weapon type**: add an entry to `common/patterns/<version>/sword_patterns.json` with a 3×3 pattern using `M`, `H`, `B` placeholders (use spaces for empty cells), for each version that should have it. No Python changes needed. It will want a sprite per tier and an item model template in the mod repo before it renders.
 
 **Draw a new tier's sprites**: write a material ramp and run `python spritegen.py generate <tier> --from <existing-tier>`, or pass a hand-written `Palette` — see the palette-swapping section above. Copy the result out of `generated_sprites/` into `common/sprites/`; nothing generates into the sprite tree automatically.
+
+**Place a material in the progression**: add it to the right tier's `materials` list in `common/data/tier_groups.json`, pointing `sprites` at its folder. The list is ordered, and that order is the order it appears on a sheet. Nothing else reads this file, so it does not affect what is generated — only what the sheets show.
 
 **Add a new mod/material tier**: add the mod's items to `common/data/<version>/keys.json`, then add entries to `common/data/<version>/tiers.json` referencing those key names, and drop the sprites into `common/sprites/` in one of the layouts above. No Python changes needed for standard tiers. Run `python main.py --mc <version>` and check the warning block — it lists any tier × weapon whose sprite could not be found. The tier and key files are per version, so a material that exists in only one version is added to only that one; the sprites are shared.
 

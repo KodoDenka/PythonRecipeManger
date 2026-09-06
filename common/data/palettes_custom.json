@@ -681,7 +681,7 @@
       "scythe": "byg_pendorite",
       "halberd": "byg_pendorite"
     },
-    "frames": 8,
+    "frames": 1,
     "frametime": 4,
     "treatments": [
       {
@@ -734,7 +734,7 @@
       "scythe": "byg_pendorite",
       "halberd": "twilight_forest_knightmetal"
     },
-    "frames": 12,
+    "frames": 1,
     "frametime": 4,
     "treatments": [
       {
@@ -752,7 +752,7 @@
       }
     ]
   },
-  "arpg_core/auridine": {
+  "arpg_core/auridian": {
     "material": [
       "#240c00",
       "#361400",
