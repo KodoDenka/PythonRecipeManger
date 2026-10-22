@@ -50,6 +50,8 @@ class VersionProfile:
     - `item_predicate` — how an inventory_changed trigger names an item. "list" is 1.20's
       `{"items": [id]}` with tags in a separate `tag` field; "string" is 1.21's
       `{"items": id}`, where a tag is the same field with a `#` prefix.
+    - `tag_dir` — where item tags live, or None to write none. 1.21 decides enchantability
+      by item tag; 1.20 decides it by class, and every weapon is a SwordItem there.
     """
     loaders: tuple[str, ...]
     recipe_dir: str
@@ -58,6 +60,7 @@ class VersionProfile:
     result_count: bool
     conditional_advancements: bool
     item_predicate: str
+    tag_dir: str | None
 
 # Keyed by the --mc argument. The GUI reads this dict to populate its version selector, so
 # adding a version here is all it takes to offer it there too.
@@ -70,6 +73,7 @@ VERSION_PROFILES: dict[str, VersionProfile] = {
         result_count=False,
         conditional_advancements=False,
         item_predicate="list",
+        tag_dir=None,
     ),
     "1.21.1": VersionProfile(
         loaders=("fabric", "neoforge"),
@@ -79,6 +83,7 @@ VERSION_PROFILES: dict[str, VersionProfile] = {
         result_count=True,
         conditional_advancements=True,
         item_predicate="string",
+        tag_dir="tags/item",
     ),
 }
 
@@ -764,6 +769,43 @@ def create_weapon_attributes_date():
             for loader in mod_loaders(mod):
                 write_json(get_attributes_path(loader, mod, tier_name, sword), json_data)
 
+# The tags Simply Swords files its own weapons under, and which weapons go in each. Simply
+# Swords adds these to minecraft:enchantable/{sword,weapon,sharp_weapon,fire_aspect,
+# durability} and spears to enchantable/trident, so joining them gets our weapons the same
+# enchantments as theirs. A 1.21 item in no enchantable tag can't be enchanted at all.
+# c:tools/melee_weapon is the loaders' shared tag for other mods looking for weapons.
+WEAPON_TAGS = {
+    "simplyswords:swords": None,
+    "simplyswords:spears": {"spear"},
+    "c:tools/melee_weapon": None,
+}
+
+def get_tag_path(loader, tag):
+    namespace, path = tag.split(":")
+    return f"{get_loader_root(loader)}/data/{namespace}/{PROFILE.tag_dir}/{path}.json"
+
+def create_tag_data():
+    """Write each tag in WEAPON_TAGS once per loader, listing every weapon that ships there.
+
+    Every entry is optional: an item exists only when its host mod is loaded and its tier
+    is enabled in config, and one required entry that fails to resolve throws out the
+    whole tag, Simply Swords' own weapons with it.
+    """
+    if PROFILE.tag_dir is None:
+        return
+    for loader in PROFILE.loaders:
+        for tag, swords in WEAPON_TAGS.items():
+            values = []
+            for tier_name, tier in tiers.items():
+                mod = get_mod(tier.mod_id)
+                if loader not in mod_loaders(mod):
+                    continue
+                for sword in SWORD_PATTERNS:
+                    if swords is None or sword in swords:
+                        values.append({"id": get_result_item(mod, tier_name, sword),
+                                       "required": False})
+            write_json(get_tag_path(loader, tag), {"replace": False, "values": values})
+
 def get_material_predicate(material):
     """How an inventory_changed trigger names the tier's material.
 
@@ -1076,6 +1118,9 @@ if __name__ == '__main__':
 
     create_weapon_attributes_date()
     start_time = log_and_return_time("Created weapon attributes data", start_time)
+
+    create_tag_data()
+    start_time = log_and_return_time("Created item tags", start_time)
 
     create_unlock_data()
     start_time = log_and_return_time("Created unlock data", start_time)
