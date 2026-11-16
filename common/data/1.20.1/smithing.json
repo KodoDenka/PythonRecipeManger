@@ -1,0 +1,21 @@
+{
+  "_comment": [
+    "Tiers that are a smithing UPGRADE of one of our own weapons rather than something you craft",
+    "from raw material. A tier listed here gets no shaped recipe - the upgrade is the only way in.",
+    "",
+    "Better Nether's cincinnasite_sword_diamond is a smithing_transform of cincinnasite_sword with",
+    "a diamond and their upgrade template, so ours upgrades our own cincinnasite weapon of the same",
+    "shape the same way. base_tier names the tier the weapon comes from; the weapon shape is always",
+    "carried across, so a cincinnasite glaive upgrades into a cincinnasite diamond glaive.",
+    "",
+    "These carry item-existence conditions on BOTH the base and the result, so switching either tier",
+    "off in the mod's config takes the upgrade recipe with it instead of leaving one that can't",
+    "resolve its own base item."
+  ],
+
+  "cincinnasite_diamond": {
+    "template": "betternether:cincinnasite_diamond_upgrade_smithing_template",
+    "base_tier": "cincinnasite",
+    "addition": "minecraft:diamond"
+  }
+}

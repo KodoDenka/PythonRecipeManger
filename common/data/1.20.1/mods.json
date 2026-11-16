@@ -1,5 +1,5 @@
 {
-  "twilight_forest":   { "namespace": "knavesneeds", "loaders": ["fabric", "forge"], "loaded_id": "twilightforest" },
+  "twilightforest":    { "namespace": "knavesneeds", "loaders": ["fabric", "forge"] },
   "blue_skies":        { "namespace": "blue_skies",  "loaders": ["forge"] },
   "undergarden":       { "namespace": "knavesneeds", "loaders": ["forge"] },
 

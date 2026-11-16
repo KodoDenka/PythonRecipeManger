@@ -23,10 +23,9 @@ class ModClass:
     A mod with its own namespace (Blue Skies) already says which mod it belongs to by the
     namespace alone, so its item paths drop the mod id — see `get_item_path()`.
 
-    `loaded_id` is the mod's *runtime* id, which is what a load condition has to name. It
-    is not always the folder name: the 1.20.1 data calls Twilight Forest `twilight_forest`
-    throughout its paths, but the mod's actual id is `twilightforest`, so a condition built
-    from the folder name would never match and the recipe would never load.
+    `loaded_id` is the mod's *runtime* id, which is what a load condition has to name, for a
+    mod whose folder name differs from it. No mod needs it today: 1.20.1 used to call Twilight
+    Forest `twilight_forest`, and a condition naming that never matched.
     """
     mod_id: str
     namespace: str
@@ -50,8 +49,12 @@ class VersionProfile:
     - `item_predicate` — how an inventory_changed trigger names an item. "list" is 1.20's
       `{"items": [id]}` with tags in a separate `tag` field; "string" is 1.21's
       `{"items": id}`, where a tag is the same field with a `#` prefix.
-    - `tag_dir` — where item tags live, or None to write none. 1.21 decides enchantability
-      by item tag; 1.20 decides it by class, and every weapon is a SwordItem there.
+    - `tag_dir` — where item tags live. 1.21 decides enchantability by item tag; 1.20
+      decides it by class, so there the tags only help other mods find our weapons.
+    - `weapon_tags` — which WEAPON_TAGS this version writes. Simply Swords 1.70 ships the
+      same weapon tags on both versions, so today both write all of them.
+    - `registry_conditions` — Fabric's `fabric:registry_contains` arrived in 1.20.5, so
+      1.20.1 Fabric can only gate a recipe on its mod being loaded, not on our item existing.
     """
     loaders: tuple[str, ...]
     recipe_dir: str
@@ -60,7 +63,9 @@ class VersionProfile:
     result_count: bool
     conditional_advancements: bool
     item_predicate: str
-    tag_dir: str | None
+    tag_dir: str
+    weapon_tags: tuple[str, ...]
+    registry_conditions: bool
 
 # Keyed by the --mc argument. The GUI reads this dict to populate its version selector, so
 # adding a version here is all it takes to offer it there too.
@@ -73,7 +78,11 @@ VERSION_PROFILES: dict[str, VersionProfile] = {
         result_count=False,
         conditional_advancements=False,
         item_predicate="list",
-        tag_dir=None,
+        tag_dir="tags/items",
+        weapon_tags=("simplyswords:swords", "simplyswords:spears", "c:tools/melee_weapon",
+                     "simplyswords:light_weapons", "simplyswords:medium_weapons",
+                     "simplyswords:heavy_weapons"),
+        registry_conditions=False,
     ),
     "1.21.1": VersionProfile(
         loaders=("fabric", "neoforge"),
@@ -84,6 +93,10 @@ VERSION_PROFILES: dict[str, VersionProfile] = {
         conditional_advancements=True,
         item_predicate="string",
         tag_dir="tags/item",
+        weapon_tags=("simplyswords:swords", "simplyswords:spears", "c:tools/melee_weapon",
+                     "simplyswords:light_weapons", "simplyswords:medium_weapons",
+                     "simplyswords:heavy_weapons"),
+        registry_conditions=True,
     ),
 }
 
@@ -99,6 +112,17 @@ LOADER_CONDITIONS = {
               lambda mod: {"type": "forge:mod_loaded", "modid": mod}),
     "neoforge": ("neoforge:conditions",
                  lambda mod: {"type": "neoforge:mod_loaded", "modid": mod}),
+}
+
+# How each loader spells "only load this if these items exist". Smithing and part recipes use
+# this instead of the mod check, because both ends of them are our own items and either one
+# can be switched off in config while its host mod stays loaded.
+ITEM_CONDITIONS = {
+    "fabric": lambda items: [{"condition": "fabric:registry_contains",
+                              "registry": "minecraft:item", "values": items}],
+    "forge": lambda items: [{"type": "forge:item_exists", "item": item} for item in items],
+    "neoforge": lambda items: [{"type": "neoforge:item_exists", "item": item}
+                               for item in items],
 }
 
 # The namespace this mod's own assets live under. Mods listed in mods.json with a different
@@ -118,16 +142,20 @@ TIER_PATTERNS: dict = {}
 # has to stay off them: a shaped recipe for one is not merely unused, it is a second and
 # wrong way to obtain a weapon the host mod means you to earn.
 #
-# Writing the smithing, anvil and ritual recipes themselves is not implemented yet — see
-# the TODO by load_crafting_rules(). Until it is, these tiers keep their models, weapon
-# attributes and textures, and the run leaves their recipe folders alone entirely.
+# The part and smithing recipes are written by create_part_data() and create_smithing_data().
+# Ritual recipes are not generated yet, so a ritual tier's recipe folder is left alone.
 NO_RECIPE_TIERS: set[str] = set()
+# tier -> (that mod's parts.json entry, the tier's own entry under it).
+PART_TIERS: dict[str, tuple[dict, dict]] = {}
+# tier -> its smithing.json entry.
+SMITHING_TIERS: dict[str, dict] = {}
 NO_ADVANCEMENT_TIERS: set[str] = set()
 # tier -> the item whose acquisition unlocks the recipe, when it is not the tier material.
 # A smithing recipe is unlocked by holding its template, not by mining its ore.
 ADVANCEMENT_TRIGGER: dict[str, str] = {}
 
 # Set from --mc before anything reads them.
+MC_VERSION = DEFAULT_VERSION
 PROFILE: VersionProfile = VERSION_PROFILES[DEFAULT_VERSION]
 # Where generated files land. None means the local ./<loader> staging folders; a path means
 # a multiloader mod project root, and output goes to <root>/<loader>/src/main/resources/.
@@ -136,6 +164,10 @@ OUTPUT_ROOT: str | None = None
 count = 0
 
 SPRITES_DIR = "common/sprites"
+# Art one Minecraft version ships and the others don't, laid out like common/sprites/ under a
+# <mc>/ folder. It can't be a folder inside common/sprites/, where discover_sprite_tiers()
+# would read the version as a mod.
+VERSION_SPRITES_DIR = "common/sprites_by_version"
 # Subfolder used under both assets/<ns>/textures/ and assets/<ns>/models/. Everything
 # that builds a texture or model reference goes through this, so the generated JSON and
 # the files on disk can't drift apart.
@@ -201,15 +233,12 @@ def load_mods(file_path):
 def load_crafting_rules(version):
     """Read the tiers that are obtained some way other than a shaped recipe.
 
-    All three files are optional — 1.20.1 declares none of them — and each one's own
-    `_comment` is the specification for what it means.
+    All three files are optional, and each one's own `_comment` is the specification for
+    what it means.
 
-    TODO: only the *exclusions* are implemented. The recipes these tiers should get
-    instead — Better End's anvil head plus assembly smithing_transform, Better Nether's
-    upgrade transform, Forbidden Arcanus' forge ritual — are fully described in the data
-    but nothing generates them yet, so those recipes are still maintained by hand in the
-    mod repo. Until that lands, `generated_dirs()` deliberately leaves their recipe folders
-    out of the clear step so a run cannot delete the hand-written ones.
+    TODO: rituals are only *excluded*. Forbidden Arcanus' forge ritual is fully described
+    in rituals.json but nothing generates it yet, so those files are maintained by hand in
+    the mod repo, and `generated_dirs()` leaves their recipe folders out of the clear step.
     """
     parts_path = f"{data_dir(version)}/parts.json"
     if os.path.isfile(parts_path):
@@ -217,8 +246,9 @@ def load_crafting_rules(version):
             if mod_id.startswith("_"):
                 continue
             template = entry.get("assembly", {}).get("template")
-            for tier_name in entry.get("tiers", {}):
+            for tier_name, tier_entry in entry.get("tiers", {}).items():
                 NO_RECIPE_TIERS.add(tier_name)
+                PART_TIERS[tier_name] = (entry, tier_entry)
                 if template:
                     ADVANCEMENT_TRIGGER[tier_name] = template
 
@@ -228,6 +258,7 @@ def load_crafting_rules(version):
             if tier_name.startswith("_"):
                 continue
             NO_RECIPE_TIERS.add(tier_name)
+            SMITHING_TIERS[tier_name] = entry
             if entry.get("template"):
                 ADVANCEMENT_TRIGGER[tier_name] = entry["template"]
 
@@ -243,6 +274,11 @@ def load_crafting_rules(version):
 
 def has_shaped_recipe(tier_name):
     return tier_name not in NO_RECIPE_TIERS
+
+def has_generated_recipe(tier_name):
+    """Whether this run writes the tier's recipes, shaped or not. Ritual tiers it does not."""
+    return (has_shaped_recipe(tier_name) or tier_name in PART_TIERS
+            or tier_name in SMITHING_TIERS)
 
 def has_advancement(tier_name):
     return tier_name not in NO_ADVANCEMENT_TIERS
@@ -392,13 +428,14 @@ def find_sprite(mod_id, name, sword):
     conventions (tier-prefixed and bare), so try each combination.
 
     Candidates are exact filenames built from the weapon name, which is what keeps variant
-    art out: Better End's `*_head.png` alternates and the stray `*2.png` / `*3.png` drafts
-    can never match, because no weapon is named `chakram_head` or `claymore2`.
+    art out: the stray `*2.png` / `*3.png` drafts never match, and Better End's `*_head.png`
+    parts only match when create_part_data() asks for `chakram_head` by name.
 
     A mod whose `loaded_id` differs from its `mod_id` is looked up under both, because the
-    sprite tree is shared by every version while the mod id is not: the art sits in
-    `common/sprites/twilightforest/`, which is what 1.21.1 calls the mod, but 1.20.1 calls
-    the same mod `twilight_forest` and would otherwise find none of it.
+    sprite tree is shared by every version while a mod id need not be.
+
+    The --mc version's own tree in VERSION_SPRITES_DIR is searched first, so art there
+    replaces the shared drawing for that version only.
     """
     mod = mods.get(mod_id)
     mod_dirs = [mod_id]
@@ -406,16 +443,21 @@ def find_sprite(mod_id, name, sword):
         mod_dirs.append(mod.loaded_id)
 
     candidates = []
-    for mod_dir in mod_dirs:
-        candidates.append(f"{SPRITES_DIR}/{mod_dir}/{name}/{name}_{sword}.png")
-        candidates.append(f"{SPRITES_DIR}/{mod_dir}/{name}/{sword}.png")
-    candidates.append(f"{SPRITES_DIR}/{name}/{name}_{sword}.png")
-    candidates.append(f"{SPRITES_DIR}/{name}/{sword}.png")
+    for root in sprite_roots():
+        for mod_dir in mod_dirs:
+            candidates.append(f"{root}/{mod_dir}/{name}/{name}_{sword}.png")
+            candidates.append(f"{root}/{mod_dir}/{name}/{sword}.png")
+        candidates.append(f"{root}/{name}/{name}_{sword}.png")
+        candidates.append(f"{root}/{name}/{sword}.png")
 
     for candidate in candidates:
         if os.path.isfile(candidate):
             return candidate
     return None
+
+def sprite_roots():
+    """The sprite trees for the --mc version, most specific first."""
+    return [f"{VERSION_SPRITES_DIR}/{MC_VERSION}", SPRITES_DIR]
 
 def discover_sprite_tiers():
     """Find every tier that has artwork, whether or not it is wired into tiers.json.
@@ -428,28 +470,32 @@ def discover_sprite_tiers():
     the top level. A folder containing PNGs directly is a tier; one containing only
     folders is a mod. Returns (mod_id, tier_name) pairs, where mod_id is None for a
     top-level tier that tiers.json has never heard of.
+
+    Both of sprite_roots() are read, so a tier whose only art is version-specific is found too.
     """
-    found = []
-    if not os.path.isdir(SPRITES_DIR):
-        return found
-
-    for entry in sorted(os.listdir(SPRITES_DIR)):
-        path = os.path.join(SPRITES_DIR, entry)
-        if not os.path.isdir(path):
+    found = set()
+    for root in sprite_roots():
+        if not os.path.isdir(root):
             continue
 
-        children = sorted(os.listdir(path))
-        if any(child.lower().endswith(".png") for child in children):
-            # A tier sitting at the top level. tiers.json is the authority on which mod it
-            # belongs to, since the folder name alone does not say.
-            mod_id = tiers[entry].mod_id if entry in tiers else None
-            found.append((mod_id, entry))
-            continue
+        for entry in os.listdir(root):
+            path = os.path.join(root, entry)
+            if not os.path.isdir(path):
+                continue
 
-        for child in children:
-            if os.path.isdir(os.path.join(path, child)):
-                found.append((entry, child))
-    return found
+            children = os.listdir(path)
+            if any(child.lower().endswith(".png") for child in children):
+                # A tier sitting at the top level. tiers.json is the authority on which mod it
+                # belongs to, since the folder name alone does not say.
+                mod_id = tiers[entry].mod_id if entry in tiers else None
+                found.add((mod_id, entry))
+                continue
+
+            for child in children:
+                if os.path.isdir(os.path.join(path, child)):
+                    found.add((entry, child))
+    # mod_id is None for a top-level tier; sort it by its tier name, where it used to sit.
+    return sorted(found, key=lambda pair: (pair[0] or pair[1], pair[1]))
 
 def get_preview_path(mod_id, tier_name):
     """Output path without an extension; preview.py appends one per format."""
@@ -773,11 +819,16 @@ def create_weapon_attributes_date():
 # Swords adds these to minecraft:enchantable/{sword,weapon,sharp_weapon,fire_aspect,
 # durability} and spears to enchantable/trident, so joining them gets our weapons the same
 # enchantments as theirs. A 1.21 item in no enchantable tag can't be enchanted at all.
-# c:tools/melee_weapon is the loaders' shared tag for other mods looking for weapons.
+# c:tools/melee_weapon is the loaders' shared tag for other mods looking for weapons. The
+# light/medium/heavy split copies Simply Swords' own; its Throwing gem power reads it.
 WEAPON_TAGS = {
     "simplyswords:swords": None,
     "simplyswords:spears": {"spear"},
     "c:tools/melee_weapon": None,
+    "simplyswords:light_weapons": {"chakram", "cutlass", "rapier", "sai"},
+    "simplyswords:medium_weapons": {"katana", "longsword", "spear", "twinblade", "warglaive"},
+    "simplyswords:heavy_weapons": {"claymore", "glaive", "greataxe", "greathammer", "halberd",
+                                   "scythe"},
 }
 
 def get_tag_path(loader, tag):
@@ -791,10 +842,9 @@ def create_tag_data():
     is enabled in config, and one required entry that fails to resolve throws out the
     whole tag, Simply Swords' own weapons with it.
     """
-    if PROFILE.tag_dir is None:
-        return
     for loader in PROFILE.loaders:
-        for tag, swords in WEAPON_TAGS.items():
+        for tag in PROFILE.weapon_tags:
+            swords = WEAPON_TAGS[tag]
             values = []
             for tier_name, tier in tiers.items():
                 mod = get_mod(tier.mod_id)
@@ -805,6 +855,110 @@ def create_tag_data():
                         values.append({"id": get_result_item(mod, tier_name, sword),
                                        "required": False})
             write_json(get_tag_path(loader, tag), {"replace": False, "values": values})
+
+def get_item_conditions(mod, loader, items):
+    """The load conditions for a recipe whose inputs or result are our own items.
+
+    Where the loader can check the item registry, the recipe loads only when every item
+    exists, so a tier switched off in config takes its recipes with it. 1.20.1 Fabric can't,
+    and falls back to the plain mod check.
+    """
+    field, conditions = get_loader_conditions(mod, loader)
+    if loader != "fabric" or PROFILE.registry_conditions:
+        conditions = ITEM_CONDITIONS[loader](items)
+    return field, conditions
+
+def get_pattern_count(sword, name, symbol="M"):
+    """How many of one ingredient a weapon's shaped pattern uses."""
+    return sum(row.count(symbol) for row in get_pattern(sword, name))
+
+def create_part_data():
+    """Write each part tier's heads: model, texture, anvil recipe, and the assembly recipe.
+
+    Each weapon gets a head forged on an anvil from the tier's material, and the weapon is a
+    smithing_transform of that head plus the host mod's handle. parts.json's `_comment` is
+    the spec. The head costs as much material as the weapon's shaped pattern would have.
+    """
+    for tier_name, (entry, tier_entry) in PART_TIERS.items():
+        tier = tiers.get(tier_name)
+        if tier is None:
+            continue
+        mod = get_mod(tier.mod_id)
+        suffix = entry["suffix"]
+        part_recipe = entry["part_recipe"]
+        assembly = entry["assembly"]
+        head_templates = set(entry.get("head_templates", []))
+        for sword in SWORD_PATTERNS:
+            head = f"{sword}{suffix}"
+            head_item = get_result_item(mod, tier_name, head)
+            weapon_item = get_result_item(mod, tier_name, sword)
+
+            if sword in head_templates:
+                # The head is geometry in the template, painted with the weapon's own sprite.
+                model = {"parent": f"knavesneeds:{ITEM_ROOT}/templates/{head}",
+                         "textures": {"layer0": get_texture_ref(tier.mod_id, tier_name, sword)}}
+                source = None
+            else:
+                model = {"parent": "minecraft:item/generated",
+                         "textures": {"layer0": get_texture_ref(tier.mod_id, tier_name, head)}}
+                source = find_sprite(tier.mod_id, tier_name, head)
+                if source is None:
+                    missing_sprites.append((tier.mod_id, tier_name, head))
+
+            anvil = {
+                "type": part_recipe["type"],
+                "input": {str(tier.material[0]): str(tier.material[1])},
+                "result": {"item": head_item},
+                "inputCount": get_pattern_count(sword, tier_name),
+            }
+            # 1.21 BCLib names the hammers allowed by tag; 1.20 BCLib by a minimum tool level.
+            if "anvil_tools" in tier_entry:
+                anvil["allowedTools"] = tier_entry["anvil_tools"]
+            if "anvil_tool_level" in tier_entry:
+                anvil["toolLevel"] = tier_entry["anvil_tool_level"]
+            anvil["anvilLevel"] = tier_entry["anvil_level"]
+            anvil["damage"] = tier_entry["anvil_damage"]
+
+            joined = {
+                "type": assembly["type"],
+                "template": {"item": assembly["template"]},
+                "base": {"item": head_item},
+                "addition": {"item": assembly["addition"].format(tier=tier_name)},
+                "result": get_result(mod, tier_name, sword),
+            }
+
+            for loader in mod_loaders(mod):
+                write_json(get_model_path(loader, mod, tier_name, head), model)
+                if source is not None:
+                    copy_file(source, get_texture_path(loader, tier.mod_id, tier_name, head))
+                field, conditions = get_item_conditions(mod, loader, [head_item])
+                write_json(get_recipe_path(loader, mod, tier_name, head),
+                           {field: conditions, **anvil})
+                field, conditions = get_item_conditions(mod, loader, [head_item, weapon_item])
+                write_json(get_recipe_path(loader, mod, tier_name, sword),
+                           {field: conditions, **joined})
+
+def create_smithing_data():
+    """Write each smithing.json tier's upgrade: our base-tier weapon plus the addition."""
+    for tier_name, entry in SMITHING_TIERS.items():
+        tier = tiers.get(tier_name)
+        if tier is None:
+            continue
+        mod = get_mod(tier.mod_id)
+        for sword in SWORD_PATTERNS:
+            base_item = get_result_item(mod, entry["base_tier"], sword)
+            data = {
+                "type": "minecraft:smithing_transform",
+                "template": {"item": entry["template"]},
+                "base": {"item": base_item},
+                "addition": {"item": entry["addition"]},
+                "result": get_result(mod, tier_name, sword),
+            }
+            for loader in mod_loaders(mod):
+                field, conditions = get_item_conditions(
+                    mod, loader, [base_item, get_result_item(mod, tier_name, sword)])
+                write_json(get_recipe_path(loader, mod, tier_name, sword),
+                           {field: conditions, **data})
 
 def get_material_predicate(material):
     """How an inventory_changed trigger names the tier's material.
@@ -908,14 +1062,14 @@ def generated_dirs(loader, mod, tier_name):
     """Every directory this run will write into for one tier on one loader.
 
     Only those: a tier the generator does not write recipes for keeps its recipe folder,
-    because the recipes there are the hand-written smithing and ritual ones this tool
-    cannot yet produce. Clearing exactly what the run is about to write is what makes the
-    scoped clear safe — anything it skips writing, it also skips deleting.
+    because the recipes there are the hand-written ritual ones this tool cannot yet
+    produce. Clearing exactly what the run is about to write is what makes the scoped clear
+    safe — anything it skips writing, it also skips deleting.
     """
     base = get_loader_root(loader)
     item_dir = os.path.dirname(get_item_path(mod, tier_name, "any"))
     dirs = []
-    if has_shaped_recipe(tier_name):
+    if has_generated_recipe(tier_name):
         dirs.append(f"{base}/data/{mod.namespace}/{PROFILE.recipe_dir}/{item_dir}")
     if has_advancement(tier_name):
         dirs.append(
@@ -1112,6 +1266,12 @@ if __name__ == '__main__':
         create_recipe_data(mc_loader)
         start_time = log_and_return_time(
             f"Made recipes for {mc_loader.capitalize()}", start_time)
+
+    create_part_data()
+    create_smithing_data()
+    start_time = log_and_return_time(
+        f"Made part and smithing recipes for {len(PART_TIERS) + len(SMITHING_TIERS)} tier(s)",
+        start_time)
 
     create_model_date()
     start_time = log_and_return_time("Created model data", start_time)

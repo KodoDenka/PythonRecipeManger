@@ -4,12 +4,13 @@
   "blaze_rod":                ["item", "minecraft:blaze_rod"],
   "blaze_powder":             ["item", "minecraft:blaze_powder"],
 
-  "fiery_ingot":              ["item", "twilight_forest:fiery_ingot"],
-  "knightmetal_ingot":        ["item", "twilight_forest:knightmetal_ingot"],
-  "ironwood_ingot":           ["item", "twilight_forest:ironwood_ingot"],
-  "steeleaf_ingot":           ["item", "twilight_forest:steeleaf_ingot"],
+  "fiery_ingot":              ["item", "twilightforest:fiery_ingot"],
+  "knightmetal_ingot":        ["item", "twilightforest:knightmetal_ingot"],
+  "ironwood_ingot":           ["item", "twilightforest:ironwood_ingot"],
+  "steeleaf_ingot":           ["item", "twilightforest:steeleaf_ingot"],
 
   "reinforced_echo_shard":    ["item", "deeperdarker:reinforced_echo_shard"],
+  "resonarium":               ["item", "deeperdarker:resonarium"],
 
   "lost_soul":                ["item", "soulsweapons:lost_soul"],
 
@@ -37,10 +38,13 @@
   "terminite_ingot":          ["item", "betterend:terminite_ingot"],
   "thallasium_ingot":         ["item", "betterend:thallasium_ingot"],
 
+  "cincinnasite_ingot":       ["item", "betternether:cincinnasite_ingot"],
   "nether_ruby":              ["item", "betternether:nether_ruby"],
   "diamond":                  ["item", "minecraft:diamond"],
+  "nether_reed_stem":         ["item", "betternether:nether_reed_stem"],
 
   "pendorite_ingot":          ["item", "byg:pendorite_ingot"],
 
+  "dragon_scale":             ["item", "forbidden_arcanus:dragon_scale"],
   "stellarite_piece":         ["item", "forbidden_arcanus:stellarite_piece"]
 }

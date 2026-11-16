@@ -1,8 +1,8 @@
 {
-  "knightmetal":      { "mod_id": "twilight_forest", "material": "knightmetal_ingot",     "handle": "wood_sticks", "binder": "iron_nugget"          },
-  "fiery":            { "mod_id": "twilight_forest", "material": "fiery_ingot",            "handle": "blaze_rod",   "binder": "blaze_powder"         },
-  "ironwood":         { "mod_id": "twilight_forest", "material": "ironwood_ingot",         "handle": "wood_sticks", "binder": "iron_nugget"          },
-  "steeleaf":         { "mod_id": "twilight_forest", "material": "steeleaf_ingot",         "handle": "wood_sticks", "binder": "iron_nugget"          },
+  "knightmetal":      { "mod_id": "twilightforest",  "material": "knightmetal_ingot",     "handle": "wood_sticks", "binder": "iron_nugget"          },
+  "fiery":            { "mod_id": "twilightforest",  "material": "fiery_ingot",            "handle": "blaze_rod",   "binder": "blaze_powder"         },
+  "ironwood":         { "mod_id": "twilightforest",  "material": "ironwood_ingot",         "handle": "wood_sticks", "binder": "iron_nugget"          },
+  "steeleaf":         { "mod_id": "twilightforest",  "material": "steeleaf_ingot",         "handle": "wood_sticks", "binder": "iron_nugget"          },
 
   "pyrope":           { "mod_id": "blue_skies",      "material": "pyrope_gem",             "handle": "wood_sticks", "binder": "iron_nugget"          },
   "aquite":           { "mod_id": "blue_skies",      "material": "aquite",                 "handle": "wood_sticks", "binder": "iron_nugget"          },
@@ -28,18 +28,19 @@
   "terminite":        { "mod_id": "betterend",       "material": "terminite_ingot",        "handle": "wood_sticks", "binder": "iron_nugget"          },
   "thallasium":       { "mod_id": "betterend",       "material": "thallasium_ingot",       "handle": "wood_sticks", "binder": "iron_nugget"          },
 
-  "cincinnasite":         { "mod_id": "betternether", "material": "aeternium_ingot",       "handle": "wood_sticks", "binder": "iron_nugget"          },
-  "cincinnasite_diamond": { "mod_id": "betternether", "material": "diamond",               "handle": "wood_sticks", "binder": "iron_nugget"          },
-  "nether_ruby":          { "mod_id": "betternether", "material": "nether_ruby",           "handle": "wood_sticks", "binder": "iron_nugget"          },
+  "cincinnasite":         { "mod_id": "betternether", "material": "cincinnasite_ingot",    "handle": "nether_reed_stem", "binder": "iron_nugget"     },
+  "cincinnasite_diamond": { "mod_id": "betternether", "material": "diamond",               "handle": "nether_reed_stem", "binder": "iron_nugget"     },
+  "nether_ruby":          { "mod_id": "betternether", "material": "nether_ruby",           "handle": "nether_reed_stem", "binder": "iron_nugget"     },
 
-  "translucent":      { "mod_id": "soulsweapons",    "material": "lost_soul",              "handle": "wood_sticks", "binder": "iron_nugget"          },
+  "translucent":      { "mod_id": "soulsweapons",    "material": "lost_soul",              "handle": "wood_sticks", "binder": "iron_nugget", "invisible_variant": true },
 
   "ametrine":         { "mod_id": "amethyst_imbuement", "material": "pendorite_ingot",     "handle": "wood_sticks", "binder": "iron_nugget"          },
   "garnet":           { "mod_id": "amethyst_imbuement", "material": "pendorite_ingot",     "handle": "wood_sticks", "binder": "iron_nugget"          },
   "glowing":          { "mod_id": "amethyst_imbuement", "material": "pendorite_ingot",     "handle": "wood_sticks", "binder": "iron_nugget"          },
   "steel":            { "mod_id": "amethyst_imbuement", "material": "pendorite_ingot",     "handle": "wood_sticks", "binder": "iron_nugget"          },
 
-  "draco_arcanus":    { "mod_id": "forbidden_arcanus", "material": "stellarite_piece",     "handle": "wood_sticks", "binder": "iron_nugget"          },
+  "draco_arcanus":    { "mod_id": "forbidden_arcanus", "material": "dragon_scale",         "handle": "wood_sticks", "binder": "iron_nugget"          },
 
-  "warden":           { "mod_id": "deeperdarker",    "material": "reinforced_echo_shard",  "handle": "wood_sticks", "binder": "iron_nugget"          }
+  "warden":           { "mod_id": "deeperdarker",    "material": "reinforced_echo_shard",  "handle": "wood_sticks", "binder": "iron_nugget"          },
+  "resonarium":       { "mod_id": "deeperdarker",    "material": "resonarium",             "handle": "wood_sticks", "binder": "iron_nugget"          }
 }
